@@ -7,6 +7,10 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 
+from api.student_routes import student_bp
+from api.course_routes import course_bp
+from api.schedule_routes import schedule_bp
+
 
 # ENVIRONMENT VARIABLES
 load_dotenv()
@@ -20,8 +24,12 @@ CORS(app)
 
 # ROUTES
 @app.route('/', methods=['GET'])
-def get():
-    return jsonify({'message': 'Hello World!'})
+def root():
+    return jsonify({"message": "Hello World"})
+
+app.register_blueprint(student_bp, url_prefix='/api')
+app.register_blueprint(course_bp, url_prefix='/api')
+app.register_blueprint(schedule_bp, url_prefix='/api')
 
 
 # MAIN
