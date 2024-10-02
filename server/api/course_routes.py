@@ -10,13 +10,13 @@ course_bp = Blueprint('course_bp', __name__)
 
 
 # ROUTES
-@course_bp.route('/course/', methods=['GET'])
-def get_course():
-    return jsonify({"message": "course root endpoint"})
-
 @course_bp.route('/course/<int:id>/', methods=['GET'])
 def get_course_by_id(id):
     return jsonify({"message": f"course {id} endpoint"})
+
+@course_bp.route('/course/<string:course_code>/', methods=['GET'])
+def get_course_by_code(course_code):
+    return jsonify({"message": f"course {course_code} endpoint"})
 
 @course_bp.route('/course/', methods=['POST'])
 def create_course():
@@ -30,13 +30,13 @@ def update_course(id):
 def delete_course(id):
     return jsonify({"message": f"course {id} delete endpoint"})
 
-@course_bp.route('/course/upload_xlsx', methods=['POST'])
+@course_bp.route('/course/import', methods=['POST'])
 def upload_course():
-    return jsonify({"message": "course upload xlsx endpoint"})
+    return jsonify({"message": "course upload endpoint"})
 
-@course_bp.route('/course/download_xlsx', methods=['GET'])
+@course_bp.route('/course/export', methods=['GET'])
 def download_course():
-    return jsonify({"message": "course download xlsx endpoint"})
+    return jsonify({"message": "course export endpoint"})
 
 @course_bp.route('/course/<int:id>/students/', methods=['GET'])
 def get_course_students(id):
