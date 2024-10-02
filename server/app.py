@@ -2,11 +2,13 @@
 """
 
 # IMPORTS
-from flask import Flask, jsonify, request, abort
+from flask import Flask, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 
+
+# ENVIRONMENT VARIABLES
 load_dotenv()
 PORT = os.getenv('PORT', 5000)
 
