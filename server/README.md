@@ -57,5 +57,3 @@
    ```sh
    PORT=5000   # The port on which the server will run
    ```
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
