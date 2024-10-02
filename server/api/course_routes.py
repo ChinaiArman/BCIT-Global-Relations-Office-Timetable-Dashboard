@@ -37,3 +37,7 @@ def upload_course():
 @course_bp.route('/course/download_xlsx', methods=['GET'])
 def download_course():
     return jsonify({"message": "course download xlsx endpoint"})
+
+@course_bp.route('/course/<int:id>/students/', methods=['GET'])
+def get_course_students(id):
+    return jsonify({"message": f"course {id} students endpoint"})
