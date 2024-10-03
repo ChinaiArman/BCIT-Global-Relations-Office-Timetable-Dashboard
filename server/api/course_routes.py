@@ -41,3 +41,8 @@ def download_course():
 @course_bp.route('/course/<int:id>/students/', methods=['GET'])
 def get_course_students(id):
     return jsonify({"message": f"course {id} students endpoint"})
+
+@course_bp.route('/course/download_template', methods=['GET'])
+def download_template():
+    return jsonify({"message": "course download template endpoint"})
+
