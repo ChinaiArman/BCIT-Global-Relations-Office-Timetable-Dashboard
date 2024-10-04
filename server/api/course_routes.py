@@ -17,7 +17,7 @@ course_bp = Blueprint('course_bp', __name__)
 def get_course_by_id(id):
     return jsonify({"message": f"course {id} endpoint"})
 
-@course_bp.route('/course/<str:course_code>/', methods=['GET'])
+@course_bp.route('/course/<string:course_code>/', methods=['GET'])
 def get_course_by_code(course_code):
     return jsonify({"message": f"course {course_code} endpoint"})
 
