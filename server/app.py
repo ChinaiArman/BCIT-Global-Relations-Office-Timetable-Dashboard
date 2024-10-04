@@ -10,6 +10,7 @@ import os
 from api.student_routes import student_bp
 from api.course_routes import course_bp
 from api.schedule_routes import schedule_bp
+from api.authentication_routes import authentication_bp
 
 
 # ENVIRONMENT VARIABLES
@@ -30,6 +31,7 @@ def root():
 app.register_blueprint(student_bp, url_prefix='/api')
 app.register_blueprint(course_bp, url_prefix='/api')
 app.register_blueprint(schedule_bp, url_prefix='/api')
+app.register_blueprint(authentication_bp, url_prefix='/api')
 
 
 # MAIN
