@@ -5,6 +5,9 @@
 from flask import Blueprint, jsonify
 
 
+# INSTANTIATE SERVICES
+
+
 # DEFINE BLUEPRINT
 course_bp = Blueprint('course_bp', __name__)
 
