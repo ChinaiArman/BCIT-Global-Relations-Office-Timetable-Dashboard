@@ -3,6 +3,11 @@
 
 # IMPORTS
 from flask import Blueprint, jsonify
+from services.Authenticator import Authenticator
+
+
+# INSTANTIATE SERVICES
+authenticator = Authenticator()
 
 
 # DEFINE BLUEPRINT
@@ -26,6 +31,6 @@ def register():
 def reset_password():
     return jsonify({"message": "reset password endpoint"})
 
-@authentication_bp.route('/change_password/', methods=['POST'])
-def change_password():
-    return jsonify({"message": "change password endpoint"})
+@authentication_bp.route('/verify/', methods=['POST'])
+def verify():
+    return jsonify({"message": "verify endpoint"})
