@@ -14,12 +14,12 @@ class Schedule:
         self.courses = courses
         self.student_id = student_id
 
-    def get_courses(self):
+    def get_courses(self) -> list:
         """
         """
         return self.courses
 
-    def get_student_id(self):
+    def get_student_id(self) -> str:
         """
         """
         return self.student_id
