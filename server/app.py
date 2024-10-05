@@ -17,8 +17,7 @@ from api.authentication_routes import authentication_bp
 
 from services.Database import Database
 from services.Authenticator import Authenticator
-from services.StudentManager import StudentManager
-from services.CourseManager import CourseManager
+from server.services.Scheduler import Scheduler
 from services.EmailManager import EmailManager
 
 
@@ -54,8 +53,7 @@ def log_request_teardown(error=None):
 # CONFIGURE SERVICES
 app.config['database'] = Database()
 app.config['authenticator'] = Authenticator()
-app.config['studentManager'] = StudentManager()
-app.config['courseManager'] = CourseManager()
+app.config['studentManager'] = Scheduler()
 app.config['emailManager'] = EmailManager()
 
 

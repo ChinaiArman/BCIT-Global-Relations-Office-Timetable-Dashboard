@@ -4,8 +4,8 @@
 # IMPORTS
 
 
-# STUDENT MANAGER CLASS
-class StudentManager:
+# SCHEDULER CLASS
+class Scheduler:
     """
     """
     def __init__(self):
