@@ -60,7 +60,7 @@ def upload_course():
     - 400: Invalid request.
     - 500: Internal server error.
 
-    Author: @ChinaiArman
+    Author: ``@ChinaiArman``
     """
     db = current_app.config['database']
     response = db.save_bulk_course_upload_file(request.files['file'])

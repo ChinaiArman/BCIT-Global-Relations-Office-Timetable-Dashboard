@@ -36,7 +36,7 @@ class Schedule:
         >>> schedule.get_courses()
         ... [course1, course2, course3]
 
-        Author: @ChinaiArman
+        Author: ``@ChinaiArman``
         """
         return self.courses
 
@@ -62,6 +62,6 @@ class Schedule:
         >>> schedule.get_student_id()
         ... '123456'
 
-        Author: @ChinaiArman
+        Author: ``@ChinaiArman``
         """
         return self.student_id

@@ -42,7 +42,7 @@ class Database:
         ... {"status": 201, "message": "File uploaded successfully"}
         ... # File saved in `server/data/` directory
 
-        Author: @ChinaiArman
+        Author: ``@ChinaiArman``
         """
         if file.filename.endswith(".xlsx") or file.filename.endswith(".csv"):
             file.save(f"server/data/bulk_course_upload_file.{file.filename.split('.')[-1]}")
@@ -79,7 +79,7 @@ class Database:
         >>> db.parse_bulk_course_upload_file(file)
         ... # File saved as CSV in `server/data/` directory
 
-        Author: @ChinaiArman
+        Author: ``@ChinaiArman``
         """
         df = pd.read_excel(file)
         df = df.map(lambda x: x.replace("*", "").replace("\n", "").strip() if isinstance(x, str) else x)

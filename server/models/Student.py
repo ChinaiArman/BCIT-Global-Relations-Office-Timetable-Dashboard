@@ -22,7 +22,7 @@ class Student:
         - selection (list): A list of Course instances selected by the student.
         - courses (list): A list of Course instances assigned to the student.
 
-        author: ``@CharlieZhang``
+        Author: ``@CharlieZhang``
         """
         self.id = id
         self.firstName = firstName

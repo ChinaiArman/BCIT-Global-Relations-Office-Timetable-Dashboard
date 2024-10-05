@@ -32,7 +32,7 @@ def configure_logging(app) -> None:
     >>> configure_logging(app)
     ... # Log files created in `server/logs/` directory
 
-    Author: @ChinaiArman
+    Author: ``@ChinaiArman``
     """
     init_log_files()
     app.logger.setLevel(logging.INFO)
@@ -73,7 +73,7 @@ def init_log_files() -> None:
     >>> init_log_files()
     ... # Log files created in `server/logs/` directory
 
-    Author: @ChinaiArman
+    Author: ``@ChinaiArman``
     """
     if not os.path.exists('server/logs'):
         os.makedirs('server/logs')
