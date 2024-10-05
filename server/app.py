@@ -2,10 +2,13 @@
 """
 
 # IMPORTS
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request, g
+import time
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
+
+from logging_config import configure_logging
 
 from api.student_routes import student_bp
 from api.course_routes import course_bp
@@ -21,6 +24,25 @@ PORT = os.getenv('PORT', 5000)
 # FLASK CONFIGURATION
 app = Flask(__name__)
 CORS(app)
+
+
+# LOGGING CONFIGURATION
+configure_logging(app)
+@app.before_request
+def log_request():
+    g.start_time = time.time()
+    app.logger.info(f"Incoming request Request: {request.method} {request.path}")
+
+@app.after_request
+def log_response(response):
+    execution_time = time.time() - g.start_time
+    app.logger.info(f"Completed request: {request.method} {request.path} "f"with status {response.status_code} in {execution_time:.4f}s")
+    return response
+
+@app.teardown_request
+def log_request_teardown(error=None):
+    if error is not None:
+        app.logger.error(f"An error occurred: {error}")
 
 
 # ROUTES
