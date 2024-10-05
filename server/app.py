@@ -15,6 +15,12 @@ from api.course_routes import course_bp
 from api.schedule_routes import schedule_bp
 from api.authentication_routes import authentication_bp
 
+from services.Database import Database
+from services.Authenticator import Authenticator
+from services.StudentManager import StudentManager
+from services.CourseManager import CourseManager
+from services.EmailManager import EmailManager
+
 
 # ENVIRONMENT VARIABLES
 load_dotenv()
@@ -44,6 +50,13 @@ def log_request_teardown(error=None):
     if error is not None:
         app.logger.error(f"An error occurred: {error}")
 
+
+# INSTANTIATE SERVICES
+app.config['database'] = Database()
+app.config['authenticator'] = Authenticator()
+app.config['studentManager'] = StudentManager()
+app.config['courseManager'] = CourseManager()
+app.config['emailManager'] = EmailManager()
 
 # ROUTES
 @app.route('/', methods=['GET'])
