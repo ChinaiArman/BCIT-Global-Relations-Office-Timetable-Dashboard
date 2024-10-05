@@ -13,4 +13,7 @@ class Database:
         """
         pass
 
-    
+    def save_bulk_course_import_file(self):
+        """
+        """
+        pass
