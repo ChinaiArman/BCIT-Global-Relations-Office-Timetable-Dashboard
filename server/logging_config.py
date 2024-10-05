@@ -29,6 +29,8 @@ def configure_logging(app) -> None:
 
 
 def init_log_files():
+    """
+    """
     if not os.path.exists('server/logs'):
         os.makedirs('server/logs')
 
