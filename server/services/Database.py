@@ -85,5 +85,7 @@ class Database:
         df = df.map(lambda x: x.replace("*", "").replace("\n", "").strip() if isinstance(x, str) else x)
         df.columns = df.columns.map(lambda x: x.replace("*", "").replace("\n", "").strip())
         df.drop(columns=DROP_COURSE_COLUMNS, inplace=True)
+        df["Instructor"] = df["Instructor"].map(lambda x: " ".join(x.split(", ")[::-1]))
+        df = df.groupby([column for column in df.columns if column != "Instructor"]).agg({'Instructor': lambda x: ' & '.join(set(x))}).reset_index()
         df.to_csv("server/data/courses.csv", index=False)
         return
