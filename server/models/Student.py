@@ -11,7 +11,19 @@ class Student:
     def __init__(
         self, id: str, firstName: str, lastName: str, selection: list, courses: list
     ):
-        """ """
+        """
+        Intialize the Student instance.
+
+        Args:
+        -----
+        - id (str): The student ID.
+        - firstName (str): The first name of the student.
+        - lastName (str): The last name of the student.
+        - selection (list): A list of Course instances selected by the student.
+        - courses (list): A list of Course instances assigned to the student.
+
+        author: ``@CharlieZhang``
+        """
         self.id = id
         self.firstName = firstName
         self.lastName = lastName
@@ -40,6 +52,8 @@ class Student:
         >>> student = Student(id='123456', firstName='John', lastName='Doe', selection=[], courses=[])
         >>> student.get_id()
         ... '123456'
+
+        Author: ``@CharlieZhang``
         """
         return self.id
 
@@ -65,6 +79,8 @@ class Student:
         >>> student = Student(id='123456', firstName='John', lastName='Doe', selection=[], courses=[])
         >>> student.get_first_name()
         ... 'John'
+
+        Author: ``@CharlieZhang``
         """
         return self.firstName
 
@@ -90,6 +106,8 @@ class Student:
         >>> student = Student(id='123456', firstName='John', lastName='Doe', selection=[], courses=[])
         >>> student.get_last_name()
         ... 'Doe'
+
+        Author: ``@CharlieZhang``
         """
         return self.lastName
 
@@ -115,6 +133,8 @@ class Student:
         >>> student = Student(id='123456', firstName='John', lastName='Doe', selection=[course1, course2, course3], courses=[])
         >>> student.get_selection()
         ... [course1, course2, course3]
+
+        Author: ``@CharlieZhang``
         """
         return self.selection
 
@@ -140,5 +160,7 @@ class Student:
         >>> student = Student(id='123456', firstName='John', lastName='Doe', selection=[], courses=[course1, course2, course3])
         >>> student.get_courses()
         ... [course1, course2, course3]
+
+        Author: ``@CharlieZhang``
         """
         return self.courses
