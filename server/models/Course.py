@@ -103,7 +103,6 @@ class Course:
 
         Author: ``@KateSullivan``
         """
-        # find the student in the list by id
         self.current_students = [student for student in self.current_students if student.id != student_id]
         self.num_enrolled -= 1
     
