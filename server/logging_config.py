@@ -28,7 +28,7 @@ def configure_logging(app) -> None:
     return
 
 
-def init_log_files():
+def init_log_files() -> None:
     """
     """
     if not os.path.exists('server/logs'):
