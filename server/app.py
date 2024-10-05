@@ -58,6 +58,7 @@ app.config['studentManager'] = StudentManager()
 app.config['courseManager'] = CourseManager()
 app.config['emailManager'] = EmailManager()
 
+
 # ROUTES
 @app.route('/', methods=['GET'])
 def root():
