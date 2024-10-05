@@ -17,7 +17,7 @@ from api.authentication_routes import authentication_bp
 
 from services.Database import Database
 from services.Authenticator import Authenticator
-from server.services.Scheduler import Scheduler
+from services.Scheduler import Scheduler
 from services.EmailManager import EmailManager
 
 
