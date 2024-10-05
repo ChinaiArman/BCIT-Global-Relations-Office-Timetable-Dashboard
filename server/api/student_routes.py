@@ -29,13 +29,13 @@ def update_student(id):
 def delete_student(id):
     return jsonify({"message": f"student {id} delete endpoint"})
 
-@student_bp.route('/students/upload', methods=['POST'])
+@student_bp.route('/students/import', methods=['PUT'])
 def upload_students():
-    return jsonify({"message": "student upload endpoint"})
+    return jsonify({"message": "student import endpoint"})
 
-@student_bp.route('/students/download', methods=['GET'])
+@student_bp.route('/students/export', methods=['GET'])
 def download_students():
-    return jsonify({"message": "student download endpoint"})
+    return jsonify({"message": "student export endpoint"})
 
 @student_bp.route('/students/<int:id>/courses/', methods=['GET'])
 def get_student_courses(id):

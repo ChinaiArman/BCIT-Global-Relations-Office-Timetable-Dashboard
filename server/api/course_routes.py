@@ -2,10 +2,12 @@
 """
 
 # IMPORTS
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 
+from services.Database import Database
 
 # INSTANTIATE SERVICES
+database = Database()
 
 
 # DEFINE BLUEPRINT
@@ -17,7 +19,7 @@ course_bp = Blueprint('course_bp', __name__)
 def get_course_by_id(id):
     return jsonify({"message": f"course {id} endpoint"})
 
-@course_bp.route('/course/<string:course_code>/', methods=['GET'])
+@course_bp.route('/course/course_code/<string:course_code>/', methods=['GET'])
 def get_course_by_code(course_code):
     return jsonify({"message": f"course {course_code} endpoint"})
 
@@ -33,9 +35,10 @@ def update_course(id):
 def delete_course(id):
     return jsonify({"message": f"course {id} delete endpoint"})
 
-@course_bp.route('/course/import', methods=['POST'])
+@course_bp.route('/course/import', methods=['PUT'])
 def upload_course():
-    return jsonify({"message": "course upload endpoint"})
+    response = database.save_bulk_course_upload_file(request.files['file'])
+    return jsonify({"message": response["message"]}), response["status"]
 
 @course_bp.route('/course/export', methods=['GET'])
 def download_course():

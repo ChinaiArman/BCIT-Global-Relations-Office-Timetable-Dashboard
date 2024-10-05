@@ -1,2 +1,7 @@
 # VENV
 .venv
+
+# Course and Student files
+server/data/bulk_course_upload_file.xlsx
+server/data/courses.csv
+server/data/students.csv
