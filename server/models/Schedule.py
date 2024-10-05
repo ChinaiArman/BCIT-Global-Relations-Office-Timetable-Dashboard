@@ -24,8 +24,7 @@ class Schedule:
 
         Returns:
         --------
-        ``list``
-            A list of Course instances assigned to the student's schedule.
+        ``list``: A list of Course instances assigned to the student's schedule.
 
         Notes:
         ------
@@ -37,7 +36,7 @@ class Schedule:
         >>> schedule.get_courses()
         ... [course1, course2, course3]
 
-        Author: ``@ChinaiArman``
+        Author: @ChinaiArman
         """
         return self.courses
 
@@ -51,8 +50,7 @@ class Schedule:
 
         Returns:
         --------
-        ``str``
-            The student ID assigned to the schedule.
+        ``str``: The student ID assigned to the schedule.
 
         Notes:
         ------
@@ -64,6 +62,6 @@ class Schedule:
         >>> schedule.get_student_id()
         ... '123456'
 
-        Author: ``@ChinaiArman``
+        Author: @ChinaiArman
         """
         return self.student_id

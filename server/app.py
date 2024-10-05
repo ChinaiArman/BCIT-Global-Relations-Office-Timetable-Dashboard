@@ -51,7 +51,7 @@ def log_request_teardown(error=None):
         app.logger.error(f"An error occurred: {error}")
 
 
-# INSTANTIATE SERVICES
+# CONFIGURE SERVICES
 app.config['database'] = Database()
 app.config['authenticator'] = Authenticator()
 app.config['studentManager'] = StudentManager()

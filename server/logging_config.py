@@ -10,6 +10,29 @@ import os
 # CONFIG LOGGING
 def configure_logging(app) -> None:
     """
+    Configure the logging for the application to write to two log files: app.log and error.log
+
+    Args:
+    -----
+    app (Flask): The Flask application instance.
+
+    Returns:
+    --------
+    None
+
+    Notes:
+    ------
+    1. The app.log file contains INFO logs.
+    2. The error.log file contains ERROR logs.
+    3. The log files are stored in the `server/logs/` directory.
+
+    Example:
+    --------
+    >>> app = Flask(__name__)
+    >>> configure_logging(app)
+    ... # Log files created in `server/logs/` directory
+
+    Author: @ChinaiArman
     """
     init_log_files()
     app.logger.setLevel(logging.INFO)
@@ -30,6 +53,27 @@ def configure_logging(app) -> None:
 
 def init_log_files() -> None:
     """
+    Initialize the log files for the application.
+
+    Args:
+    -----
+    None
+
+    Returns:
+    --------
+    None
+
+    Notes:
+    ------
+    1. The log files are stored in the `server/logs/` directory.
+    2. The log files are created if they do not exist.
+
+    Example:
+    --------
+    >>> init_log_files()
+    ... # Log files created in `server/logs/` directory
+
+    Author: @ChinaiArman
     """
     if not os.path.exists('server/logs'):
         os.makedirs('server/logs')
