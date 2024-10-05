@@ -9,7 +9,7 @@ class Student:
     """ """
 
     def __init__(
-        self, id: str, firstName: str, lastName: str, selection: list, courses: list
+        self, id: str, firstName: str, lastName: str, selection: list=[], courses: list=[]
     ):
         """
         Intialize the Student instance.
