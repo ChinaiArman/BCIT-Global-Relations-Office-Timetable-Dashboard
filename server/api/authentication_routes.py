@@ -2,7 +2,7 @@
 """
 
 # IMPORTS
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request, current_app
 
 
 # INSTANTIATE SERVICES
