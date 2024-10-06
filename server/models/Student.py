@@ -2,30 +2,19 @@
 """
 
 # IMPORTS
+from db_config import db
+from models.Enrollments import enrollments
 
 
 # STUDENT DATA CLASS
-class Student:
-    """ """
+class Student(db.Model):
+    __tablename__ = 'students'
 
-    def __init__(
-        self, id: str, firstName: str, lastName: str, selection: list=[], courses: list=[]
-    ):
-        """
-        Intialize the Student instance.
+    id = db.Column(db.String(10), primary_key=True, autoincrement=False)
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    student_email = db.Column(db.String(50), nullable=False)
+    preferences = db.Column(db.String(200), default='')
 
-        Args:
-        -----
-        - id (str): The student ID.
-        - firstName (str): The first name of the student.
-        - lastName (str): The last name of the student.
-        - selection (list): A list of Course instances selected by the student.
-        - courses (list): A list of Course instances assigned to the student.
-
-        Author: ``@CharlieZhang``
-        """
-        self.id = id
-        self.firstName = firstName
-        self.lastName = lastName
-        self.selection = selection
-        self.courses = courses
+    # Use a string reference for the Course class
+    courses = db.relationship('Course', secondary=enrollments, back_populates='students')

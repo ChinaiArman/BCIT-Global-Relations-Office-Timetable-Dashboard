@@ -1,5 +1,2 @@
 # VENV
 .venv
-
-# Course and Student files
-server/data/students.csv

@@ -4,6 +4,9 @@
 # IMPORTS
 import pandas as pd
 
+from models.Course import Course
+from models.Student import Student
+
 
 # CONSTANTS
 DROP_COURSE_COLUMNS = [
@@ -23,13 +26,14 @@ DROP_COURSE_COLUMNS = [
 
 # DATABASE CLASS
 class Database:
-    """ """
+    """
+    """
+    def __init__(self, db):
+        """
+        """
+        self.db = db
 
-    def __init__(self):
-        """ """
-        pass
-
-    def save_bulk_course_upload_file(self, file) -> dict:
+    def load_courses_from_file(self, file) -> dict:
         """
         Save the bulk course upload file to the server.
 
@@ -55,24 +59,14 @@ class Database:
 
         Author: ``@ChinaiArman``
         """
-        if file.filename.endswith(".xlsx") or file.filename.endswith(".csv"):
-            file.save(
-                f"server/data/bulk_course_upload_file.{file.filename.split('.')[-1]}"
-            )
-            try:
-                self.parse_bulk_course_upload_file(file)
-            except KeyError:
-                return {
-                    "status": 400,
-                    "message": "Invalid file format. Please use course upload template.",
-                }
-            return {"status": 201, "message": "File uploaded successfully"}
-        else:
-            return {
-                "status": 400,
-                "message": "Invalid file type. Please upload an Excel file.",
-            }
-
+        if not (file.filename.endswith(".xlsx") or file.filename.endswith(".csv")):
+            return False
+        try:
+            self.save_bulk_course_upload_file(self.parse_bulk_course_upload_file(file))
+            return True
+        except KeyError:
+            return False
+    
     def parse_bulk_course_upload_file(self, file) -> None:
         """
         Parse the bulk course upload file to remove unnecessary columns.
@@ -113,12 +107,19 @@ class Database:
         )
         df.drop(columns=DROP_COURSE_COLUMNS, inplace=True)
         df["Instructor"] = df["Instructor"].map(lambda x: " ".join(x.split(", ")[::-1]))
-        df = (
-            df.groupby([column for column in df.columns if column != "Instructor"])
-            .agg({"Instructor": lambda x: " & ".join(set(x))})
-            .reset_index()
-        )
-        df.to_csv("server/data/courses.csv", index=False)
+        df = df.groupby([column for column in df.columns if column != "Instructor"]).agg({'Instructor': lambda x: ' & '.join(set(x))}).reset_index()
+        df["Instructor"] = df["Instructor"].map(lambda x: x[:256])
+        return df
+    
+    def save_bulk_course_upload_file(self, df) -> None:
+        """
+        """
+        self.db.session.query(Course).delete()
+        self.db.session.commit()
+        for _, row in df.iterrows():
+            course = Course(status='Active', block=row['Block'], crn=row['CRN'], course_grouping=row['Block'] + row['Course'], course_code=row['Course'], course_type=row['Type'], day=row['Day'], begin_time=row['Begin Time'], end_time=row['End Time'], building_room=row['Bldg/Room'], start_date=row['Start Date'], end_date=row['End Date'], max_capacity=row['Max.'], num_enrolled= row['Act.'], is_full_time=row['FT/PT'], term_code=row["Term Code (swvmday)"], instructor=row['Instructor'])
+            self.db.session.add(course)
+        self.db.session.commit()
         return
 
     def get_student_by_id(self, id: int) -> dict:

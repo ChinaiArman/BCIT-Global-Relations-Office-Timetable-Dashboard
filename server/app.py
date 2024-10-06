@@ -20,6 +20,8 @@ from services.Authenticator import Authenticator
 from services.Scheduler import Scheduler
 from services.EmailManager import EmailManager
 
+from db_config import db, configure_db
+
 
 # ENVIRONMENT VARIABLES
 load_dotenv()
@@ -29,6 +31,10 @@ PORT = os.getenv('PORT', 5000)
 # FLASK CONFIGURATION
 app = Flask(__name__)
 CORS(app)
+
+
+# DATABASE CONFIGURATION
+configure_db(app)
 
 
 # LOGGING CONFIGURATION
@@ -51,7 +57,7 @@ def log_request_teardown(error=None):
 
 
 # CONFIGURE SERVICES
-app.config['database'] = Database()
+app.config['database'] = Database(db)
 app.config['authenticator'] = Authenticator()
 app.config['studentManager'] = Scheduler()
 app.config['emailManager'] = EmailManager()
@@ -70,4 +76,6 @@ app.register_blueprint(authentication_bp, url_prefix='/api')
 
 # MAIN
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)
