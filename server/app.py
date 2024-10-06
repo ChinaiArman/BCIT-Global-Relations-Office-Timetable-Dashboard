@@ -3,6 +3,7 @@
 
 # IMPORTS
 from flask import Flask, jsonify, request, g
+from flask_sqlalchemy import SQLAlchemy
 import time
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -20,15 +21,28 @@ from services.Authenticator import Authenticator
 from services.Scheduler import Scheduler
 from services.EmailManager import EmailManager
 
+from sql_db import db
+
 
 # ENVIRONMENT VARIABLES
 load_dotenv()
 PORT = os.getenv('PORT', 5000)
+DB_USERNAME = os.getenv('DB_USERNAME')
+DB_PASSWORD = os.getenv('DB_PASSWORD')
+DB_HOST = os.getenv('DB_HOST')
+DB_PORT = os.getenv('DB_PORT')
+DB_NAME = os.getenv('DB_NAME')
 
 
 # FLASK CONFIGURATION
 app = Flask(__name__)
 CORS(app)
+
+
+# DATABASE CONFIGURATION
+app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db.init_app(app)
 
 
 # LOGGING CONFIGURATION
@@ -51,7 +65,7 @@ def log_request_teardown(error=None):
 
 
 # CONFIGURE SERVICES
-app.config['database'] = Database()
+app.config['database'] = Database(db)
 app.config['authenticator'] = Authenticator()
 app.config['studentManager'] = Scheduler()
 app.config['emailManager'] = EmailManager()
@@ -70,4 +84,6 @@ app.register_blueprint(authentication_bp, url_prefix='/api')
 
 # MAIN
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)

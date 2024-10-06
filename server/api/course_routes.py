@@ -63,7 +63,7 @@ def upload_course():
     Author: ``@ChinaiArman``
     """
     db = current_app.config['database']
-    response = db.save_bulk_course_upload_file(request.files['file'])
+    response = db.load_courses_from_file(request.files['file'])
     return jsonify({"message": response["message"]}), response["status"]
 
 @course_bp.route('/course/export', methods=['GET'])

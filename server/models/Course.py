@@ -2,49 +2,36 @@
 """
 
 # IMPORTS
+from sql_db import db
+from models.Enrollments import enrollments
 
 
 # COURSE DATA CLASS
-class Course:
+class Course(db.Model):
     """
-    Represents a course with its details.
     """
-    def __init__(self, status: str, block: str, crn: str, course_code: str, course_type: str, day: str, begin_time: int, end_time: int, instructor: str, building_room: str, start_date: str, end_date: str, max_capacity: int, num_enrolled: int, current_students: list):
-        """
-        Initializes a Course instance with its details.
+    __tablename__ = 'courses'
 
-        Args:
-        - status (str): The status of the course.
-        - block (str): The block of the course.
-        - crn (str): The Course Registration Number.
-        - course_code (str): The code of the course.
-        - course_type (str): The type of the course.
-        - day (str): The day of the week the course is held.
-        - begin_time (int): The start time of the course.
-        - end_time (int): The end time of the course.
-        - instructor (str): The instructor teaching the course.
-        - building_room (str): The building and room where the course is held.
-        - start_date (str): The start date of the course.
-        - end_date (str): The end date of the course.
-        - max_capacity (int): The maximum capacity of the course.
-        - num_enrolled (int): The actual number of students enrolled.
-        - current_students (list): A list of students currently enrolled in the course.
-        """
-        self.status = status
-        self.block = block
-        self.crn = crn
-        self.course_code = course_code
-        self.course_type = course_type
-        self.day = day
-        self.begin_time = begin_time
-        self.end_time = end_time
-        self.instructor = instructor
-        self.building_room = building_room
-        self.start_date = start_date
-        self.end_date = end_date
-        self.max_capacity = max_capacity
-        self.num_enrolled = num_enrolled
-        self.current_students = current_students
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    status = db.Column(db.String(10), nullable=False)
+    block = db.Column(db.String(10), nullable=False)
+    crn = db.Column(db.Integer, nullable=False)
+    course_grouping = db.Column(db.String(20), nullable=False)
+    course_code = db.Column(db.String(20), nullable=False)
+    course_type = db.Column(db.String(10), nullable=False)
+    day = db.Column(db.String(20), nullable=False)
+    begin_time = db.Column(db.Time, nullable=False)
+    end_time = db.Column(db.Time, nullable=False)
+    building_room = db.Column(db.String(100), nullable=False)
+    start_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date, nullable=False)
+    max_capacity = db.Column(db.Integer, nullable=False)
+    num_enrolled = db.Column(db.Integer, default=0)
+    is_full_time = db.Column(db.String(20), nullable=False)
+    term_code = db.Column(db.String(10), nullable=False)
+    instructor = db.Column(db.String(256), nullable=False)
+
+    students = db.relationship('Student', secondary=enrollments, back_populates='courses')
 
     def add_student(self, student):
         """
@@ -73,15 +60,16 @@ class Course:
 
         Author: ``@KateSullivan``
         """
-        self.current_students.append(student)
-        self.num_enrolled += 1
+        if self.num_enrolled < self.max_capacity:
+            self.current_students.append(student)
+            self.num_enrolled += 1
 
-    def remove_student(self, student_id: str):
+    def remove_student(self, student: str):
         """
         Remove a student from the course. This will remove the student object from the list and decrease the actual enrollment by 1.
 
         Args:
-        - student_id (str): The student ID of the student to be removed from the course.
+        - student (str): The student object to be removed from the course.
 
         Returns:
         --------
@@ -95,7 +83,8 @@ class Course:
         Example:
         --------
         >>> course = Course(status='Active', block='A', crn='12345', course_code='CS101', course_type='Lecture', day='Monday', begin_time=9, end_time=10, instructor='John Doe', building_room='Building A, Room 101', start_date='2022-01-01', end_date='2022-05-01', max_capacity=30, actual_enrollment=25, current_students=['123456'])
-        >>> course.remove_student('123456')
+        >>> student = Student(id='123456', first_name='Jane', last_name='Doe', student_email='jane_doe@bcit.ca', selection
+        >>> course.remove_student(student)
         >>> print(course.current_students)
         ... []
         >>> print(course.actual_enrollment)
@@ -103,6 +92,7 @@ class Course:
 
         Author: ``@KateSullivan``
         """
-        self.current_students = [student for student in self.current_students if student.id != student_id]
-        self.num_enrolled -= 1
+        if student in self.current_students:
+            self.current_students.remove(student)
+            self.num_enrolled -= 1
     
