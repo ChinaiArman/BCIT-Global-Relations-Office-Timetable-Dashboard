@@ -78,5 +78,6 @@ def get_student_courses(id):
 @student_bp.route("/students/download_template", methods=["GET"])
 def download_template():
     """ """
-
+    db = current_app.config["database"]
+    response = db.download_student_template()
     return jsonify({"message": "student download template endpoint"})

@@ -6,16 +6,27 @@ import pandas as pd
 
 
 # CONSTANTS
-DROP_COURSE_COLUMNS = ["Hrs", "Block Code (swvmday)", "Block Conflicts (swvmday)", "Instructor Conflicts (swvmday)", "Instructor Conflicts (swvmday) = 'Y'", "Meeting Day No. (swvmday)", "Room Conflicts (swvmday)", "Room Conflicts (swvmday)  =  'Y'", "Sorted By", "Sort Order", "Time"]
+DROP_COURSE_COLUMNS = [
+    "Hrs",
+    "Block Code (swvmday)",
+    "Block Conflicts (swvmday)",
+    "Instructor Conflicts (swvmday)",
+    "Instructor Conflicts (swvmday) = 'Y'",
+    "Meeting Day No. (swvmday)",
+    "Room Conflicts (swvmday)",
+    "Room Conflicts (swvmday)  =  'Y'",
+    "Sorted By",
+    "Sort Order",
+    "Time",
+]
 
 
 # DATABASE CLASS
 class Database:
-    """
-    """
+    """ """
+
     def __init__(self):
-        """
-        """
+        """ """
         pass
 
     def save_bulk_course_upload_file(self, file) -> dict:
@@ -45,15 +56,23 @@ class Database:
         Author: ``@ChinaiArman``
         """
         if file.filename.endswith(".xlsx") or file.filename.endswith(".csv"):
-            file.save(f"server/data/bulk_course_upload_file.{file.filename.split('.')[-1]}")
+            file.save(
+                f"server/data/bulk_course_upload_file.{file.filename.split('.')[-1]}"
+            )
             try:
                 self.parse_bulk_course_upload_file(file)
             except KeyError:
-                return {"status": 400, "message": "Invalid file format. Please use course upload template."}
+                return {
+                    "status": 400,
+                    "message": "Invalid file format. Please use course upload template.",
+                }
             return {"status": 201, "message": "File uploaded successfully"}
         else:
-            return {"status": 400, "message": "Invalid file type. Please upload an Excel file."}
-    
+            return {
+                "status": 400,
+                "message": "Invalid file type. Please upload an Excel file.",
+            }
+
     def parse_bulk_course_upload_file(self, file) -> None:
         """
         Parse the bulk course upload file to remove unnecessary columns.
@@ -82,10 +101,171 @@ class Database:
         Author: ``@ChinaiArman``
         """
         df = pd.read_excel(file)
-        df = df.map(lambda x: x.replace("*", "").replace("\n", "").strip() if isinstance(x, str) else x)
-        df.columns = df.columns.map(lambda x: x.replace("*", "").replace("\n", "").strip())
+        df = df.map(
+            lambda x: (
+                x.replace("*", "").replace("\n", "").strip()
+                if isinstance(x, str)
+                else x
+            )
+        )
+        df.columns = df.columns.map(
+            lambda x: x.replace("*", "").replace("\n", "").strip()
+        )
         df.drop(columns=DROP_COURSE_COLUMNS, inplace=True)
         df["Instructor"] = df["Instructor"].map(lambda x: " ".join(x.split(", ")[::-1]))
-        df = df.groupby([column for column in df.columns if column != "Instructor"]).agg({'Instructor': lambda x: ' & '.join(set(x))}).reset_index()
+        df = (
+            df.groupby([column for column in df.columns if column != "Instructor"])
+            .agg({"Instructor": lambda x: " & ".join(set(x))})
+            .reset_index()
+        )
         df.to_csv("server/data/courses.csv", index=False)
         return
+
+    def get_student_by_id(self, id: int) -> dict:
+        """
+        Get the student by ID.
+
+        Args:
+        -----
+        id (int): The student ID.
+
+        Returns:
+        --------
+        dict: The student information.
+
+        Example:
+        --------
+        >>> db = Database()
+        >>> db.get_student_by_id(1)
+        ... {"id": 1, "firstName": "John", "lastName": "Doe", "selection": [], "courses": []}
+        """
+        df = pd.read_csv("server/data/students.csv")
+        student = df[df["BCIT ID"] == id].to_dict(orient="records")
+        if student:
+            return {"status": 200, "message": "Student Found", "data": student[0]}
+        else:
+            return {"status": 404, "message": "Student not found"}
+
+    def create_student(self, student) -> dict:
+        """
+        Create a new student.
+
+        Args:
+        -----
+        student (Student): The student to create.
+
+        Returns:
+        --------
+        dict: The response message.
+
+        Example:
+        --------
+        >>> db = Database()
+        >>> student = Student(1, "John", "Doe")
+        >>> db.create_student(student)
+        ... {"message": "Student created successfully"}
+        """
+        try:
+            df = pd.read_csv("server/data/students.csv")
+            if student.id in df["BCIT ID"].values:
+                return {"error": "Student ID already exists"}, 400
+            df = pd.read_csv("server/data/students.csv")
+            df = pd.concat([df, student.__dict__], ignore_index=True)
+            df.to_csv("server/data/students.csv", index=False)
+            return {"status": 201, "message": "Student created successfully"}
+        except Exception as e:
+            return {"status": 500, "message": str(e)}
+
+    def update_student(self, id: int, data: dict) -> dict:
+        """
+        Update the student by ID.
+
+        Args:
+        -----
+        id (int): The student ID.
+        student (Student): The student to update.
+
+        Returns:
+        --------
+        dict: The response message.
+
+        Example:
+        --------
+        >>> db = Database()
+        >>> student = Student(1, "John", "Doe")
+        >>> db.update_student(1, student)
+        ... {"message": "Student updated successfully"}
+        """
+        try:
+            df = pd.read_csv("server/data/students.csv")
+
+            if id not in df["BCIT ID"].values:
+                return {"status": 404, "message": "Student not found"}
+
+            invalid_keys = [key for key in data.keys() if key not in df.columns]
+            if invalid_keys:
+                return {"status": 400, "message": f"Invalid keys: {invalid_keys}"}
+
+            df.loc[df["BCIT ID"] == id, data.keys()] = data.values()
+            df.to_csv("server/data/students.csv", index=False)
+            return {"status": 200, "message": "Student updated successfully"}
+
+        except Exception as e:
+            return {"status": 500, "message": str(e)}
+        
+    def delete_student(self, id: int) -> dict:
+        """
+        Delete the student by ID.
+
+        Args:
+        -----
+        id (int): The student ID.
+
+        Returns:
+        --------
+        dict: The response message.
+
+        Example:
+        --------
+        >>> db = Database()
+        >>> db.delete_student(1)
+        ... {"message": "Student deleted successfully"}
+        """
+        try:
+            df = pd.read_csv("server/data/students.csv")
+            if id not in df["BCIT ID"].values:
+                return {"status": 404, "message": "Student not found"}
+            df = df[df["BCIT ID"] != id]
+            df.to_csv("server/data/students.csv", index=False)
+            return {"status": 200, "message": "Student deleted successfully"}
+        except Exception as e:
+            return {"status": 500, "message": str(e)}
+        
+    def get_student_courses(self, id: int) -> dict:
+        """
+        Get the courses for the student by ID.
+
+        Args:
+        -----
+        id (int): The student ID.
+
+        Returns:
+        --------
+        dict: The response message.
+
+        Example:
+        --------
+        >>> db = Database()
+        >>> db.get_student_courses(1)
+        ... {"message": "Student courses found"}
+        """
+        df = pd.read_csv("server/data/students.csv")
+        courses = df.loc[df["BCIT ID"] == id, "Courses"]
+        if courses:
+            course_list = courses.split(", ")
+            for course in courses:
+                
+            return {"status": 200, "message": "Student courses found", "data": courses}
+        else:
+            return {"status": 404, "message": "Student courses not found"}
+    
