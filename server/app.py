@@ -20,7 +20,7 @@ from services.Authenticator import Authenticator
 from services.Scheduler import Scheduler
 from services.EmailManager import EmailManager
 
-from db_config import db, config_db
+from db_config import db, configure_db
 
 
 # ENVIRONMENT VARIABLES
@@ -34,7 +34,7 @@ CORS(app)
 
 
 # DATABASE CONFIGURATION
-config_db(app)
+configure_db(app)
 
 
 # LOGGING CONFIGURATION

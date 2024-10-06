@@ -21,7 +21,7 @@ db = SQLAlchemy()
 
 
 # CONFIGURE DATABASE
-def config_db(app):
+def configure_db(app):
     app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
