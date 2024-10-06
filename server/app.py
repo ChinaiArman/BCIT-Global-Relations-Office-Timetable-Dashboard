@@ -3,7 +3,6 @@
 
 # IMPORTS
 from flask import Flask, jsonify, request, g
-from flask_sqlalchemy import SQLAlchemy
 import time
 from flask_cors import CORS
 from dotenv import load_dotenv
