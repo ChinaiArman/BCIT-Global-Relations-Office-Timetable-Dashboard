@@ -20,17 +20,12 @@ from services.Authenticator import Authenticator
 from services.Scheduler import Scheduler
 from services.EmailManager import EmailManager
 
-from db_config import db
+from db_config import db, config_db
 
 
 # ENVIRONMENT VARIABLES
 load_dotenv()
 PORT = os.getenv('PORT', 5000)
-DB_USERNAME = os.getenv('DB_USERNAME')
-DB_PASSWORD = os.getenv('DB_PASSWORD')
-DB_HOST = os.getenv('DB_HOST')
-DB_PORT = os.getenv('DB_PORT')
-DB_NAME = os.getenv('DB_NAME')
 
 
 # FLASK CONFIGURATION
@@ -39,9 +34,7 @@ CORS(app)
 
 
 # DATABASE CONFIGURATION
-app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db.init_app(app)
+config_db(app)
 
 
 # LOGGING CONFIGURATION
