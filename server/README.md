@@ -52,8 +52,29 @@
    ```
 
 4. Set up environment variables
+
    - Create a `.env` file in the server directory of the project.
    - Add the following environment variables to the `.env` file:
+
    ```sh
-   PORT=5000   # The port on which the server will run
+   PORT=5000         # The port on which the server will run
+   DB_USERNAME=""    # The username for the database
+   DB_PASSWORD=""    # The password for the database
+   DB_HOST=""        # The host for the database
+   DB_PORT=""        # The port for the database
+   DB_NAME=""        # The name of the database
+   ```
+
+5. Install MYSQL Server
+
+   - Install MySQL Server on your local machine from the following link (recommend to install both server and workbench):
+     - [MySQL Community Server](https://dev.mysql.com/downloads/installer/)
+   - Create a new database and user for the project.
+   - Add the database credentials to the `.env` file.
+
+6. Run the server
+
+   ```sh
+   cd ..                      # Change to the project directory
+   python server/app.py       # Run the server
    ```
