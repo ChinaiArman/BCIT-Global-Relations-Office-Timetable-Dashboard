@@ -21,7 +21,30 @@ db = SQLAlchemy()
 
 
 # CONFIGURE DATABASE
-def configure_db(app):
+def configure_db(app) -> None:
+    """
+    Configure the MYSQL database connection.
+
+    Args:
+    -----
+    app (Flask): The Flask application instance.
+
+    Returns:
+    --------
+    None
+
+    Notes:
+    ------
+    1. The database connection is configured using the environment variables.
+    2. The database connection is initialized.
+
+    Example:
+    --------
+    >>> configure_db(app)
+    ... # Database connection configured
+
+    Author: ``@ChinaiArman``
+    """
     app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
