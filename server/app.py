@@ -21,7 +21,7 @@ from services.Authenticator import Authenticator
 from services.Scheduler import Scheduler
 from services.EmailManager import EmailManager
 
-from sql_db import db
+from db_config import db
 
 
 # ENVIRONMENT VARIABLES

@@ -2,7 +2,7 @@
 """
 
 # IMPORTS
-from sql_db import db
+from db_config import db
 
 
 # ENROLLMENTS TABLE
