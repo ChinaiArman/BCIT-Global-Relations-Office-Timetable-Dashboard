@@ -64,7 +64,10 @@ def upload_course():
     """
     db = current_app.config['database']
     response = db.load_courses_from_file(request.files['file'])
-    return jsonify({"message": response["message"]}), response["status"]
+    if response:
+        return jsonify({"message": "Course data successfully uploaded"}), 201
+    else:
+        return jsonify({"message": "Invalid request"}), 400
 
 @course_bp.route('/course/export', methods=['GET'])
 def download_course():
