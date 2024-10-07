@@ -55,8 +55,7 @@ class Database:
             df = self.parse_bulk_course_upload_file(file)
             self.save_bulk_course_upload_file(df)
             return True
-        except Exception as e:
-            print(e)
+        except:
             return False
     
     def parse_bulk_course_upload_file(self, file) -> None:
@@ -120,7 +119,6 @@ class Database:
         """
         self.db.session.query(Course).delete()
         self.db.session.commit()
-        # reset auto increment back to 1
         self.db.session.execute(text("ALTER TABLE courses AUTO_INCREMENT = 1"))
         for _, row in df.iterrows():
             try: 
