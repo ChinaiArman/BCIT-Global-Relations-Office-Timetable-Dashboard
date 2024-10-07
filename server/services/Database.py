@@ -126,10 +126,6 @@ class Database:
                 course = Course(status=row['Status'], block=row['Block'], crn=row['CRN'], course_grouping=row['Block'] + row['Course'], course_code=row['Course'], course_type=row['Type'], day=row['Day'], begin_time=row['Begin Time'], end_time=row['End Time'], building_room=row['Bldg/Room'], start_date=row['Start Date'], end_date=row['End Date'], max_capacity=row['Max.'], num_enrolled= row['Act.'], is_full_time=row['FT/PT'], term_code=row["Term Code (swvmday)"], instructor=row['Instructor'])
                 self.db.session.add(course)
             except:
-                row["Start Date"] = str(row["Start Date"])
-                row["End Date"] = str(row["End Date"])
-                row["Begin Time"] = str(row["Begin Time"])
-                row["End Time"] = str(row["End Time"])
-                invalid_rows.append(row.to_dict())
+                invalid_rows.append({"crn": row["CRN"], "course": row["Course"], "block": row["Block"], "instructor": row["Instructor"]})
         self.db.session.commit()
         return invalid_rows
