@@ -9,6 +9,8 @@ from datetime import datetime
 from models.Course import Course
 from models.Student import Student
 
+from exceptions import InvalidUploadFile
+
 
 # CONSTANTS
 DROP_COURSE_COLUMNS = ["Hrs", "Block Code (swvmday)", "Block Conflicts (swvmday)", "Instructor Conflicts (swvmday)", "Instructor Conflicts (swvmday) = 'Y'", "Meeting Day No. (swvmday)", "Room Conflicts (swvmday)", "Room Conflicts (swvmday)  =  'Y'", "Sorted By", "Sort Order", "Time"]
@@ -23,9 +25,9 @@ class Database:
         """
         self.db = db
 
-    def load_courses_from_file(self, file) -> dict:
+    def save_bulk_course_upload_file(self, file) -> list:
         """
-        Save the bulk course upload file to the server.
+        Save the bulk course upload file to the database.
 
         Args:
         -----
@@ -33,31 +35,31 @@ class Database:
 
         Returns:
         --------
-        dict: The response message.
+        list: A list of invalid rows.
 
         Notes:
         ------
-        1. The file is saved in the `server/data/` directory.
+        1. The file is validated to ensure it is an XLSX file.
         2. The file is parsed to remove unnecessary columns.
+        3. The data is normalized and uploaded to the database.
+        4. Invalid rows are returned.
 
         Example:
         --------
         >>> db = Database()
         >>> db.save_bulk_course_upload_file(file)
-        ... {"status": 201, "message": "File uploaded successfully"}
-        ... # File saved in `server/data/` directory
-
-        Author: ``@ChinaiArman``
+        ... # Invalid rows returned
+        ... # Course data uploaded to the database
         """
         if not file.filename.endswith(".xlsx"):
-            return False
+            raise InvalidUploadFile("Invalid file format. Please upload an XLSX file.")
         try:
             df = self.parse_bulk_course_upload_file(file)
-            return self.save_bulk_course_upload_file(df)
+            return self.upload_courses_to_database(df)
         except:
-            return False
+            raise InvalidUploadFile("Invalid file format. Error processing the file.")
     
-    def parse_bulk_course_upload_file(self, file) -> None:
+    def parse_bulk_course_upload_file(self, file) -> pd.DataFrame:
         """
         Parse the bulk course upload file to remove unnecessary columns.
 
@@ -67,20 +69,22 @@ class Database:
 
         Returns:
         --------
-        None
+        pd.DataFrame: The parsed DataFrame.
 
         Notes:
         ------
         1. The file is read as a DataFrame.
         2. The columns are cleaned by removing special characters.
         3. The unnecessary columns are removed.
-        4. The DataFrame is saved as a CSV file in the `server/data/` directory.
+        4. The instructor names are cleaned.
+        5. The data is grouped by the columns and the instructors are aggregated.
+        6. The DataFrame is returned.
 
         Example:
         --------
         >>> db = Database()
         >>> db.parse_bulk_course_upload_file(file)
-        ... # File saved as CSV in `server/data/` directory
+        ... # DataFrame returned
 
         Author: ``@ChinaiArman``
         """
@@ -92,8 +96,27 @@ class Database:
         df = df.groupby([column for column in df.columns if column != "Instructor"]).agg({'Instructor': lambda x: ','.join(set(x))}).reset_index()
         return df
 
-    def normalize_course_data(self, row) -> None:
+    def normalize_course_data(self, row: pd.Series) -> pd.Series:
         """
+        Normalize the course data.
+
+        Args:
+        -----
+        row (pd.Series): The row to normalize.
+
+        Returns:
+        --------
+        pd.Series: The normalized row.
+
+        Notes:
+        ------
+        1. Matches the column requirements for the Course model.
+
+        Example:
+        --------
+        >>> db = Database()
+        >>> db.normalize_course_data(row)
+        ... # Normalized row returned
         """
         row["Status"] = "Active" if row["Status"] == "Active" else "Inactive"
         row["Block"] = row["Block"][:8]
@@ -113,8 +136,29 @@ class Database:
         row["Instructor"] = row["Instructor"][:512]
         return row
 
-    def save_bulk_course_upload_file(self, df: pd.DataFrame) -> None:
+    def upload_courses_to_database(self, df: pd.DataFrame) -> list:
         """
+        Upload the courses to the database.
+
+        Args:
+        -----
+        df (pd.DataFrame): The DataFrame to upload.
+
+        Returns:
+        --------
+        list: A list of invalid rows.
+
+        Notes:
+        ------
+        1. The courses are uploaded to the database.
+        2. Invalid rows are returned.
+
+        Example:
+        --------
+        >>> db = Database()
+        >>> db.upload_courses_to_database(df)
+        ... # Invalid rows returned
+        ... # Courses uploaded to the database
         """
         self.db.session.query(Course).delete()
         self.db.session.commit()

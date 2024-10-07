@@ -64,12 +64,12 @@ class Course(db.Model):
             self.current_students.append(student)
             self.num_enrolled += 1
 
-    def remove_student(self, student: str):
+    def remove_student(self, student):
         """
         Remove a student from the course. This will remove the student object from the list and decrease the actual enrollment by 1.
 
         Args:
-        - student (str): The student object to be removed from the course.
+        - student (Student): The student object to be removed from the course.
 
         Returns:
         --------
