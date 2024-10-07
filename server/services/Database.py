@@ -3,6 +3,7 @@
 
 # IMPORTS
 import pandas as pd
+from sqlalchemy import text
 from datetime import datetime
 
 from models.Course import Course
@@ -48,14 +49,14 @@ class Database:
 
         Author: ``@ChinaiArman``
         """
-        if not (file.filename.endswith(".xlsx") or file.filename.endswith(".csv")):
+        if not file.filename.endswith(".xlsx"):
             return False
         try:
             df = self.parse_bulk_course_upload_file(file)
-            df = self.normalize_student_data(df)
             self.save_bulk_course_upload_file(df)
             return True
-        except:
+        except Exception as e:
+            print(e)
             return False
     
     def parse_bulk_course_upload_file(self, file) -> None:
@@ -93,37 +94,41 @@ class Database:
         df = df.groupby([column for column in df.columns if column != "Instructor"]).agg({'Instructor': lambda x: ','.join(set(x))}).reset_index()
         return df
 
-    def normalize_student_data(self, df: pd.DataFrame) -> None:
+    def normalize_course_data(self, row) -> None:
         """
         """
-        df["Status"] = df["Status"].map(lambda x: "Active" if x == "Active" else "Inactive")
-        df["Block"] = df["Block"].map(lambda x: x[:8])
-        df["CRN"] = df["CRN"].map(lambda x: int(x))
-        df["Course"] = df["Course"].map(lambda x: x[:8])
-        df["Type"] = df["Type"].map(lambda x: x[:3])
-        df["Day"] = df["Day"].map(lambda x: x[:3])
-        df["Begin Time"] = df["Begin Time"].map(lambda x: datetime.strptime(str(int(x)), "%H%M").time())
-        df["End Time"] = df["End Time"].map(lambda x: datetime.strptime(str(int(x)), "%H%M").time())
-        df["Bldg/Room"] = df["Bldg/Room"].map(lambda x: x[:10])
-        df["Start Date"] = df["Start Date"].map(lambda x: datetime.strptime(str(x), "%Y-%m-%d %H:%M:%S").date())
-        df["End Date"] = df["End Date"].map(lambda x: datetime.strptime(str(x), "%Y-%m-%d %H:%M:%S").date())
-        df["Max."] = df["Max."].map(lambda x: int(x))
-        df["Act."] = df["Act."].map(lambda x: int(x))
-        df["FT/PT"] = df["FT/PT"].map(lambda x: True if x == "FT" else False)
-        df["Term Code (swvmday)"] = df["Term Code (swvmday)"].map(lambda x: int(x))
-        df["Instructor"] = df["Instructor"].map(lambda x: x[:512])
-        return df
+        row["Status"] = "Active" if row["Status"] == "Active" else "Inactive"
+        row["Block"] = row["Block"][:8]
+        row["CRN"] = int(row["CRN"])
+        row["Course"] = row["Course"][:8]
+        row["Type"] = row["Type"][:3]
+        row["Day"] = row["Day"][:3]
+        row["Begin Time"] = datetime.strptime(str(int(row["Begin Time"])), "%H%M").time()
+        row["End Time"] = datetime.strptime(str(int(row["End Time"])), "%H%M").time()
+        row["Bldg/Room"] = row["Bldg/Room"][:10]
+        row["Start Date"] = datetime.strptime(str(row["Start Date"]), "%Y-%m-%d %H:%M:%S").date()
+        row["End Date"] = datetime.strptime(str(row["End Date"]), "%Y-%m-%d %H:%M:%S").date()
+        row["Max."] = int(row["Max."])
+        row["Act."] = int(row["Act."])
+        row["FT/PT"] = True if row["FT/PT"] == "FT" else False
+        row["Term Code (swvmday)"] = int(row["Term Code (swvmday)"])
+        row["Instructor"] = row["Instructor"][:512]
+        return row
 
     def save_bulk_course_upload_file(self, df: pd.DataFrame) -> None:
         """
         """
         self.db.session.query(Course).delete()
         self.db.session.commit()
+        # reset auto increment back to 1
+        self.db.session.execute(text("ALTER TABLE courses AUTO_INCREMENT = 1"))
         for _, row in df.iterrows():
             try: 
-                course = Course(status='Active', block=row['Block'], crn=row['CRN'], course_grouping=row['Block'] + row['Course'], course_code=row['Course'], course_type=row['Type'], day=row['Day'], begin_time=row['Begin Time'], end_time=row['End Time'], building_room=row['Bldg/Room'], start_date=row['Start Date'], end_date=row['End Date'], max_capacity=row['Max.'], num_enrolled= row['Act.'], is_full_time=row['FT/PT'], term_code=row["Term Code (swvmday)"], instructor=row['Instructor'])
+                row = self.normalize_course_data(row)
+                course = Course(status=row['Status'], block=row['Block'], crn=row['CRN'], course_grouping=row['Block'] + row['Course'], course_code=row['Course'], course_type=row['Type'], day=row['Day'], begin_time=row['Begin Time'], end_time=row['End Time'], building_room=row['Bldg/Room'], start_date=row['Start Date'], end_date=row['End Date'], max_capacity=row['Max.'], num_enrolled= row['Act.'], is_full_time=row['FT/PT'], term_code=row["Term Code (swvmday)"], instructor=row['Instructor'])
                 self.db.session.add(course)
-            except:
+            except Exception as e:
+                print(e)
                 pass
         self.db.session.commit()
         return
