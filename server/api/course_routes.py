@@ -64,8 +64,8 @@ def upload_course():
     """
     db = current_app.config['database']
     response = db.load_courses_from_file(request.files['file'])
-    if response:
-        return jsonify({"message": "Course data successfully uploaded"}), 201
+    if response is not False:
+        return jsonify({"message": "Course data successfully uploaded", "invalid_rows": response }), 201
     else:
         return jsonify({"message": "Invalid request"}), 400
 
