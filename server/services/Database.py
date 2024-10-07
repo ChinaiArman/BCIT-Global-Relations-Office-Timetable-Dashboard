@@ -3,6 +3,7 @@
 
 # IMPORTS
 import pandas as pd
+from datetime import datetime
 
 from models.Course import Course
 from models.Student import Student
@@ -50,9 +51,11 @@ class Database:
         if not (file.filename.endswith(".xlsx") or file.filename.endswith(".csv")):
             return False
         try:
-            self.save_bulk_course_upload_file(self.parse_bulk_course_upload_file(file))
+            df = self.parse_bulk_course_upload_file(file)
+            df = self.normalize_student_data(df)
+            self.save_bulk_course_upload_file(df)
             return True
-        except KeyError:
+        except:
             return False
     
     def parse_bulk_course_upload_file(self, file) -> None:
@@ -87,17 +90,40 @@ class Database:
         df.columns = df.columns.map(lambda x: x.replace("*", "").replace("\n", "").strip())
         df.drop(columns=DROP_COURSE_COLUMNS, inplace=True)
         df["Instructor"] = df["Instructor"].map(lambda x: " ".join(x.split(", ")[::-1]))
-        df = df.groupby([column for column in df.columns if column != "Instructor"]).agg({'Instructor': lambda x: ' & '.join(set(x))}).reset_index()
-        df["Instructor"] = df["Instructor"].map(lambda x: x[:256])
+        df = df.groupby([column for column in df.columns if column != "Instructor"]).agg({'Instructor': lambda x: ','.join(set(x))}).reset_index()
         return df
-    
-    def save_bulk_course_upload_file(self, df) -> None:
+
+    def normalize_student_data(self, df: pd.DataFrame) -> None:
+        """
+        """
+        df["Status"] = df["Status"].map(lambda x: "Active" if x == "Active" else "Inactive")
+        df["Block"] = df["Block"].map(lambda x: x[:8])
+        df["CRN"] = df["CRN"].map(lambda x: int(x))
+        df["Course"] = df["Course"].map(lambda x: x[:8])
+        df["Type"] = df["Type"].map(lambda x: x[:3])
+        df["Day"] = df["Day"].map(lambda x: x[:3])
+        df["Begin Time"] = df["Begin Time"].map(lambda x: datetime.strptime(str(int(x)), "%H%M").time())
+        df["End Time"] = df["End Time"].map(lambda x: datetime.strptime(str(int(x)), "%H%M").time())
+        df["Bldg/Room"] = df["Bldg/Room"].map(lambda x: x[:10])
+        df["Start Date"] = df["Start Date"].map(lambda x: datetime.strptime(str(x), "%Y-%m-%d %H:%M:%S").date())
+        df["End Date"] = df["End Date"].map(lambda x: datetime.strptime(str(x), "%Y-%m-%d %H:%M:%S").date())
+        df["Max."] = df["Max."].map(lambda x: int(x))
+        df["Act."] = df["Act."].map(lambda x: int(x))
+        df["FT/PT"] = df["FT/PT"].map(lambda x: True if x == "FT" else False)
+        df["Term Code (swvmday)"] = df["Term Code (swvmday)"].map(lambda x: int(x))
+        df["Instructor"] = df["Instructor"].map(lambda x: x[:512])
+        return df
+
+    def save_bulk_course_upload_file(self, df: pd.DataFrame) -> None:
         """
         """
         self.db.session.query(Course).delete()
         self.db.session.commit()
         for _, row in df.iterrows():
-            course = Course(status='Active', block=row['Block'], crn=row['CRN'], course_grouping=row['Block'] + row['Course'], course_code=row['Course'], course_type=row['Type'], day=row['Day'], begin_time=row['Begin Time'], end_time=row['End Time'], building_room=row['Bldg/Room'], start_date=row['Start Date'], end_date=row['End Date'], max_capacity=row['Max.'], num_enrolled= row['Act.'], is_full_time=row['FT/PT'], term_code=row["Term Code (swvmday)"], instructor=row['Instructor'])
-            self.db.session.add(course)
+            try: 
+                course = Course(status='Active', block=row['Block'], crn=row['CRN'], course_grouping=row['Block'] + row['Course'], course_code=row['Course'], course_type=row['Type'], day=row['Day'], begin_time=row['Begin Time'], end_time=row['End Time'], building_room=row['Bldg/Room'], start_date=row['Start Date'], end_date=row['End Date'], max_capacity=row['Max.'], num_enrolled= row['Act.'], is_full_time=row['FT/PT'], term_code=row["Term Code (swvmday)"], instructor=row['Instructor'])
+                self.db.session.add(course)
+            except:
+                pass
         self.db.session.commit()
         return
