@@ -17,17 +17,20 @@ student_bp = Blueprint("student_bp", __name__)
 @student_bp.route("/student/<string:id>/", methods=["GET"])
 def get_student_by_id(id):
     """ """
-    return jsonify({"message": f"student {id} endpoint"})
+    db = current_app.config["database"]
+    response = db.get_student_by_id(id)
+    return (
+        jsonify({"message": response["message"], "data": response["data"]}),
+        response["status"],
+    )
 
 
 @student_bp.route("/student/", methods=["POST"])
 def create_student():
     """ """
     data = request.get_json()
-    # Need to match the keys of the data with the Student parameters
-    student = Student(**data)
     db = current_app.config["database"]
-    response = db.create_student(student)
+    response = db.create_student(data)
     return jsonify({"message": response["message"]}), response["status"]
 
 
@@ -78,10 +81,13 @@ def get_student_courses(id):
     """ """
     db = current_app.config["database"]
     response = db.get_student_courses(id)
-    return (
-        jsonify({"message": response["message"], "data": response["data"]}),
-        response["status"],
-    )
+    if response["status"] == 200 or response["status"] == 500:
+        return (
+            jsonify({"message": response["message"], "data": response["data"]}),
+            response["status"],
+        )
+    else:
+        return jsonify({"message": response["message"]}), response["status"]
 
 
 @student_bp.route("/student/download_template", methods=["GET"])
