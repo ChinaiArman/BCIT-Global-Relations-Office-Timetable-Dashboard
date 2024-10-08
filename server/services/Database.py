@@ -30,11 +30,10 @@ DROP_COURSE_COLUMNS = [
 
 # DATABASE CLASS
 class Database:
-    """
-    """
+    """ """
+
     def __init__(self, db):
-        """
-        """
+        """ """
         self.db = db
 
     def bulk_course_upload(self, file) -> list:
@@ -70,7 +69,7 @@ class Database:
             return self.upload_courses_to_database(df)
         except:
             raise InvalidUploadFile("Invalid file format. Error processing the file.")
-    
+
     def parse_bulk_course_upload_file(self, file) -> pd.DataFrame:
         """
         Parse the bulk course upload file to remove unnecessary columns.
@@ -113,7 +112,11 @@ class Database:
         )
         df.drop(columns=DROP_COURSE_COLUMNS, inplace=True)
         df["Instructor"] = df["Instructor"].map(lambda x: " ".join(x.split(", ")[::-1]))
-        df = df.groupby([column for column in df.columns if column != "Instructor"]).agg({'Instructor': lambda x: ','.join(set(x))}).reset_index()
+        df = (
+            df.groupby([column for column in df.columns if column != "Instructor"])
+            .agg({"Instructor": lambda x: ",".join(set(x))})
+            .reset_index()
+        )
         return df
 
     def normalize_course_data(self, row: pd.Series) -> pd.Series:
@@ -144,11 +147,17 @@ class Database:
         row["Course"] = row["Course"][:8]
         row["Type"] = row["Type"][:3]
         row["Day"] = row["Day"][:3]
-        row["Begin Time"] = datetime.strptime(str(int(row["Begin Time"])), "%H%M").time()
+        row["Begin Time"] = datetime.strptime(
+            str(int(row["Begin Time"])), "%H%M"
+        ).time()
         row["End Time"] = datetime.strptime(str(int(row["End Time"])), "%H%M").time()
         row["Bldg/Room"] = row["Bldg/Room"][:10]
-        row["Start Date"] = datetime.strptime(str(row["Start Date"]), "%Y-%m-%d %H:%M:%S").date()
-        row["End Date"] = datetime.strptime(str(row["End Date"]), "%Y-%m-%d %H:%M:%S").date()
+        row["Start Date"] = datetime.strptime(
+            str(row["Start Date"]), "%Y-%m-%d %H:%M:%S"
+        ).date()
+        row["End Date"] = datetime.strptime(
+            str(row["End Date"]), "%Y-%m-%d %H:%M:%S"
+        ).date()
         row["Max."] = int(row["Max."])
         row["Act."] = int(row["Act."])
         row["FT/PT"] = True if row["FT/PT"] == "FT" else False
@@ -185,18 +194,42 @@ class Database:
         self.db.session.execute(text("ALTER TABLE courses AUTO_INCREMENT = 1"))
         invalid_rows = []
         for _, row in df.iterrows():
-            try: 
+            try:
                 row = self.normalize_course_data(row)
-                course = Course(status=row['Status'], block=row['Block'], crn=row['CRN'], course_grouping=row['Block'] + row['Course'], course_code=row['Course'], course_type=row['Type'], day=row['Day'], begin_time=row['Begin Time'], end_time=row['End Time'], building_room=row['Bldg/Room'], start_date=row['Start Date'], end_date=row['End Date'], max_capacity=row['Max.'], num_enrolled= row['Act.'], is_full_time=row['FT/PT'], term_code=row["Term Code (swvmday)"], instructor=row['Instructor'])
+                course = Course(
+                    status=row["Status"],
+                    block=row["Block"],
+                    crn=row["CRN"],
+                    course_grouping=row["Block"] + row["Course"],
+                    course_code=row["Course"],
+                    course_type=row["Type"],
+                    day=row["Day"],
+                    begin_time=row["Begin Time"],
+                    end_time=row["End Time"],
+                    building_room=row["Bldg/Room"],
+                    start_date=row["Start Date"],
+                    end_date=row["End Date"],
+                    max_capacity=row["Max."],
+                    num_enrolled=row["Act."],
+                    is_full_time=row["FT/PT"],
+                    term_code=row["Term Code (swvmday)"],
+                    instructor=row["Instructor"],
+                )
                 self.db.session.add(course)
             except:
-                invalid_rows.append({"crn": row["CRN"], "course": row["Course"], "block": row["Block"], "instructor": row["Instructor"]})
+                invalid_rows.append(
+                    {
+                        "crn": row["CRN"],
+                        "course": row["Course"],
+                        "block": row["Block"],
+                        "instructor": row["Instructor"],
+                    }
+                )
         self.db.session.commit()
         return invalid_rows
 
     def bulk_student_upload(self, file) -> list:
-        """
-        """
+        """ """
         if not file.filename.endswith(".csv"):
             raise InvalidUploadFile("Invalid file format. Please upload an CSV file.")
         try:
@@ -206,8 +239,7 @@ class Database:
             raise InvalidUploadFile("Invalid file format. Error processing the file.")
 
     def normalize_student_data(self, row: pd.Series) -> pd.Series:
-        """
-        """
+        """ """
         row["BCIT Student Number"] = row["BCIT Student Number"][:9]
         row["Legal First Name"] = row["Legal First Name"][:50]
         row["Legal Last Name"] = row["Legal Last Name"][:50]
@@ -225,7 +257,19 @@ class Database:
         for _, row in df.iterrows():
             try:
                 row = self.normalize_student_data(row)
-                student = Student(id=row['BCIT Student Number'], first_name=row['Legal First Name'], last_name=row['Legal Last Name'], term_code=row['Term Code'], preferences=",".join([row[f"Course Code Preference #{i}"] for i in range(1, 9)]))
+                student = Student(
+                    id=row["BCIT Student Number"],
+                    first_name=row["Legal First Name"],
+                    last_name=row["Legal Last Name"],
+                    term_code=row["Term Code"],
+                    preferences=",".join(
+                        [
+                            row[f"Course Code Preference #{i}"]
+                            for i in range(1, 9)
+                            if row[f"Course Code Preference #{i}"]
+                        ]
+                    ),
+                )
                 self.db.session.add(student)
             except Exception as e:
                 print(e)
@@ -251,14 +295,34 @@ class Database:
         >>> db.get_student_by_id(1)
         ... {"id": 1, "firstName": "John", "lastName": "Doe", "selection": [], "courses": []}
         """
-        df = pd.read_csv("server/data/students.csv")
-        student = df[df["BCIT ID"] == id].to_dict(orient="records")
-        if student:
-            return {"status": 200, "message": "Student Found", "data": student[0]}
-        else:
-            return {"status": 404, "message": "Student not found"}
+        try:
+            student = self.db.session.query(Student).filter(Student.id == id).first()
 
-    def create_student(self, student) -> dict:
+            if student:
+                return {
+                    "status": 200,
+                    "message": "Student Found",
+                    "data": {
+                        "id": student.id,
+                        "firstName": student.first_name,
+                        "lastName": student.last_name,
+                        "preferences": (
+                            student.preferences.split(",")
+                            if student.preferences
+                            else []
+                        ),
+                    },
+                }
+            else:
+                return {"status": 404, "message": "Student not found"}
+
+        except Exception as e:
+            return {
+                "status": 500,
+                "message": "Error querying into database",
+                "data": str(e),
+            }
+
         """
         Create a new student.
 
@@ -324,7 +388,7 @@ class Database:
 
         except Exception as e:
             return {"status": 500, "message": str(e)}
-        
+
     def delete_student(self, id: int) -> dict:
         """
         Delete the student by ID.
@@ -352,7 +416,7 @@ class Database:
             return {"status": 200, "message": "Student deleted successfully"}
         except Exception as e:
             return {"status": 500, "message": str(e)}
-        
+
     def get_student_courses(self, id: int) -> dict:
         """
         Get the courses for the student by ID.
@@ -371,13 +435,23 @@ class Database:
         >>> db.get_student_courses(1)
         ... {"message": "Student courses found"}
         """
-        df = pd.read_csv("server/data/students.csv")
-        courses = df.loc[df["BCIT ID"] == id, "Courses"]
-        if courses:
-            course_list = courses.split(", ")
-            for course in courses:
-                
-            return {"status": 200, "message": "Student courses found", "data": courses}
-        else:
-            return {"status": 404, "message": "Student courses not found"}
-    
+        try:
+            student = self.db.session.query(Student).filter(Student.id == id).first()
+            if student:
+                courses = student.preferences.split(",")
+                if courses:
+                    return {
+                        "status": 200,
+                        "message": "Student preferences found",
+                        "data": courses,
+                    }
+                else:
+                    return {"status": 404, "message": "Student preferences found"}
+            else:
+                return {"status": 404, "message": "Student not found"}
+        except Exception as e:
+            return {
+                "status": 500,
+                "message": "Error in querying into database",
+                "data": str(e),
+            }
