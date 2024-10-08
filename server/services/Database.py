@@ -331,7 +331,7 @@ class Database:
 
         Args:
         -----
-        student (Student): The student to create.
+        data (dict): The student data.
 
         Returns:
         --------
@@ -392,7 +392,7 @@ class Database:
         Args:
         -----
         id (int): The student ID.
-        student (Student): The student to update.
+        data (dict): The new student data.
 
         Returns:
         --------
@@ -405,22 +405,34 @@ class Database:
         >>> db.update_student(1, student)
         ... {"message": "Student updated successfully"}
         """
-        # try:
-        #     df = pd.read_csv("server/data/students.csv")
+        try:
+            student = self.db.session.query(Student).filter(Student.id == id).first()
+            if not student:
+                return {"status": 404, "message": "Student not found"}
 
-        #     if id not in df["BCIT ID"].values:
-        #         return {"status": 404, "message": "Student not found"}
+            student.first_name = (
+                data.get("first_name") if data.get("first_name") else student.first_name
+            )
+            student.last_name = (
+                data.get("last_name") if data.get("last_name") else student.last_name
+            )
+            student.term_code = (
+                data.get("term_code") if data.get("term_code") else student.term_code
+            )
 
-        #     invalid_keys = [key for key in data.keys() if key not in df.columns]
-        #     if invalid_keys:
-        #         return {"status": 400, "message": f"Invalid keys: {invalid_keys}"}
+            student.preferences = (
+                ",".join(data.get("preferences"))
+                if data.get("preferences")
+                and ",".join(data.get("preferences")) != student.preferences
+                else student.preferences
+            )
 
-        #     df.loc[df["BCIT ID"] == id, data.keys()] = data.values()
-        #     df.to_csv("server/data/students.csv", index=False)
-        #     return {"status": 200, "message": "Student updated successfully"}
+            self.db.session.commit()
 
-        # except Exception as e:
-        #     return {"status": 500, "message": str(e)}
+            return {"status": 200, "message": "Student updated successfully"}
+
+        except Exception as e:
+            return {"status": 500, "message": str(e)}
 
     def delete_student(self, id: int) -> dict:
         """
@@ -440,16 +452,19 @@ class Database:
         >>> db.delete_student(1)
         ... {"message": "Student deleted successfully"}
         """
-        # try:
-        #     df = pd.read_csv("server/data/students.csv")
-        #     if id not in df["BCIT ID"].values:
-        #         return {"status": 404, "message": "Student not found"}
-        #     df = df[df["BCIT ID"] != id]
-        #     df.to_csv("server/data/students.csv", index=False)
-        #     return {"status": 200, "message": "Student deleted successfully"}
-        # except Exception as e:
-        #     return {"status": 500, "message": str(e)}
-        pass
+        try:
+
+            student = self.db.session.query(Student).filter(Student.id == id).first()
+
+            if not student:
+                return {"status": 404, "message": "Student not found"}
+
+            self.db.session.delete(student)
+            self.db.session.commit()
+
+            return {"status": 200, "message": "Student deleted successfully"}
+        except Exception as e:
+            return {"status": 500, "message": str(e)}
 
     def get_student_courses(self, id: int) -> dict:
         """
