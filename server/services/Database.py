@@ -405,22 +405,22 @@ class Database:
         >>> db.update_student(1, student)
         ... {"message": "Student updated successfully"}
         """
-        try:
-            df = pd.read_csv("server/data/students.csv")
+        # try:
+        #     df = pd.read_csv("server/data/students.csv")
 
-            if id not in df["BCIT ID"].values:
-                return {"status": 404, "message": "Student not found"}
+        #     if id not in df["BCIT ID"].values:
+        #         return {"status": 404, "message": "Student not found"}
 
-            invalid_keys = [key for key in data.keys() if key not in df.columns]
-            if invalid_keys:
-                return {"status": 400, "message": f"Invalid keys: {invalid_keys}"}
+        #     invalid_keys = [key for key in data.keys() if key not in df.columns]
+        #     if invalid_keys:
+        #         return {"status": 400, "message": f"Invalid keys: {invalid_keys}"}
 
-            df.loc[df["BCIT ID"] == id, data.keys()] = data.values()
-            df.to_csv("server/data/students.csv", index=False)
-            return {"status": 200, "message": "Student updated successfully"}
+        #     df.loc[df["BCIT ID"] == id, data.keys()] = data.values()
+        #     df.to_csv("server/data/students.csv", index=False)
+        #     return {"status": 200, "message": "Student updated successfully"}
 
-        except Exception as e:
-            return {"status": 500, "message": str(e)}
+        # except Exception as e:
+        #     return {"status": 500, "message": str(e)}
 
     def delete_student(self, id: int) -> dict:
         """
@@ -440,15 +440,16 @@ class Database:
         >>> db.delete_student(1)
         ... {"message": "Student deleted successfully"}
         """
-        try:
-            df = pd.read_csv("server/data/students.csv")
-            if id not in df["BCIT ID"].values:
-                return {"status": 404, "message": "Student not found"}
-            df = df[df["BCIT ID"] != id]
-            df.to_csv("server/data/students.csv", index=False)
-            return {"status": 200, "message": "Student deleted successfully"}
-        except Exception as e:
-            return {"status": 500, "message": str(e)}
+        # try:
+        #     df = pd.read_csv("server/data/students.csv")
+        #     if id not in df["BCIT ID"].values:
+        #         return {"status": 404, "message": "Student not found"}
+        #     df = df[df["BCIT ID"] != id]
+        #     df.to_csv("server/data/students.csv", index=False)
+        #     return {"status": 200, "message": "Student deleted successfully"}
+        # except Exception as e:
+        #     return {"status": 500, "message": str(e)}
+        pass
 
     def get_student_courses(self, id: int) -> dict:
         """
