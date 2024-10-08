@@ -244,13 +244,15 @@ class Database:
         row["Legal First Name"] = row["Legal First Name"][:50]
         row["Legal Last Name"] = row["Legal Last Name"][:50]
         row["Term Code"] = int(row["Term Code"])
-        for i in range(1, 9):
-            row[f"Course Code Preference #{i}"] = row[f"Course Code Preference #{i}"][:8]
+        preference_columns = [
+            col for col in row.index if col.startswith("Course Code Preference")
+        ]
+        for col in preference_columns:
+            row[col] = row[col][:8]
         return row
 
     def upload_students_to_database(self, df: pd.DataFrame) -> list:
-        """
-        """
+        """ """
         self.db.session.query(Student).delete()
         self.db.session.commit()
         invalid_rows = []
@@ -323,6 +325,7 @@ class Database:
                 "data": str(e),
             }
 
+    def create_student(self, data) -> dict:
         """
         Create a new student.
 
@@ -342,12 +345,42 @@ class Database:
         ... {"message": "Student created successfully"}
         """
         try:
-            df = pd.read_csv("server/data/students.csv")
-            if student.id in df["BCIT ID"].values:
-                return {"error": "Student ID already exists"}, 400
-            df = pd.read_csv("server/data/students.csv")
-            df = pd.concat([df, student.__dict__], ignore_index=True)
-            df.to_csv("server/data/students.csv", index=False)
+            print(data.get("preferences"))
+
+            if (
+                self.db.session.query(Student)
+                .filter(Student.id == data.get("id"))
+                .first()
+            ):
+                return {"status": 400, "message": "Student ID already exists"}
+
+            student = {
+                "BCIT Student Number": data.get("id"),
+                "Legal First Name": data.get("first_name"),
+                "Legal Last Name": data.get("last_name"),
+                "Term Code": data.get("term_code"),
+            }
+
+            for i, preference in enumerate(data.get("preferences")):
+                student[f"Course Code Preference #{i+1}"] = preference
+
+            student = pd.Series(student)
+            row = self.normalize_student_data(student)
+            student = Student(
+                id=row["BCIT Student Number"],
+                first_name=row["Legal First Name"],
+                last_name=row["Legal Last Name"],
+                term_code=row["Term Code"],
+                preferences=",".join(
+                    [
+                        row[f"Course Code Preference #{i}"]
+                        for i in range(1, len(data.get("preferences")))
+                        if row[f"Course Code Preference #{i}"]
+                    ]
+                ),
+            )
+            self.db.session.add(student)
+            self.db.session.commit()
             return {"status": 201, "message": "Student created successfully"}
         except Exception as e:
             return {"status": 500, "message": str(e)}
