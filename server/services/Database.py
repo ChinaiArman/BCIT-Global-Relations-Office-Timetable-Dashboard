@@ -25,7 +25,7 @@ class Database:
         """
         self.db = db
 
-    def save_bulk_course_upload_file(self, file) -> list:
+    def bulk_course_upload(self, file) -> list:
         """
         Save the bulk course upload file to the database.
 
@@ -171,5 +171,44 @@ class Database:
                 self.db.session.add(course)
             except:
                 invalid_rows.append({"crn": row["CRN"], "course": row["Course"], "block": row["Block"], "instructor": row["Instructor"]})
+        self.db.session.commit()
+        return invalid_rows
+
+    def bulk_student_upload(self, file) -> list:
+        """
+        """
+        if not file.filename.endswith(".csv"):
+            raise InvalidUploadFile("Invalid file format. Please upload an CSV file.")
+        try:
+            df = pd.read_csv(file)
+            return self.upload_students_to_database(df)
+        except:
+            raise InvalidUploadFile("Invalid file format. Error processing the file.")
+
+    def normalize_student_data(self, row: pd.Series) -> pd.Series:
+        """
+        """
+        row["BCIT Student Number"] = row["BCIT Student Number"][:9]
+        row["Legal First Name"] = row["Legal First Name"][:50]
+        row["Legal Last Name"] = row["Legal Last Name"][:50]
+        row["Term Code"] = int(row["Term Code"])
+        for i in range(1, 9):
+            row[f"Course Code Preference #{i}"] = row[f"Course Code Preference #{i}"][:8]
+        return row
+
+    def upload_students_to_database(self, df: pd.DataFrame) -> list:
+        """
+        """
+        self.db.session.query(Student).delete()
+        self.db.session.commit()
+        invalid_rows = []
+        for _, row in df.iterrows():
+            try:
+                row = self.normalize_student_data(row)
+                student = Student(id=row['BCIT Student Number'], first_name=row['Legal First Name'], last_name=row['Legal Last Name'], term_code=row['Term Code'], preferences=",".join([row[f"Course Code Preference #{i}"] for i in range(1, 9)]))
+                self.db.session.add(student)
+            except Exception as e:
+                print(e)
+                invalid_rows.append({"id": row["BCIT Student Number"]})
         self.db.session.commit()
         return invalid_rows

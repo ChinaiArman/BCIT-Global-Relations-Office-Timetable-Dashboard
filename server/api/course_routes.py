@@ -64,7 +64,7 @@ def upload_course():
     """
     db = current_app.config['database']
     try:
-        response = db.save_bulk_course_upload_file(request.files['file'])
+        response = db.bulk_course_upload(request.files['file'])
         return jsonify({"message": "Course data successfully uploaded", "invalid_rows": response }), 201
     except Exception as e:
         return jsonify({"message": str(e)}), 400
