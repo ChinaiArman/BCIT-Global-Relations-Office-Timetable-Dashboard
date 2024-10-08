@@ -13,7 +13,7 @@ student_bp = Blueprint('student_bp', __name__)
 
 
 # ROUTES
-@student_bp.route('/student/<int:id>/', methods=['GET'])
+@student_bp.route('/student/<string:id>/', methods=['GET'])
 def get_student_by_id(id):
     """
     """
@@ -25,13 +25,13 @@ def create_student():
     """
     return jsonify({"message": "student create endpoint"})
 
-@student_bp.route('/student/<int:id>/', methods=['PUT'])
+@student_bp.route('/student/<string:id>/', methods=['PUT'])
 def update_student(id):
     """
     """
     return jsonify({"message": f"student {id} update endpoint"})
 
-@student_bp.route('/student/<int:id>/', methods=['DELETE'])
+@student_bp.route('/student/<string:id>/', methods=['DELETE'])
 def delete_student(id):
     """
     """
@@ -54,7 +54,7 @@ def download_student():
     """
     return jsonify({"message": "student export endpoint"})
 
-@student_bp.route('/student/<int:id>/courses/', methods=['GET'])
+@student_bp.route('/student/<string:id>/courses/', methods=['GET'])
 def get_student_courses(id):
     """
     """
