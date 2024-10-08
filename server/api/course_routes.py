@@ -47,10 +47,10 @@ def upload_course():
     """
     Request: PUT /course/import
 
-    Description: Upload a XLSX or CSV file containing course data.
+    Description: Upload a XLSX file to the MYSQL Database containing course data.
 
     Request Body:
-    - file: CSV file containing course data.
+    - file: XLSX file containing course data.
 
     Response:
     - message: Success or error message.
@@ -63,11 +63,11 @@ def upload_course():
     Author: ``@ChinaiArman``
     """
     db = current_app.config['database']
-    response = db.load_courses_from_file(request.files['file'])
-    if response:
-        return jsonify({"message": "Course data successfully uploaded"}), 201
-    else:
-        return jsonify({"message": "Invalid request"}), 400
+    try:
+        response = db.bulk_course_upload(request.files['file'])
+        return jsonify({"message": "Course data successfully uploaded", "invalid_rows": response }), 201
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
 
 @course_bp.route('/course/export', methods=['GET'])
 def download_course():
