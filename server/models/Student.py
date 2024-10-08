@@ -16,5 +16,4 @@ class Student(db.Model):
     term_code = db.Column(db.Integer, nullable=False)
     preferences = db.Column(db.String(71), default='')
 
-    # Use a string reference for the Course class
     courses = db.relationship('Course', secondary=enrollments, back_populates='students')
