@@ -130,12 +130,13 @@ def get_course_students(block, course_code):
 
     Author: Kate Sullivan
     """
-    course = Course.query.filter_by(block=block, course_code=course_code).first()
-    if course:
-        students = [student.serialize() for student in course.students]
-        return jsonify(students)
-    else:
-        return jsonify({"message": "Course not found"}), 404
+    # course = Course.query.filter_by(block=block, course_code=course_code).first()
+    # if course:
+    #     students = [student.serialize() for student in course.students]
+    #     return jsonify(students)
+    # else:
+    #     return jsonify({"message": "Course not found"}), 404
+    return jsonify({"message": "get course students endpoint"})
 
 @course_bp.route('/course/download_template', methods=['GET'])
 def download_template():
