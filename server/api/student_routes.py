@@ -2,12 +2,15 @@
 """
 
 # IMPORTS
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request, current_app, send_file
+import io
 
 
 # INSTANTIATE SERVICES
 from services.Database import Database
 from models.Student import Student
+
+from exceptions import DatabaseError
 
 # DEFINE BLUEPRINT
 student_bp = Blueprint("student_bp", __name__)
@@ -17,38 +20,50 @@ student_bp = Blueprint("student_bp", __name__)
 @student_bp.route("/student/<string:id>/", methods=["GET"])
 def get_student_by_id(id):
     """ """
-    db = current_app.config["database"]
-    response = db.get_student_by_id(id)
-    return (
-        jsonify({"message": response["message"], "data": response["data"]}),
-        response["status"],
-    )
+    try:
+        db = current_app.config["database"]
+        response = db.get_student_by_id(id)
+        return (
+            jsonify({"message": response["message"], "data": response["data"]}),
+            response["status"],
+        )
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
 
 
 @student_bp.route("/student/", methods=["POST"])
 def create_student():
     """ """
-    data = request.get_json()
-    db = current_app.config["database"]
-    response = db.create_student(data)
-    return jsonify({"message": response["message"]}), response["status"]
+    try:
+        data = request.get_json()
+        db = current_app.config["database"]
+        response = db.create_student(data)
+        return jsonify({"message": response["message"]}), response["status"]
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
 
 
 @student_bp.route("/student/<string:id>/", methods=["PUT"])
 def update_student(id):
     """ """
-    db = current_app.config["database"]
-    data = request.get_json()
-    response = db.update_student(id, data)
-    return jsonify({"message": response["message"]}), response["status"]
+    try:
+        db = current_app.config["database"]
+        data = request.get_json()
+        response = db.update_student(id, data)
+        return jsonify({"message": response["message"]}), response["status"]
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
 
 
 @student_bp.route("/student/<string:id>/", methods=["DELETE"])
 def delete_student(id):
     """ """
-    db = current_app.config["database"]
-    response = db.delete_student(id)
-    return jsonify({"message": response["message"]}), response["status"]
+    try:
+        db = current_app.config["database"]
+        response = db.delete_student(id)
+        return jsonify({"message": response["message"]}), response["status"]
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
 
 
 @student_bp.route("/student/import", methods=["PUT"])
@@ -79,15 +94,15 @@ def download_student():
 @student_bp.route("/student/<string:id>/courses/", methods=["GET"])
 def get_student_courses(id):
     """ """
-    db = current_app.config["database"]
-    response = db.get_student_courses(id)
-    if response["status"] == 200 or response["status"] == 500:
+    try:
+        db = current_app.config["database"]
+        response = db.get_student_courses(id)
         return (
             jsonify({"message": response["message"], "data": response["data"]}),
             response["status"],
         )
-    else:
-        return jsonify({"message": response["message"]}), response["status"]
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
 
 
 @student_bp.route("/student/download_template", methods=["GET"])

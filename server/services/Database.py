@@ -10,6 +10,9 @@ from models.Course import Course
 from models.Student import Student
 
 from exceptions import InvalidUploadFile
+from exceptions import DataNotFound
+from exceptions import DatabaseError
+from exceptions import DataAlreadyExists
 
 
 # CONSTANTS
@@ -316,14 +319,9 @@ class Database:
                     },
                 }
             else:
-                return {"status": 404, "message": "Student not found"}
-
+                raise DataNotFound("Student")
         except Exception as e:
-            return {
-                "status": 500,
-                "message": "Error querying into database",
-                "data": str(e),
-            }
+            raise DatabaseError(f"Error querying into database: {str(e)}")
 
     def create_student(self, data) -> dict:
         """
@@ -352,7 +350,7 @@ class Database:
                 .filter(Student.id == data.get("id"))
                 .first()
             ):
-                return {"status": 400, "message": "Student ID already exists"}
+                raise DataAlreadyExists("Student")
 
             student = {
                 "BCIT Student Number": data.get("id"),
@@ -383,7 +381,7 @@ class Database:
             self.db.session.commit()
             return {"status": 201, "message": "Student created successfully"}
         except Exception as e:
-            return {"status": 500, "message": str(e)}
+            raise DatabaseError(f"Error creating student: {str(e)}")
 
     def update_student(self, id: int, data: dict) -> dict:
         """
@@ -408,7 +406,7 @@ class Database:
         try:
             student = self.db.session.query(Student).filter(Student.id == id).first()
             if not student:
-                return {"status": 404, "message": "Student not found"}
+                raise DataNotFound("Student")
 
             student.first_name = (
                 data.get("first_name") if data.get("first_name") else student.first_name
@@ -432,7 +430,7 @@ class Database:
             return {"status": 200, "message": "Student updated successfully"}
 
         except Exception as e:
-            return {"status": 500, "message": str(e)}
+            raise DatabaseError(f"Error updating student: {str(e)}")
 
     def delete_student(self, id: int) -> dict:
         """
@@ -457,14 +455,14 @@ class Database:
             student = self.db.session.query(Student).filter(Student.id == id).first()
 
             if not student:
-                return {"status": 404, "message": "Student not found"}
+                raise DataNotFound("Student")
 
             self.db.session.delete(student)
             self.db.session.commit()
 
             return {"status": 200, "message": "Student deleted successfully"}
         except Exception as e:
-            return {"status": 500, "message": str(e)}
+            raise DatabaseError(f"Error deleting student: {str(e)}")
 
     def get_student_courses(self, id: int) -> dict:
         """
@@ -495,12 +493,8 @@ class Database:
                         "data": courses,
                     }
                 else:
-                    return {"status": 404, "message": "Student preferences found"}
+                    raise DataNotFound("Student Preferences")
             else:
-                return {"status": 404, "message": "Student not found"}
+                raise DataNotFound("Student")
         except Exception as e:
-            return {
-                "status": 500,
-                "message": "Error in querying into database",
-                "data": str(e),
-            }
+            raise DatabaseError(f"Error querying into database: {str(e)}")
