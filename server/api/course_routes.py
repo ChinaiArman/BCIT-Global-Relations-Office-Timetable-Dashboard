@@ -5,7 +5,6 @@ This module defines the routes for course-related operations within the BCIT Glo
 # IMPORTS
 from flask import Blueprint, jsonify, request, current_app
 
-from services.Database import Database
 
 # DEFINE BLUEPRINT
 course_bp = Blueprint('course_bp', __name__)
@@ -34,12 +33,8 @@ def get_course_by_crn(crn):
     """
     try:
         db = current_app.config['database']
-        if db is None:
-            return jsonify({"error": "Database connection not established"}), 500
-        courses = db.get_courses_by_crn(crn)
-        if not courses:
-            return jsonify({"error": "Course not found", "message": f"No course found with CRN {crn}"}), 404
-        return jsonify(courses), 200
+        response = db.get_course_by_crn(crn)
+        return jsonify(response), 200
     except Exception as e:
         return jsonify({"error": "Internal server error", "message": str(e)}), 500
 
@@ -66,12 +61,8 @@ def get_course_by_block_and_course_code(block, course_code):
     """
     try:
         db = current_app.config['database']
-        if db is None:
-            return jsonify({"error": "Database connection not established"}), 500
-        courses = db.get_courses_by_block_and_course_code(block, course_code)
-        if not courses:
-            return jsonify({"error": "Course not found", "message": f"No course found with block {block} and course code {course_code}"}), 404
-        return jsonify(courses), 200
+        response = db.get_courses_by_block_and_course_code(block, course_code)
+        return jsonify(response), 200
     except Exception as e:
         return jsonify({"error": "Internal server error", "message": str(e)}), 500
 
@@ -97,8 +88,8 @@ def upload_course():
 
     Author: ``@ChinaiArman``
     """
-    db = current_app.config['database']
     try:
+        db = current_app.config['database']
         response = db.bulk_course_upload(request.files['file'])
         return jsonify({"message": "Course data successfully uploaded", "invalid_rows": response }), 201
     except Exception as e:

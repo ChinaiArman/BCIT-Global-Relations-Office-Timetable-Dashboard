@@ -5,9 +5,6 @@
 from flask import Blueprint, jsonify, request, current_app
 
 
-# INSTANTIATE SERVICES
-
-
 # DEFINE BLUEPRINT
 schedule_bp = Blueprint('schedule_bp', __name__)
 

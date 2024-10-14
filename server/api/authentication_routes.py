@@ -5,9 +5,6 @@
 from flask import Blueprint, jsonify, request, current_app
 
 
-# INSTANTIATE SERVICES
-
-
 # DEFINE BLUEPRINT
 authentication_bp = Blueprint('authentication_bp', __name__)
 

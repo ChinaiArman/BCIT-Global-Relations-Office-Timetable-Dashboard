@@ -305,18 +305,10 @@ class Database:
 
             if student:
                 return {
-                    "status": 200,
-                    "message": "Student Found",
-                    "data": {
-                        "id": student.id,
-                        "firstName": student.first_name,
-                        "lastName": student.last_name,
-                        "preferences": (
-                            student.preferences.split(",")
-                            if student.preferences
-                            else []
-                        ),
-                    },
+                    "id": student.id,
+                    "firstName": student.first_name,
+                    "lastName": student.last_name,
+                    "preferences": [student.preferences.split(",") if student.preferences else []],
                 }
             else:
                 raise DataNotFound("Student")
