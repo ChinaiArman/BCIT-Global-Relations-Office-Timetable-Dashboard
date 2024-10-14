@@ -10,6 +10,15 @@ class InvalidUploadFile(Exception):
         super().__init__(self.message)
 
 
+class InvalidFileType(Exception):
+    """
+    Raised when an invalid file type is uploaded.
+    """
+    def __init__(self, message="Invalid file type uploaded."):
+        self.message = message
+        super().__init__(self.message)
+
+
 class DatabaseError(Exception):
     """
     Raised when an error occurs in the database

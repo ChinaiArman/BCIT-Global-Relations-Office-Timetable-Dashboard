@@ -73,15 +73,21 @@ def download_student():
     return jsonify({"message": "student export endpoint"})
 
 
-@student_bp.route("/student/<string:id>/courses/", methods=["GET"])
-def get_student_courses(id):
+@student_bp.route("/student/<string:id>/preferences/", methods=["GET"])
+def get_student_preferences(id):
     """ """
     try:
         db = current_app.config["database"]
-        response = db.get_student_courses(id)
+        response = db.get_student_preferences(id)
         return jsonify(response), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 400
+
+
+@student_bp.route("/student/<string:id>/courses/", methods=["GET"])
+def get_student_courses(id):
+    """ """
+    return jsonify({"message": "student courses endpoint"})
 
 
 @student_bp.route("/student/download_template", methods=["GET"])

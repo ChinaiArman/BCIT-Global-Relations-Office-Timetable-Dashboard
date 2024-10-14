@@ -9,10 +9,7 @@ from datetime import datetime
 from models.Course import Course
 from models.Student import Student
 
-from exceptions import InvalidUploadFile
-from exceptions import DataNotFound
-from exceptions import DatabaseError
-from exceptions import DataAlreadyExists
+from exceptions import InvalidUploadFile, InvalidFileType, DataNotFound, DatabaseError, DataAlreadyExists
 
 
 # CONSTANTS
@@ -66,7 +63,7 @@ class Database:
         ... # Course data uploaded to the database
         """
         if not file.filename.endswith(".xlsx"):
-            raise InvalidUploadFile("Invalid file format. Please upload an XLSX file.")
+            raise InvalidFileType("Invalid file format. Please upload an XLSX file.")
         try:
             df = self.parse_bulk_course_upload_file(file)
             return self.upload_courses_to_database(df)
@@ -234,7 +231,7 @@ class Database:
     def bulk_student_upload(self, file) -> list:
         """ """
         if not file.filename.endswith(".csv"):
-            raise InvalidUploadFile("Invalid file format. Please upload an CSV file.")
+            raise InvalidFileType("Invalid file format. Please upload an CSV file.")
         try:
             df = pd.read_csv(file)
             return self.upload_students_to_database(df)
@@ -302,18 +299,16 @@ class Database:
         """
         try:
             student = self.db.session.query(Student).filter(Student.id == id).first()
-
-            if student:
-                return {
-                    "id": student.id,
-                    "firstName": student.first_name,
-                    "lastName": student.last_name,
-                    "preferences": [student.preferences.split(",") if student.preferences else []],
-                }
-            else:
-                raise DataNotFound("Student")
         except Exception as e:
             raise DatabaseError(f"Error querying into database: {str(e)}")
+        if not student:
+            raise DataNotFound(f"Unable to find student by ID: {id}")
+        return {
+            "id": student.id,
+            "firstName": student.first_name,
+            "lastName": student.last_name,
+            "preferences": student.preferences.split(","),
+        }
 
     def create_student(self, data) -> dict:
         """
@@ -336,24 +331,16 @@ class Database:
         """
         try:
             print(data.get("preferences"))
-
-            if (
-                self.db.session.query(Student)
-                .filter(Student.id == data.get("id"))
-                .first()
-            ):
+            if self.db.session.query(Student).filter(Student.id == data.get("id")).first():
                 raise DataAlreadyExists("Student")
-
             student = {
                 "BCIT Student Number": data.get("id"),
                 "Legal First Name": data.get("first_name"),
                 "Legal Last Name": data.get("last_name"),
                 "Term Code": data.get("term_code"),
             }
-
             for i, preference in enumerate(data.get("preferences")):
                 student[f"Course Code Preference #{i+1}"] = preference
-
             student = pd.Series(student)
             row = self.normalize_student_data(student)
             student = Student(
@@ -361,17 +348,11 @@ class Database:
                 first_name=row["Legal First Name"],
                 last_name=row["Legal Last Name"],
                 term_code=row["Term Code"],
-                preferences=",".join(
-                    [
-                        row[f"Course Code Preference #{i}"]
-                        for i in range(1, len(data.get("preferences")))
-                        if row[f"Course Code Preference #{i}"]
-                    ]
-                ),
+                preferences=",".join([row[f"Course Code Preference #{i}"] for i in range(1, len(data.get("preferences"))) if row[f"Course Code Preference #{i}"]]),
             )
             self.db.session.add(student)
             self.db.session.commit()
-            return {"status": 201, "message": "Student created successfully"}
+            return
         except Exception as e:
             raise DatabaseError(f"Error creating student: {str(e)}")
 
@@ -399,28 +380,12 @@ class Database:
             student = self.db.session.query(Student).filter(Student.id == id).first()
             if not student:
                 raise DataNotFound("Student")
-
-            student.first_name = (
-                data.get("first_name") if data.get("first_name") else student.first_name
-            )
-            student.last_name = (
-                data.get("last_name") if data.get("last_name") else student.last_name
-            )
-            student.term_code = (
-                data.get("term_code") if data.get("term_code") else student.term_code
-            )
-
-            student.preferences = (
-                ",".join(data.get("preferences"))
-                if data.get("preferences")
-                and ",".join(data.get("preferences")) != student.preferences
-                else student.preferences
-            )
-
+            student.first_name = data.get("first_name") if data.get("first_name") else student.first_name
+            student.last_name = data.get("last_name") if data.get("last_name") else student.last_name
+            student.term_code = data.get("term_code") if data.get("term_code") else student.term_code
+            student.preferences = ",".join(data.get("preferences")) if data.get("preferences") and ",".join(data.get("preferences")) != student.preferences else student.preferences
             self.db.session.commit()
-
-            return {"status": 200, "message": "Student updated successfully"}
-
+            return
         except Exception as e:
             raise DatabaseError(f"Error updating student: {str(e)}")
 
@@ -443,20 +408,16 @@ class Database:
         ... {"message": "Student deleted successfully"}
         """
         try:
-
             student = self.db.session.query(Student).filter(Student.id == id).first()
-
             if not student:
-                raise DataNotFound("Student")
-
+                raise DataNotFound(f"Student with ID not found: {id}")
             self.db.session.delete(student)
             self.db.session.commit()
-
-            return {"status": 200, "message": "Student deleted successfully"}
+            return
         except Exception as e:
             raise DatabaseError(f"Error deleting student: {str(e)}")
 
-    def get_student_courses(self, id: int) -> dict:
+    def get_student_preferences(self, id: int) -> dict:
         """
         Get the courses for the student by ID.
 
@@ -476,17 +437,8 @@ class Database:
         """
         try:
             student = self.db.session.query(Student).filter(Student.id == id).first()
-            if student:
-                courses = student.preferences.split(",")
-                if courses:
-                    return {
-                        "status": 200,
-                        "message": "Student preferences found",
-                        "data": courses,
-                    }
-                else:
-                    raise DataNotFound("Student Preferences")
-            else:
-                raise DataNotFound("Student")
+            if not student:
+                raise DataNotFound(f"Student with ID not found: {id}")
+            return student.preferences.split(",")
         except Exception as e:
             raise DatabaseError(f"Error querying into database: {str(e)}")
