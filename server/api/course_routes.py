@@ -66,8 +66,6 @@ def get_course_by_block_and_course_code(block, course_code):
     except Exception as e:
         return jsonify({"error": "Internal server error", "message": str(e)}), 500
 
-
-
 @course_bp.route('/course/import', methods=['PUT'])
 def upload_course():
     """

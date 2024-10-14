@@ -2,7 +2,7 @@
 """
 
 # IMPORTS
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request, current_app, send_file
 
 
 # DEFINE BLUEPRINT
@@ -93,4 +93,7 @@ def get_student_courses(id):
 @student_bp.route("/student/download_template", methods=["GET"])
 def download_template():
     """ """
-    return jsonify({"message": "student download template endpoint"})
+    try:
+        return send_file("templates/student_upload_template.csv", as_attachment=True)
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400

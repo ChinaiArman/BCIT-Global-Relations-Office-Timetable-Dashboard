@@ -17,3 +17,13 @@ class Student(db.Model):
     preferences = db.Column(db.String(71), default='')
 
     courses = db.relationship('Course', secondary=enrollments, back_populates='students')
+
+    def __repr__(self):
+        return {
+            "id": self.id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "term_code": self.term_code,
+            "preferences": self.preferences,
+            "courses": [course.course_code for course in self.courses]
+        }

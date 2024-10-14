@@ -274,7 +274,6 @@ class Database:
                 )
                 self.db.session.add(student)
             except Exception as e:
-                print(e)
                 invalid_rows.append({"id": row["BCIT Student Number"]})
         self.db.session.commit()
         return invalid_rows
@@ -303,12 +302,7 @@ class Database:
             raise DatabaseError(f"Error querying into database: {str(e)}")
         if not student:
             raise DataNotFound(f"Unable to find student by ID: {id}")
-        return {
-            "id": student.id,
-            "firstName": student.first_name,
-            "lastName": student.last_name,
-            "preferences": student.preferences.split(","),
-        }
+        return student.__repr__()
 
     def create_student(self, data) -> dict:
         """

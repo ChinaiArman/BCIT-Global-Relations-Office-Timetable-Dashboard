@@ -32,3 +32,26 @@ class Course(db.Model):
     instructor = db.Column(db.String(512), nullable=False)
 
     students = db.relationship('Student', secondary=enrollments, back_populates='courses')
+
+    def __repr__(self):
+        return {
+            "id": self.id,
+            "status": self.status,
+            "block": self.block,
+            "crn": self.crn,
+            "course_grouping": self.course_grouping,
+            "course_code": self.course_code,
+            "course_type": self.course_type,
+            "day": self.day,
+            "begin_time": self.begin_time,
+            "end_time": self.end_time,
+            "building_room": self.building_room,
+            "start_date": self.start_date,
+            "end_date": self.end_date,
+            "max_capacity": self.max_capacity,
+            "num_enrolled": self.num_enrolled,
+            "is_full_time": self.is_full_time,
+            "term_code": self.term_code,
+            "instructor": self.instructor,
+            "students": [student.id for student in self.students]
+        }
