@@ -20,7 +20,6 @@ def get_student_by_id(id):
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-
 @student_bp.route("/student/", methods=["POST"])
 def create_student():
     """ """
@@ -31,7 +30,6 @@ def create_student():
         return jsonify({"message": "Student created successfully"}), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 400
-
 
 @student_bp.route("/student/<string:id>/", methods=["PUT"])
 def update_student(id):
@@ -55,7 +53,6 @@ def delete_student(id):
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-
 @student_bp.route("/student/import", methods=["PUT"])
 def upload_student():
     """ """
@@ -66,29 +63,25 @@ def upload_student():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-
-@student_bp.route("/student/export", methods=["GET"])
-def download_student():
-    """ """
-    return jsonify({"message": "student export endpoint"})
-
-
-@student_bp.route("/student/<string:id>/preferences/", methods=["GET"])
-def get_student_preferences(id):
+@student_bp.route("/student/get_all", methods=["GET"])
+def get_all_students():
     """ """
     try:
         db = current_app.config["database"]
-        response = db.get_student_preferences(id)
+        response = db.get_all_students()
         return jsonify(response), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-
-@student_bp.route("/student/<string:id>/courses/", methods=["GET"])
-def get_student_courses(id):
+@student_bp.route("/student/export", methods=["GET"])
+def download_student():
     """ """
-    return jsonify({"message": "student courses endpoint"})
-
+    try:
+        db = current_app.config["database"]
+        file = db.export_student()
+        return send_file(file, as_attachment=True)
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
 
 @student_bp.route("/student/download_template", methods=["GET"])
 def download_template():

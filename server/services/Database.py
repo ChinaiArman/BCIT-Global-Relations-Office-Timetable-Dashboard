@@ -410,29 +410,3 @@ class Database:
             return
         except Exception as e:
             raise DatabaseError(f"Error deleting student: {str(e)}")
-
-    def get_student_preferences(self, id: int) -> dict:
-        """
-        Get the courses for the student by ID.
-
-        Args:
-        -----
-        id (int): The student ID.
-
-        Returns:
-        --------
-        dict: The response message.
-
-        Example:
-        --------
-        >>> db = Database()
-        >>> db.get_student_courses(1)
-        ... {"message": "Student courses found"}
-        """
-        try:
-            student = self.db.session.query(Student).filter(Student.id == id).first()
-            if not student:
-                raise DataNotFound(f"Student with ID not found: {id}")
-            return student.preferences.split(",")
-        except Exception as e:
-            raise DatabaseError(f"Error querying into database: {str(e)}")
