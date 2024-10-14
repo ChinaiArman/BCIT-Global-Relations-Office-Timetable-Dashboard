@@ -273,7 +273,7 @@ class Database:
                     ),
                 )
                 self.db.session.add(student)
-            except Exception as e:
+            except Exception:
                 invalid_rows.append({"id": row["BCIT Student Number"]})
         self.db.session.commit()
         return invalid_rows
@@ -410,3 +410,24 @@ class Database:
             return
         except Exception as e:
             raise DatabaseError(f"Error deleting student: {str(e)}")
+
+    def get_all_students(self) -> list:
+        """
+        """
+        try:
+            students = self.db.session.query(Student).all()
+        except Exception as e:
+            raise DatabaseError(f"Error querying into database: {str(e)}")
+        return [student.__repr__() for student in students]
+
+    def export_students(self) -> pd.DataFrame:
+        """
+        """
+        try:
+            students = self.db.session.query(Student).all()
+        except Exception as e:
+            raise DatabaseError(f"Error querying into database: {str(e)}")
+        df = pd.DataFrame([student.__repr__() for student in students])
+        file_path = "exports/students.csv"
+        df.to_csv(file_path, index=False)
+        return file_path

@@ -78,8 +78,8 @@ def download_student():
     """ """
     try:
         db = current_app.config["database"]
-        file = db.export_student()
-        return send_file(file, as_attachment=True)
+        file_path = db.export_student()
+        return send_file(file_path, as_attachment=True)
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
