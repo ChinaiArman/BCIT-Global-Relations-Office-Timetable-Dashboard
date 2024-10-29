@@ -3,11 +3,13 @@
 
 # IMPORTS
 import pandas as pd
-from sqlalchemy import text
+from sqlalchemy import text, delete, insert, update
 from datetime import datetime
 
 from models.Course import Course
 from models.Student import Student
+from models.Preferences import preferences
+from models.Enrollments import enrollments
 
 from exceptions import InvalidUploadFile, InvalidFileType, DataNotFound, DatabaseError, DataAlreadyExists
 
@@ -264,15 +266,12 @@ class Database:
                     first_name=row["Legal First Name"],
                     last_name=row["Legal Last Name"],
                     term_code=row["Term Code"],
-                    preferences=",".join(
-                        [
-                            row[f"Course Code Preference #{i}"]
-                            for i in range(1, 9)
-                            if row[f"Course Code Preference #{i}"]
-                        ]
-                    ),
                 )
                 self.db.session.add(student)
+
+                preferences = [row[f"Course Code Preference #{i}"] for i in range(1, 9) if row[f"Course Code Preference #{i}"]]
+                self.add_student_preferences(student.id, preferences)
+
             except Exception:
                 invalid_rows.append({"id": row["BCIT Student Number"]})
         self.db.session.commit()
@@ -326,7 +325,7 @@ class Database:
         try:
             print(data.get("preferences"))
             if self.db.session.query(Student).filter(Student.id == data.get("id")).first():
-                raise DataAlreadyExists("Student")
+                raise DataAlreadyExists("Student already exists")
             student = {
                 "BCIT Student Number": data.get("id"),
                 "Legal First Name": data.get("first_name"),
@@ -341,13 +340,17 @@ class Database:
                 id=row["BCIT Student Number"],
                 first_name=row["Legal First Name"],
                 last_name=row["Legal Last Name"],
-                term_code=row["Term Code"],
-                preferences=",".join([row[f"Course Code Preference #{i}"] for i in range(1, len(data.get("preferences"))) if row[f"Course Code Preference #{i}"]]),
+                term_code=row["Term Code"]
             )
             self.db.session.add(student)
+
+            preferences = [row[f"Course Code Preference #{i}"] for i in range(1, 9) if row[f"Course Code Preference #{i}"]]
+
+            self.change_student_preferences(student.id, preferences) 
             self.db.session.commit()
             return
         except Exception as e:
+            self.db.session.rollback()
             raise DatabaseError(f"Error creating student: {str(e)}")
 
     def update_student(self, id: int, data: dict) -> dict:
@@ -357,7 +360,7 @@ class Database:
         Args:
         -----
         id (int): The student ID.
-        data (dict): The new student data.
+        data (dict): The student data.
 
         Returns:
         --------
@@ -366,21 +369,30 @@ class Database:
         Example:
         --------
         >>> db = Database()
-        >>> student = Student(1, "John", "Doe")
-        >>> db.update_student(1, student)
-        ... {"message": "Student updated successfully"}
+        >>> db.update_student(1, {"first_name": "John", "last_name": "Doe", "term_code": 202101})
+        ... 
+
         """
         try:
             student = self.db.session.query(Student).filter(Student.id == id).first()
             if not student:
-                raise DataNotFound("Student")
-            student.first_name = data.get("first_name") if data.get("first_name") else student.first_name
-            student.last_name = data.get("last_name") if data.get("last_name") else student.last_name
-            student.term_code = data.get("term_code") if data.get("term_code") else student.term_code
-            student.preferences = ",".join(data.get("preferences")) if data.get("preferences") and ",".join(data.get("preferences")) != student.preferences else student.preferences
+                raise DataNotFound(f"Student with ID not found: {id}")
+            
+            updatable_columns = ['first_name', 'last_name', 'term_code']
+            for key, value in data.items():
+                if key in updatable_columns and value is not None:
+                    setattr(student, key, value)
+
+            if data.get("preferences"):
+                self.change_student_preferences(id, data.get("preferences"))
+
+            if data.get("courses"):
+                self.replace_courses_for_student(id, data.get("courses"))
+
             self.db.session.commit()
             return
         except Exception as e:
+            self.db.session.rollback()
             raise DatabaseError(f"Error updating student: {str(e)}")
 
     def delete_student(self, id: int) -> dict:
@@ -431,3 +443,95 @@ class Database:
         file_path = "exports/students.csv"
         df.to_csv(file_path, index=False)
         return file_path
+
+    def add_student_preferences(self, student_id: int, courses: list) -> dict:
+        """
+        """
+        try:
+            for priority, course_code in enumerate(courses, start=1):
+                insert_stmt = insert(preferences).values(
+                    student_id=student_id,
+                    priority=priority,
+                    course_code=course_code
+                )
+                self.db.session.execute(insert_stmt)
+            return
+        except Exception as e:
+            self.db.session.rollback()
+            raise DatabaseError(f"Error adding student preference: {str(e)}")
+    
+    def change_student_preferences(self, student_id: int, courses: list) -> dict:
+        """
+        """
+        try:
+            self.delete_student_preferences(student_id)
+            for priority, course_code in enumerate(courses, start=1):
+                insert_stmt = insert(preferences).values(
+                    student_id=student_id,
+                    priority=priority,
+                    course_code=course_code
+                )
+            self.db.session.execute(insert_stmt)
+        except Exception as e:
+            self.db.session.rollback()
+            raise DatabaseError(f"Error adding student preference: {str(e)}")
+        
+    def delete_student_preferences(self, student_id):
+        """
+
+        """
+        try:
+            statement = delete(preferences).where(preferences.c.student_id == student_id)
+            self.db.session.execute(statement)
+        except Exception as e:
+            self.db.session.rollback()
+            raise DatabaseError(f"Error deleting student preferences: {str(e)}")
+
+    def add_course_to_student(self, student_id: int, course_id: int) -> dict:
+        """
+        """
+        try:
+            student = self.db.session.query(Student).filter(Student.id == student_id).first()
+            if not student:
+                raise DataNotFound(f"Student with ID not found: {student_id}")
+            
+            course = self.db.session.query(Course).filter(Course.id == course_id).first()
+            if not course:
+                raise DataNotFound(f"Course with ID not found: {course_id}")
+            
+            enrollment = self.db.session.query(enrollments).filter(enrollments.c.student_id == student_id, enrollments.c.course_id == course_id).first()
+            if enrollment:
+                raise DataAlreadyExists(f"Student is already enrolled in course: {course_id}")
+            else :
+                self.db.session.execute(enrollments.insert().values(student_id=student_id, course_id=course_id))
+
+            self.db.session.commit()
+            return
+        except Exception as e:
+            self.db.session.rollback()
+            raise DatabaseError(f"Error adding course to student: {str(e)}")    
+        
+    def replace_courses_for_student(self, student_id: int, new_courses: list) -> dict:
+        """
+        """
+        try:
+            student = self.db.session.query(Student).filter(Student.id == student_id).first()
+            if not student:
+                raise DataNotFound(f"Student with ID not found: {student_id}")
+
+            existing_courses = self.db.session.query(Course.id).filter(Course.id.in_(new_courses)).all()
+            existing_course_ids = {course.id for course in existing_courses} 
+            invalid_courses = [course for course in new_courses if course not in existing_course_ids]
+            
+            if invalid_courses:
+                raise DataNotFound(f"Invalid course ID(s) found: {invalid_courses}")
+
+            self.db.session.query(enrollments).filter(enrollments.c.student_id == student_id).delete()
+
+            new_enrollments = [{'student_id': student_id, 'course_id': course_id} for course_id in new_courses]
+            
+            self.db.session.execute(enrollments.insert(), new_enrollments)
+            return 
+        except Exception as e:
+            self.db.session.rollback()
+            raise DatabaseError(f"Error replacing courses for student: {str(e)}")
