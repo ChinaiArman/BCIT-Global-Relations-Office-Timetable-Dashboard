@@ -4,7 +4,6 @@
 # IMPORTS
 from db_config import db
 from models.Enrollments import enrollments
-from models.Preferences import preferences
 
 
 # STUDENT DATA CLASS
@@ -16,7 +15,7 @@ class Student(db.Model):
     last_name = db.Column(db.String(50), nullable=False)
     term_code = db.Column(db.Integer, nullable=False)
 
-    preferences = db.relationship("Course", secondary=preferences)
+    preferences = db.relationship("Preferences", back_populates="student")
     courses = db.relationship(
         "Course", secondary=enrollments, back_populates="students"
     )

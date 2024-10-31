@@ -4,11 +4,17 @@
 # IMPORTS
 from db_config import db
 
+class Preferences(db.Model):
+    __tablename__ = "preferences"
 
-# PREFERENCES TABLE
-preferences = db.Table(
-    "preferences",
-    db.Column("student_id", db.String(9), db.ForeignKey("students.id"), primary_key=True),
-    db.Column("priority", db.Integer, primary_key=True),
-    db.Column("course_code", db.String(8), nullable=False),
-)
+    student_id = db.Column(db.String(9), db.ForeignKey("students.id"), primary_key=True)
+    priority = db.Column(db.Integer, primary_key=True)
+    preference = db.Column(db.String(8), nullable=False) 
+    student = db.relationship("Student", back_populates="preferences")
+
+    def __repr__(self):
+        return {
+            "student_id": self.student_id,
+            "priority": self.priority,
+            "course_code": self.preference,
+        }

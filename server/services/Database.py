@@ -8,7 +8,7 @@ from datetime import datetime
 
 from models.Course import Course
 from models.Student import Student
-from models.Preferences import preferences
+from models.Preferences import Preferences
 from models.Enrollments import enrollments
 
 from exceptions import InvalidUploadFile, InvalidFileType, DataNotFound, DatabaseError, DataAlreadyExists
@@ -344,7 +344,7 @@ class Database:
             )
             self.db.session.add(student)
 
-            preferences = [row[f"Course Code Preference #{i}"] for i in range(1, 9) if row[f"Course Code Preference #{i}"]]
+            preferences = [row[f"Course Code Preference #{i}"] for i in range(1, len(data.get("preferences"))) if row[f"Course Code Preference #{i}"]]
 
             self.change_student_preferences(student.id, preferences) 
             self.db.session.commit()
@@ -449,12 +449,12 @@ class Database:
         """
         try:
             for priority, course_code in enumerate(courses, start=1):
-                insert_stmt = insert(preferences).values(
-                    student_id=student_id,
-                    priority=priority,
-                    course_code=course_code
-                )
-                self.db.session.execute(insert_stmt)
+                preference = Preferences(
+                                student_id=student_id,
+                                priority=priority,
+                                preference=course_code
+                            )
+                self.db.session.add(preference)
             return
         except Exception as e:
             self.db.session.rollback()
@@ -465,13 +465,7 @@ class Database:
         """
         try:
             self.delete_student_preferences(student_id)
-            for priority, course_code in enumerate(courses, start=1):
-                insert_stmt = insert(preferences).values(
-                    student_id=student_id,
-                    priority=priority,
-                    course_code=course_code
-                )
-            self.db.session.execute(insert_stmt)
+            self.add_student_preferences(student_id, courses)
         except Exception as e:
             self.db.session.rollback()
             raise DatabaseError(f"Error adding student preference: {str(e)}")
@@ -481,8 +475,8 @@ class Database:
 
         """
         try:
-            statement = delete(preferences).where(preferences.c.student_id == student_id)
-            self.db.session.execute(statement)
+            self.db.session.query(Preferences).filter(Preferences.student_id == student_id).delete()
+            return
         except Exception as e:
             self.db.session.rollback()
             raise DatabaseError(f"Error deleting student preferences: {str(e)}")
