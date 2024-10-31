@@ -473,6 +473,9 @@ class Database:
             student = self.db.session.query(Student).filter(Student.id == id).first()
             if not student:
                 raise DataNotFound(f"Student with ID not found: {id}")
+            
+            self.delete_student_preferences(id)
+            self.db.session.query(enrollments).filter(enrollments.c.student_id == id).delete()
             self.db.session.delete(student)
             self.db.session.commit()
             return
