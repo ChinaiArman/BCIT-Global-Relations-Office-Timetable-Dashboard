@@ -231,7 +231,31 @@ class Database:
         return invalid_rows
 
     def bulk_student_upload(self, file) -> list:
-        """ """
+        """ 
+        Save the bulk student upload file to the database.
+
+        Args:
+        -----
+        file (FileStorage): The file to save.
+
+        Returns:
+        --------
+        list: A list of invalid rows.
+
+        Notes:
+        ------
+        1. The file is validated to ensure it is a CSV file.
+        2. The file is read as a DataFrame.
+        3. The data is normalized and uploaded to the database.
+        4. Invalid rows are returned.
+
+        Example:
+        --------
+        >>> db = Database()
+        >>> db.save_bulk_student_upload_file(file)
+        ... # Invalid rows returned
+        ... # Student data uploaded to the database
+        """
         if not file.filename.endswith(".csv"):
             raise InvalidFileType("Invalid file format. Please upload an CSV file.")
         try:
@@ -241,7 +265,23 @@ class Database:
             raise InvalidUploadFile("Invalid file format. Error processing the file.")
 
     def normalize_student_data(self, row: pd.Series) -> pd.Series:
-        """ """
+        """ 
+        Normalize the student data.
+
+        Args:
+        -----
+        row (pd.Series): The row to normalize.
+
+        Returns:
+        --------
+        pd.Series: The normalized row.
+        
+        Example:
+        --------
+        >>> db = Database()
+        >>> db.normalize_student_data(row)
+        ... # Normalized row returned
+        """
         row["BCIT Student Number"] = row["BCIT Student Number"][:9]
         row["Legal First Name"] = row["Legal First Name"][:50]
         row["Legal Last Name"] = row["Legal Last Name"][:50]
@@ -254,7 +294,23 @@ class Database:
         return row
 
     def upload_students_to_database(self, df: pd.DataFrame) -> list:
-        """ """
+        """ 
+        Upload the students to the database.
+        
+        Args:
+        -----
+        df (pd.DataFrame): The DataFrame to upload.
+        
+        Returns:
+        --------
+        list: A list of invalid rows.
+        
+        Example:
+        --------
+        >>> db = Database()
+        >>> db.upload_students_to_database(df)
+        ...
+        """
         self.db.session.query(Student).delete()
         self.db.session.commit()
         invalid_rows = []
@@ -425,6 +481,17 @@ class Database:
 
     def get_all_students(self) -> list:
         """
+        Get all students.
+
+        Returns:
+        --------
+        list: A list of all students.
+
+        Example:
+        --------
+        >>> db = Database()
+        >>> db.get_all_students()
+        ... [{"id": 1, "firstName": "John", "lastName": "Doe", "selection": [], "courses": []}]
         """
         try:
             students = self.db.session.query(Student).all()
@@ -434,6 +501,17 @@ class Database:
 
     def export_students(self) -> pd.DataFrame:
         """
+        Export all students.
+
+        Returns:
+        --------
+        pd.DataFrame: The DataFrame of all students.
+
+        Example:
+        --------
+        >>> db = Database()
+        >>> db.export_students()
+        ... # DataFrame returned
         """
         try:
             students = self.db.session.query(Student).all()
@@ -446,6 +524,22 @@ class Database:
 
     def add_student_preferences(self, student_id: int, courses: list) -> dict:
         """
+        Add student preferences to the database.
+
+        Args:
+        -----
+        student_id (int): The student ID.
+        courses (list): The list of course codes.
+
+        Returns:
+        --------
+        dict: The response message.
+
+        Example:
+        --------
+        >>> db = Database()
+        >>> db.add_student_preferences(1, ["COMP 1001", "COMP 1002", "COMP 1003"])
+        ... 
         """
         try:
             for priority, course_code in enumerate(courses, start=1):
@@ -462,6 +556,22 @@ class Database:
     
     def change_student_preferences(self, student_id: int, courses: list) -> dict:
         """
+        Change student preferences in the database.
+
+        Args:
+        -----
+        student_id (int): The student ID.
+        courses (list): The list of course codes.
+
+        Returns:
+        --------
+        dict: The response message.
+
+        Example:
+        --------
+        >>> db = Database()
+        >>> db.change_student_preferences(1, ["COMP 1001", "COMP 1002", "COMP 1003"])
+        ...
         """
         try:
             self.delete_student_preferences(student_id)
@@ -472,7 +582,21 @@ class Database:
         
     def delete_student_preferences(self, student_id):
         """
+        Delete student preferences from the database for the student.
 
+        Args:
+        -----
+        student_id (int): The student ID.
+
+        Returns:
+        --------
+        dict: The response message.
+
+        Example:
+        --------
+        >>> db = Database()
+        >>> db.delete_student_preferences(1)
+        ...
         """
         try:
             self.db.session.query(Preferences).filter(Preferences.student_id == student_id).delete()
@@ -483,6 +607,22 @@ class Database:
 
     def add_course_to_student(self, student_id: int, course_id: int) -> dict:
         """
+        Add a course to a student.
+
+        Args:
+        -----
+        student_id (int): The student ID.
+        course_id (int): The course ID.
+
+        Returns:
+        --------
+        dict: The response message.
+
+        Example:
+        --------
+        >>> db = Database()
+        >>> db.add_course_to_student(1, 1)
+        ...
         """
         try:
             student = self.db.session.query(Student).filter(Student.id == student_id).first()
@@ -507,6 +647,22 @@ class Database:
         
     def replace_courses_for_student(self, student_id: int, new_courses: list) -> dict:
         """
+        Replace courses for a student.
+
+        Args:
+        -----
+        student_id (int): The student ID.
+        new_courses (list): The list of course IDs.
+
+        Returns:
+        --------
+        dict: The response message.
+
+        Example:
+        --------
+        >>> db = Database()
+        >>> db.replace_courses_for_student(1, [1, 2, 3])
+        ...
         """
         try:
             student = self.db.session.query(Student).filter(Student.id == student_id).first()
