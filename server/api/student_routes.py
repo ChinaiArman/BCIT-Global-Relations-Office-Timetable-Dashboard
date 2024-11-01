@@ -90,3 +90,13 @@ def download_template():
         return send_file("templates/student_upload_template.csv", as_attachment=True)
     except Exception as e:
         return jsonify({"message": str(e)}), 400
+
+@student_bp.route("/student/add_course/student/<string:id>/course/<string:crn>/", methods=["PUT"])
+def add_course_to_student_route(id, crn):
+    """ """
+    try:
+        db = current_app.config["database"]
+        db.add_course_to_student(id, crn)
+        return jsonify({"message": "Course added successfully"}), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400

@@ -631,6 +631,7 @@ class Database:
         >>> db.add_course_to_student(1, 1)
         ...
         """
+
         try:
             student = self.db.session.query(Student).filter(Student.id == student_id).first()
             if not student:
@@ -693,20 +694,9 @@ class Database:
             self.db.session.rollback()
             raise DatabaseError(f"Error replacing courses for student: {str(e)}")
 
-    def get_courses_by_block_and_course_code(self, block, course_code):
+    def get_course_by_course_grouping(self, course_grouping):
         try:
-            courses = self.db.session.query(Course).filter(Course.block == block, Course.course_code == course_code).all()
-            course_reprs = [course.__repr__() for course in courses]
-            return course_reprs
-        except Exception as e:
-            self.db.session.rollback()
-            raise DatabaseError(f"Error fetching courses by block and course code: {str(e)}")
-
-    def get_course_by_crn(self, crn):
-        try:
-            courses = self.db.session.query(Course).filter(Course.crn == crn).all()
-            if not courses:
-                raise DataNotFound(f"Course with CRN not found: {crn}")
+            courses = self.db.session.query(Course).filter(Course.course_grouping == course_grouping).all()
             for course in courses:
                 course.start_date = course.start_date.strftime("%Y-%m-%d")
                 course.end_date = course.end_date.strftime("%Y-%m-%d")
@@ -716,4 +706,20 @@ class Database:
             return course_reprs
         except Exception as e:
             self.db.session.rollback()
-            raise DatabaseError(f"Error fetching course by CRN: {str(e)}")
+            raise DatabaseError(f"Error fetching course by course grouping: {str(e)}")
+
+    def get_course_by_course_code(self, course_code):
+        try:
+            courses = self.db.session.query(Course).filter(Course.course_code == course_code).all()
+            if not courses:
+                raise DataNotFound(f"Course with course code not found: {course_code}")
+            for course in courses:
+                course.start_date = course.start_date.strftime("%Y-%m-%d")
+                course.end_date = course.end_date.strftime("%Y-%m-%d")
+                course.begin_time = course.begin_time.strftime("%H:%M")
+                course.end_time = course.end_time.strftime("%H:%M")
+            course_reprs = [course.__repr__() for course in courses]
+            return course_reprs
+        except Exception as e:
+            self.db.session.rollback()
+            raise DatabaseError(f"Error fetching course by course code: {str(e)}")

@@ -11,18 +11,18 @@ course_bp = Blueprint('course_bp', __name__)
 
 
 # ROUTES
-@course_bp.route('/course/<int:crn>/', methods=['GET'])
-def get_course_by_crn(crn):
+@course_bp.route('/course/course_code/<string:course_code>/', methods=['GET'])
+def get_course_by_course_code(course_code):
     """
-    Request: GET /course/<int:crn>/
+    Request: GET /course/course_code/<string:course_code>/
 
-    Description: Retrieve a course by its CRN.
+    Description: Retrieve a course by its course code.
 
     Parameters:
-    - crn (int): The Course Registration Number.
+    - course_code (string): The course code.
 
     Response:
-    - courses (list): A list of courses matching the CRN.
+    - courses (list): A list of courses matching the course code.
 
     Status Codes:
     - 200: Course data successfully retrieved.
@@ -33,24 +33,23 @@ def get_course_by_crn(crn):
     """
     try:
         db = current_app.config['database']
-        response = db.get_course_by_crn(crn)
+        response = db.get_course_by_course_code(course_code)
         return jsonify(response), 200
     except Exception as e:
         return jsonify({"error": "Internal server error", "message": str(e)}), 500
 
-@course_bp.route('/course/block/<string:block>/course_code/<string:course_code>/', methods=['GET'])
-def get_course_by_block_and_course_code(block, course_code):
+@course_bp.route('/course/course_grouping/<string:course_grouping>/', methods=['GET'])
+def get_course_by_course_grouping(course_grouping):
     """
-    Request: GET /course/block/<string:block>/course_code/<string:course_code>/
+    Request: GET /course/course_grouping/<string:course_grouping>/
 
-    Description: Retrieve a course by its block and course code.
+    Description: Retrieve courses by their course grouping.
 
     Parameters:
-    - block (string): The block of the course.
-    - course_code (string): The course code.
+    - course_grouping (string): The course grouping.
 
     Response:
-    - courses (list): A list of courses matching the block and course code.
+    - courses (list): A list of courses matching the course grouping.
 
     Status Codes:
     - 200: Course data successfully retrieved.
@@ -61,8 +60,7 @@ def get_course_by_block_and_course_code(block, course_code):
     """
     try:
         db = current_app.config['database']
-        response = db.get_courses_by_block_and_course_code(block, course_code)
-
+        response = db.get_course_by_course_grouping(course_grouping)
         return jsonify(response), 200
     except Exception as e:
         return jsonify({"error": "Internal server error", "message": str(e)}), 500
