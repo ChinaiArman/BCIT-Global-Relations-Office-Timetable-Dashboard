@@ -692,3 +692,28 @@ class Database:
         except Exception as e:
             self.db.session.rollback()
             raise DatabaseError(f"Error replacing courses for student: {str(e)}")
+
+    def get_courses_by_block_and_course_code(self, block, course_code):
+        try:
+            courses = self.db.session.query(Course).filter(Course.block == block, Course.course_code == course_code).all()
+            course_reprs = [course.__repr__() for course in courses]
+            return course_reprs
+        except Exception as e:
+            self.db.session.rollback()
+            raise DatabaseError(f"Error fetching courses by block and course code: {str(e)}")
+
+    def get_course_by_crn(self, crn):
+        try:
+            courses = self.db.session.query(Course).filter(Course.crn == crn).all()
+            if not courses:
+                raise DataNotFound(f"Course with CRN not found: {crn}")
+            for course in courses:
+                course.start_date = course.start_date.strftime("%Y-%m-%d")
+                course.end_date = course.end_date.strftime("%Y-%m-%d")
+                course.begin_time = course.begin_time.strftime("%H:%M")
+                course.end_time = course.end_time.strftime("%H:%M")
+            course_reprs = [course.__repr__() for course in courses]
+            return course_reprs
+        except Exception as e:
+            self.db.session.rollback()
+            raise DatabaseError(f"Error fetching course by CRN: {str(e)}")

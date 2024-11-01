@@ -62,6 +62,7 @@ def get_course_by_block_and_course_code(block, course_code):
     try:
         db = current_app.config['database']
         response = db.get_courses_by_block_and_course_code(block, course_code)
+
         return jsonify(response), 200
     except Exception as e:
         return jsonify({"error": "Internal server error", "message": str(e)}), 500
@@ -119,12 +120,12 @@ def get_course_students(block, course_code):
 
     Author: Kate Sullivan
     """
-    # course = Course.query.filter_by(block=block, course_code=course_code).first()
-    # if course:
-    #     students = [student.serialize() for student in course.students]
-    #     return jsonify(students)
-    # else:
-    #     return jsonify({"message": "Course not found"}), 404
+    course = Course.query.filter_by(block=block, course_code=course_code).first()
+    if course:
+        students = [student.serialize() for student in course.students]
+        return jsonify(students)
+    else:
+        return jsonify({"message": "Course not found"}), 404
     return jsonify({"message": "get course students endpoint"})
 
 @course_bp.route('/course/download_template', methods=['GET'])
