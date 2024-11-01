@@ -651,7 +651,47 @@ class Database:
             return
         except Exception as e:
             self.db.session.rollback()
-            raise DatabaseError(f"Error adding course to student: {str(e)}")    
+            raise DatabaseError(f"Error adding course to student: {str(e)}")   
+
+    def remove_course_from_student(self, student_id: int, course_id: int) -> dict:
+        """
+        Remove a course from a student.
+
+        Args:
+        -----
+        student_id (int): The student ID.
+        course_id (int): The course ID.
+
+        Returns:
+        --------
+        dict: The response message.
+
+        Example:
+        --------
+        >>> db = Database()
+        >>> db.remove_course_from_student(1, 1)
+        ...
+        """
+        try:
+            student = self.db.session.query(Student).filter(Student.id == student_id).first()
+            if not student:
+                raise DataNotFound(f"Student with ID not found: {student_id}")
+            
+            course = self.db.session.query(Course).filter(Course.id == course_id).first()
+            if not course:
+                raise DataNotFound(f"Course with ID not found: {course_id}")
+            
+            enrollment = self.db.session.query(enrollments).filter(enrollments.c.student_id == student_id, enrollments.c.course_id == course_id).first()
+            if not enrollment:
+                raise DataNotFound(f"Student is not enrolled in course: {course_id}")
+            else:
+                self.db.session.execute(enrollments.delete().where(enrollments.c.student_id == student_id).where(enrollments.c.course_id == course_id))
+
+            self.db.session.commit()
+            return
+        except Exception as e:
+            self.db.session.rollback()
+            raise DatabaseError(f"Error removing course from student: {str(e)}") 
         
     def replace_courses_for_student(self, student_id: int, new_courses: list) -> dict:
         """
