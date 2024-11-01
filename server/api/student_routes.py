@@ -110,3 +110,14 @@ def remove_course_from_student_route(student_id, course_id):
         return jsonify({"message": "Course removed successfully"}), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 400
+
+@student_bp.route("/student/replace_all_courses/student/<string:student_id>/course_list/<string:course_list>", methods=["PUT"])
+def replace_all_courses_for_student_route(student_id, course_list):
+    """ """
+    try:
+        db = current_app.config["database"]
+        db.replace_all_courses_for_student(student_id, course_list)
+        return jsonify({"message": "Courses replaced successfully"}), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
+

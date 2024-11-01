@@ -693,14 +693,14 @@ class Database:
             self.db.session.rollback()
             raise DatabaseError(f"Error removing course from student: {str(e)}") 
         
-    def replace_courses_for_student(self, student_id: int, new_courses: list) -> dict:
+    def replace_all_courses_for_student(self, student_id: int, course_list: str) -> dict:
         """
-        Replace courses for a student.
+        Replace all courses for a student.
 
         Args:
         -----
         student_id (int): The student ID.
-        new_courses (list): The list of course IDs.
+        course_list (str): The comma-separated list of course IDs.
 
         Returns:
         --------
@@ -709,10 +709,14 @@ class Database:
         Example:
         --------
         >>> db = Database()
-        >>> db.replace_courses_for_student(1, [1, 2, 3])
+        >>> db.replace_all_courses_for_student_route(1, "1,2,3")
         ...
         """
         try:
+
+            new_courses = course_list.split(',')
+            new_courses = {int(course) for course in new_courses}
+
             student = self.db.session.query(Student).filter(Student.id == student_id).first()
             if not student:
                 raise DataNotFound(f"Student with ID not found: {student_id}")
@@ -724,15 +728,17 @@ class Database:
             if invalid_courses:
                 raise DataNotFound(f"Invalid course ID(s) found: {invalid_courses}")
 
-            self.db.session.query(enrollments).filter(enrollments.c.student_id == student_id).delete()
+            self.db.session.execute(enrollments.delete().where(enrollments.c.student_id == student_id))
+            self.db.session.commit()
 
             new_enrollments = [{'student_id': student_id, 'course_id': course_id} for course_id in new_courses]
             
             self.db.session.execute(enrollments.insert(), new_enrollments)
+            self.db.session.commit()
             return 
         except Exception as e:
             self.db.session.rollback()
-            raise DatabaseError(f"Error replacing courses for student: {str(e)}")
+            raise DatabaseError(f"Error replacing all courses for student: {str(e)}")
 
     def get_course_by_course_grouping(self, course_grouping):
         try:
