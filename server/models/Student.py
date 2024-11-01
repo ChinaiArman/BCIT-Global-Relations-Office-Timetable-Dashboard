@@ -26,6 +26,6 @@ class Student(db.Model):
             "first_name": self.first_name,
             "last_name": self.last_name,
             "term_code": self.term_code,
-            "preferences": [course.course_code for course in self.preferences],
+            "preferences": [course.preference for course in self.preferences],
             "courses": [course.course_code for course in self.courses],
         }
