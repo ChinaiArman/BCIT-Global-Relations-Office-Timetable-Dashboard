@@ -311,27 +311,31 @@ class Database:
         >>> db.upload_students_to_database(df)
         ...
         """
-        self.db.session.query(Student).delete()
-        self.db.session.commit()
-        invalid_rows = []
-        for _, row in df.iterrows():
-            try:
-                row = self.normalize_student_data(row)
-                student = Student(
-                    id=row["BCIT Student Number"],
-                    first_name=row["Legal First Name"],
-                    last_name=row["Legal Last Name"],
-                    term_code=row["Term Code"],
-                )
-                self.db.session.add(student)
+        try:
+            self.db.session.query(Preferences).delete()
+            self.db.session.query(Student).delete()
+            invalid_rows = []
+            for _, row in df.iterrows():
+                try:
+                    row = self.normalize_student_data(row)
+                    student = Student(
+                        id=row["BCIT Student Number"],
+                        first_name=row["Legal First Name"],
+                        last_name=row["Legal Last Name"],
+                        term_code=row["Term Code"],
+                    )
+                    self.db.session.add(student)
 
-                preferences = [row[f"Course Code Preference #{i}"] for i in range(1, 9) if row[f"Course Code Preference #{i}"]]
-                self.add_student_preferences(student.id, preferences)
+                    preferences = [row[f"Course Code Preference #{i}"] for i in range(1, 9) if row[f"Course Code Preference #{i}"] and row[f"Course Code Preference #{i}"] != ""] 
+                    self.add_student_preferences(student.id, preferences)
 
-            except Exception:
-                invalid_rows.append({"id": row["BCIT Student Number"]})
-        self.db.session.commit()
-        return invalid_rows
+                except Exception as e:
+                    invalid_rows.append({"id": row["BCIT Student Number"]})
+            self.db.session.commit()
+            return invalid_rows
+        except Exception as e:
+            self.db.session.rollback()
+            raise DatabaseError(f"Error uploading students to the database: {str(e)}")
 
     def get_student_by_id(self, id: int) -> dict:
         """
