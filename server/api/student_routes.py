@@ -91,12 +91,12 @@ def download_template():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-@student_bp.route("/student/add_course/student/<string:id>/course/<string:crn>/", methods=["PUT"])
-def add_course_to_student_route(id, crn):
+@student_bp.route("/student/add_course/student/<string:student_id>/course/<string:course_id>/", methods=["PUT"])
+def add_course_to_student_route(student_id, course_id):
     """ """
     try:
         db = current_app.config["database"]
-        db.add_course_to_student(id, crn)
+        db.add_course_to_student(student_id, course_id)
         return jsonify({"message": "Course added successfully"}), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 400
