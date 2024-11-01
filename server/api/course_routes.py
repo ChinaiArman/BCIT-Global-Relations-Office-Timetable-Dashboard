@@ -65,6 +65,33 @@ def get_course_by_course_grouping(course_grouping):
     except Exception as e:
         return jsonify({"error": "Internal server error", "message": str(e)}), 500
 
+@course_bp.route('/course/course_id/<string:id>/', methods=['GET'])
+def get_course_by_id(id):
+    """
+    Request: GET /course/course_id/<string:id>/
+
+    Description: Retrieve a course by its ID.
+
+    Parameters:
+    - id (string): The course ID.
+
+    Response:
+    - course (object): The course matching the ID.
+
+    Status Codes:
+    - 200: Course data successfully retrieved.
+    - 404: Course not found.
+    - 500: Internal server error.
+
+    Author: ``@KateSullivan``
+    """
+    try:
+        db = current_app.config['database']
+        response = db.get_course_by_course_id(id)
+        return jsonify(response), 200
+    except Exception as e:
+        return jsonify({"error": "Internal server error", "message": str(e)}), 500
+
 @course_bp.route('/course/import', methods=['PUT'])
 def upload_course():
     """

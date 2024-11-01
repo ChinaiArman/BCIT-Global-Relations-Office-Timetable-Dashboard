@@ -723,3 +723,17 @@ class Database:
         except Exception as e:
             self.db.session.rollback()
             raise DatabaseError(f"Error fetching course by course code: {str(e)}")
+
+    def get_course_by_course_id(self, id):
+        try:
+            course = self.db.session.query(Course).filter(Course.id == id).first()
+            if not course:
+                raise DataNotFound(f"Course with ID not found: {id}")
+            course.start_date = course.start_date.strftime("%Y-%m-%d")
+            course.end_date = course.end_date.strftime("%Y-%m-%d")
+            course.begin_time = course.begin_time.strftime("%H:%M")
+            course.end_time = course.end_time.strftime("%H:%M")
+            return course.__repr__()
+        except Exception as e:
+            self.db.session.rollback()
+            raise DatabaseError(f"Error fetching course by ID: {str(e)}")
