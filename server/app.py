@@ -22,6 +22,8 @@ from logging_config import configure_logging
 
 # FLASK CONFIGURATION
 def create_app():
+    """
+    """
     app = Flask(__name__)
     CORS(app)
 

@@ -799,10 +799,6 @@ class Database:
         Raises
         ------
         InvalidEmailAddress: If the email address is invalid.
-
-        Disclaimer
-        ----------
-        This method was created with the assistance of AI tools (GitHub Copilot). All code created is original and has been reviewed and understood by a human developer.
         """
         user = self.db.session.query(User).filter(User.email == email).first()
         if not user:
@@ -826,10 +822,6 @@ class Database:
         Raises
         ------
         EmailAddressAlreadyInUse: If the email address is already in use.
-
-        Disclaimer
-        ----------
-        This method was created with the assistance of AI tools (GitHub Copilot). All code created is original and has been reviewed and understood by a human developer.
         """
         if self.db.session.query(User).filter(User.email == email).first():
             raise EmailAddressAlreadyInUse()
@@ -905,10 +897,6 @@ class Database:
         Raises
         ------
         UserNotFound: If the user is not found.
-
-        Disclaimer
-        ----------
-        This method was created with the assistance of AI tools (GitHub Copilot). All code created is original and has been reviewed and understood by a human developer.
         """
         user = self.db.session.query(User).filter(User.id == user_id).first()
         if not user:

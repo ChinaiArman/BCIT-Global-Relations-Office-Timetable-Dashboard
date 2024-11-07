@@ -12,10 +12,6 @@ from exceptions import IncorrectPassword, InvalidOneTimeCode
 class Authenticator:
     """
     A class used to authenticate users, sessions, requests, and API keys.
-
-    Disclaimer
-    ----------
-    This class was created with the assistance of AI tools (GitHub Copilot). All code created is original and has been reviewed and understood by a human developer.
     """
     def __init__(self):
         """
@@ -38,10 +34,6 @@ class Authenticator:
         Returns
         -------
         str: The encrypted password.
-
-        Disclaimer
-        ----------
-        This method was created with the assistance of AI tools (GitHub Copilot). All code created is original and has been reviewed and understood by a human developer.
         """
         salt = bcrypt.gensalt()
         return bcrypt.hashpw(password.encode('utf-8'), salt)
@@ -62,10 +54,6 @@ class Authenticator:
         Raises
         ------
         IncorrectPassword: If the password is incorrect.
-
-        Disclaimer
-        ----------
-        This method was created with the assistance of AI tools (GitHub Copilot). All code created is original and has been reviewed and understood by a human developer.
         """
         if not bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):
             raise IncorrectPassword()
@@ -82,10 +70,6 @@ class Authenticator:
         Returns
         -------
         str: The new 6 digit code.
-
-        Disclaimer
-        ----------
-        This method was created with the assistance of AI tools (GitHub Copilot). All code created is original and has been reviewed and understood by a human developer.
         """
         return secrets.token_hex(3)
     
