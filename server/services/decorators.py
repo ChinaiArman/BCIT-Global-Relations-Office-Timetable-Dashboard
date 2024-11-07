@@ -42,7 +42,12 @@ def login_required(func: callable) -> callable:
         This function was created with the assistance of AI tools (GitHub Copilot). All code created is original and has been reviewed and understood by a human developer.
         """
         if "user_id" in session:
-            return func(*args, **kwargs)
+            db = current_app.config['database']
+            user = db.get_user_by_id(session.get('user_id'))
+            if user.is_verified:
+                return func(*args, **kwargs)
+            else:
+                return jsonify({"error": "user not verified"}), 401
         else:
             return jsonify({"error": "login required"}), 401
     return wrapper
