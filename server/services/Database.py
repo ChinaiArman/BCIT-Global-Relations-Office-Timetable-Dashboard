@@ -873,14 +873,13 @@ class Database:
         self.db.session.commit()
         return
     
-    def verify_user(self, user: User, api_key: str) -> None:
+    def verify_user(self, user: User) -> None:
         """
         Verify a user.
 
         Args
         ----
         user (User): The user object.
-        api_key (str): The new user API key.
 
         Returns
         -------
@@ -888,7 +887,6 @@ class Database:
         """
         user.is_verified = True
         user.verification_code = None
-        user.api_key = api_key
         self.db.session.commit()
         return
     

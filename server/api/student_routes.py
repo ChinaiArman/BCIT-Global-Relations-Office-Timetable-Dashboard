@@ -4,7 +4,7 @@
 # IMPORTS
 from flask import Blueprint, jsonify, request, current_app, send_file
 
-from services.decorators import login_required
+from services.decorators import verified_login_required
 
 
 # DEFINE BLUEPRINT
@@ -13,7 +13,7 @@ student_bp = Blueprint("student_bp", __name__)
 
 # ROUTES
 @student_bp.route("/student/<string:id>/", methods=["GET"])
-@login_required
+@verified_login_required
 def get_student_by_id(id):
     """
     Request: GET /student/<string:id>/
@@ -41,7 +41,7 @@ def get_student_by_id(id):
         return jsonify({"message": str(e)}), 400
 
 @student_bp.route("/student/", methods=["POST"])
-@login_required
+@verified_login_required
 def create_student():
     """
     Request: POST /student/
@@ -70,7 +70,7 @@ def create_student():
         return jsonify({"message": str(e)}), 400
 
 @student_bp.route("/student/<string:id>/", methods=["PUT"])
-@login_required
+@verified_login_required
 def update_student(id):
     """
     Request: PUT /student/<string:id>/
@@ -101,7 +101,7 @@ def update_student(id):
 
 
 @student_bp.route("/student/<string:id>/", methods=["DELETE"])
-@login_required
+@verified_login_required
 def delete_student(id):
     """
     Request: DELETE /student/<string:id>/
@@ -129,7 +129,7 @@ def delete_student(id):
         return jsonify({"message": str(e)}), 400
 
 @student_bp.route("/student/import", methods=["PUT"])
-@login_required
+@verified_login_required
 def upload_student():
     """
     Request: PUT /student/import
@@ -158,7 +158,7 @@ def upload_student():
         return jsonify({"message": str(e)}), 400
 
 @student_bp.route("/student/get_all", methods=["GET"])
-@login_required
+@verified_login_required
 def get_all_students():
     """
     Request: GET /student/get_all
@@ -182,7 +182,7 @@ def get_all_students():
         return jsonify({"message": str(e)}), 400
 
 @student_bp.route("/student/export", methods=["GET"])
-@login_required
+@verified_login_required
 def download_student():
     """
     Request: GET /student/export/
@@ -206,7 +206,7 @@ def download_student():
         return jsonify({"message": str(e)}), 400
 
 @student_bp.route("/student/download_template", methods=["GET"])
-@login_required
+@verified_login_required
 def download_template():
     """
     Request: GET /student/download_template/
@@ -228,7 +228,7 @@ def download_template():
         return jsonify({"message": str(e)}), 400
 
 @student_bp.route("/student/add_course/student/<string:student_id>/course/<string:course_id>/", methods=["PUT"])
-@login_required
+@verified_login_required
 def add_course_to_student_route(student_id, course_id):
     """
     Request: PUT /student/add_course/student/<string:student_id>/course/<string:course_id>/
@@ -257,7 +257,7 @@ def add_course_to_student_route(student_id, course_id):
         return jsonify({"message": str(e)}), 400
 
 @student_bp.route("/student/remove_course/student/<string:student_id>/course/<string:course_id>/", methods=["PUT"])
-@login_required
+@verified_login_required
 def remove_course_from_student_route(student_id, course_id):
     """
     Request: PUT /student/remove_course/student/<string:student_id>/course/<string:course_id>/
@@ -286,7 +286,7 @@ def remove_course_from_student_route(student_id, course_id):
         return jsonify({"message": str(e)}), 400
 
 @student_bp.route("/student/replace_all_courses/student/<string:student_id>/course_list/<string:course_list>", methods=["PUT"])
-@login_required
+@verified_login_required
 def replace_all_courses_for_student_route(student_id, course_list):
     """
     Request: PUT /student/replace_all_courses/student/<string:student_id>/course_list/<string:course_list>

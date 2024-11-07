@@ -5,7 +5,7 @@ This module defines the routes for course-related operations within the BCIT Glo
 # IMPORTS
 from flask import Blueprint, jsonify, request, current_app
 
-from services.decorators import login_required
+from services.decorators import verified_login_required
 
 
 # DEFINE BLUEPRINT
@@ -14,7 +14,7 @@ course_bp = Blueprint('course_bp', __name__)
 
 # ROUTES
 @course_bp.route('/course/course_code/<string:course_code>/', methods=['GET'])
-@login_required
+@verified_login_required
 def get_course_by_course_code(course_code):
     """
     Request: GET /course/course_code/<string:course_code>/
@@ -42,7 +42,7 @@ def get_course_by_course_code(course_code):
         return jsonify({"error": "Internal server error", "message": str(e)}), 500
 
 @course_bp.route('/course/course_grouping/<string:course_grouping>/', methods=['GET'])
-@login_required
+@verified_login_required
 def get_course_by_course_grouping(course_grouping):
     """
     Request: GET /course/course_grouping/<string:course_grouping>/
@@ -70,7 +70,7 @@ def get_course_by_course_grouping(course_grouping):
         return jsonify({"error": "Internal server error", "message": str(e)}), 500
 
 @course_bp.route('/course/course_id/<string:id>/', methods=['GET'])
-@login_required
+@verified_login_required
 def get_course_by_id(id):
     """
     Request: GET /course/course_id/<string:id>/
@@ -98,7 +98,7 @@ def get_course_by_id(id):
         return jsonify({"error": "Internal server error", "message": str(e)}), 500
 
 @course_bp.route('/course/import', methods=['PUT'])
-@login_required
+@verified_login_required
 def upload_course():
     """
     Request: PUT /course/import
@@ -126,14 +126,14 @@ def upload_course():
         return jsonify({"message": str(e)}), 400
 
 @course_bp.route('/course/export', methods=['GET'])
-@login_required
+@verified_login_required
 def download_course():
     """
     """
     return jsonify({"message": "course export endpoint"})
 
 @course_bp.route('/course/<string:course_grouping>/students/', methods=['GET'])
-@login_required
+@verified_login_required
 def get_course_students(course_grouping):
     """
     Request: GET /course/<string:course_grouping>/students/
@@ -160,7 +160,7 @@ def get_course_students(course_grouping):
         return jsonify({"message": str(e)}), 404
 
 @course_bp.route('/course/download_template', methods=['GET'])
-@login_required
+@verified_login_required
 def download_template():
     """
     """

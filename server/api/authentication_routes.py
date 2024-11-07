@@ -4,7 +4,7 @@
 # IMPORTS
 from flask import Blueprint, jsonify, request, current_app, session
 
-from services.decorators import login_required, admin_required
+from services.decorators import verified_login_required, admin_required, unverified_login_required
 
 
 # DEFINE BLUEPRINT
@@ -39,7 +39,7 @@ def login() -> tuple:
         return jsonify({"error": str(e)}), 401
 
 @authentication_bp.route('/authenticate/logout/', methods=['POST'])
-@login_required
+@verified_login_required
 def logout() -> tuple:
     """
     Logout a user.
@@ -137,7 +137,7 @@ def request_password_reset() -> tuple:
         return jsonify({"error": str(e)}), 401
 
 @authentication_bp.route('/authenticate/verify/', methods=['POST'])
-@login_required
+@unverified_login_required
 def verify() -> tuple:
     """
     Verify a user.
@@ -157,8 +157,7 @@ def verify() -> tuple:
         user = db.get_user_by_id(user_id)
         verification_code = request.json.get('verification_code')
         authenticator.verify_code(verification_code, user.verification_code)
-        api_key = authenticator.generate_api_key()
-        db.verify_user(user, api_key)
+        db.verify_user(user)
         return jsonify({"message": "verification successful"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 401

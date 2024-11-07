@@ -7,7 +7,7 @@ from flask import session, jsonify, current_app
 
 
 # DECORATORS
-def login_required(func: callable) -> callable:
+def verified_login_required(func: callable) -> callable:
     """
     A decorator to require login for a route.
 
@@ -19,9 +19,7 @@ def login_required(func: callable) -> callable:
     -------
     wrapper (callable): The decorated function.
 
-    Disclaimer
-    ----------
-    This function was created with the assistance of AI tools (GitHub Copilot). All code created is original and has been reviewed and understood by a human developer.
+    Author: @ChinaiArman
     """
     @wraps(func)
     def wrapper(*args, **kwargs) -> callable:
@@ -37,9 +35,7 @@ def login_required(func: callable) -> callable:
         -------
         func(*args, **kwargs): The decorated function.
 
-        Disclaimer
-        ----------
-        This function was created with the assistance of AI tools (GitHub Copilot). All code created is original and has been reviewed and understood by a human developer.
+        Author: @ChinaiArman
         """
         if "user_id" in session:
             db = current_app.config['database']
@@ -48,6 +44,30 @@ def login_required(func: callable) -> callable:
                 return func(*args, **kwargs)
             else:
                 return jsonify({"error": "user not verified"}), 401
+        else:
+            return jsonify({"error": "login required"}), 401
+    return wrapper
+
+def unverified_login_required(func: callable) -> callable:
+    """
+    A decorator to require login for a route.
+    
+    Args
+    ----
+    func (callable): The function to decorate.
+    
+    Returns
+    -------
+    wrapper (callable): The decorated function.
+
+    Author: @ChinaiArman
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> callable:
+        """
+        """
+        if "user_id" in session:
+            return func(*args, **kwargs)
         else:
             return jsonify({"error": "login required"}), 401
     return wrapper
@@ -64,9 +84,7 @@ def admin_required(func: callable) -> callable:
     -------
     wrapper (callable): The decorated function.
 
-    Disclaimer
-    ----------
-    This function was created with the assistance of AI tools (GitHub Copilot). All code created is original and has been reviewed and understood by a human developer.
+    Author: @ChinaiArman
     """
     @wraps(func)
     def wrapper(*args, **kwargs) -> callable:
