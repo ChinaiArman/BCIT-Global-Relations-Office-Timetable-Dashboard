@@ -183,3 +183,4 @@ def delete_user() -> tuple:
         return jsonify({"message": "user deleted"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 401
+

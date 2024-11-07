@@ -913,3 +913,162 @@ class Database:
         self.db.session.query(User).filter(User.id == user_id).delete()
         self.db.session.commit()
         return
+
+    def get_user_by_verification_code(self, verification_code: str) -> User:
+        """
+        Get a user by verification code.
+        
+        Args
+        ----
+        verification_code (str): The verification code
+        
+        Returns
+        -------
+        User: The user object if found
+        
+        Raises
+        ------
+        UserNotFound: If no user is found with the given verification code
+        """
+        try:
+            user = self.db.session.query(User).filter(User.verification_code == verification_code).first()
+            if not user:
+                raise UserNotFound("Invalid verification code")
+            return user
+        except Exception as e:
+            raise DatabaseError(f"Error fetching user by verification code: {str(e)}")
+
+    def create_unverified_user(self, username: str, email: str, verification_code: str) -> User:
+        """
+        Create a new unverified user without a password.
+        
+        Args
+        ----
+        username (str): The username
+        email (str): The email address
+        verification_code (str): The verification code
+        
+        Returns
+        -------
+        User: The created user object
+        
+        Raises
+        ------
+        EmailAddressAlreadyInUse: If the email is already registered
+        DatabaseError: If there's an error creating the user
+        """
+        try:
+            if self.db.session.query(User).filter(User.email == email).first():
+                raise EmailAddressAlreadyInUse()
+            
+            user = User(
+                username=username,
+                email=email,
+                password=None,  # Password will be set during verification
+                verification_code=verification_code,
+                reset_code=None,
+                is_verified=False,
+                is_admin=False
+            )
+            self.db.session.add(user)
+            self.db.session.commit()
+            return user
+        except Exception as e:
+            self.db.session.rollback()
+            raise DatabaseError(f"Error creating unverified user: {str(e)}")
+
+    def verify_user_with_password(self, user: User, password: str) -> None:
+        """
+        Verify a user and set their initial password.
+        
+        Args
+        ----
+        user (User): The user object to verify
+        password (str): The encrypted password to set
+        
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        DatabaseError: If there's an error updating the user
+        """
+        try:
+            user.password = password
+            user.is_verified = True
+            user.verification_code = None
+            self.db.session.commit()
+            return
+        except Exception as e:
+            self.db.session.rollback()
+            raise DatabaseError(f"Error verifying user and setting password: {str(e)}")
+
+    def create_user(self, username: str, email: str, password: str, verification_code: str) -> User:
+        """
+        Create a new user in the database.
+
+        Args
+        ----
+        username (str): User username
+        email (str): User email address
+        password (str): User encrypted password
+        verification_code (str): User verification code
+
+        Returns
+        -------
+        user (User): The user object
+
+        Raises
+        ------
+        EmailAddressAlreadyInUse: If the email address is already in use
+        DatabaseError: If there's an error creating the user
+        """
+        try:
+            if self.db.session.query(User).filter(User.email == email).first():
+                raise EmailAddressAlreadyInUse()
+            
+            user = User(
+                username=username,
+                email=email,
+                password=password,
+                verification_code=verification_code,
+                reset_code=None,
+                is_verified=False,
+                is_admin=False
+            )
+            self.db.session.add(user)
+            self.db.session.commit()
+            return user
+        except Exception as e:
+            self.db.session.rollback()
+            raise DatabaseError(f"Error creating user: {str(e)}")
+
+    def get_user_by_verification_code_and_email(self, verification_code: str, email: str) -> User:
+        """
+        Get a user by both verification code and email for additional security.
+        
+        Args
+        ----
+        verification_code (str): The verification code
+        email (str): The user's email address
+        
+        Returns
+        -------
+        User: The user object if found
+        
+        Raises
+        ------
+        UserNotFound: If no user is found with the given verification code and email
+        DatabaseError: If there's an error querying the database
+        """
+        try:
+            user = self.db.session.query(User).filter(
+                User.verification_code == verification_code,
+                User.email == email
+            ).first()
+            if not user:
+                raise UserNotFound("Invalid verification code or email")
+            return user
+        except Exception as e:
+            raise DatabaseError(f"Error fetching user by verification code and email: {str(e)}")

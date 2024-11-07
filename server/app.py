@@ -9,6 +9,7 @@ from api.student_routes import student_bp
 from api.course_routes import course_bp
 from api.schedule_routes import schedule_bp
 from api.authentication_routes import authentication_bp
+from api.email_routes import email_bp
 
 from services.Database import Database
 from services.Authenticator import Authenticator
@@ -18,14 +19,30 @@ from services.EmailManager import EmailManager
 from db_config import db, configure_db
 from session_config import configure_sessions
 from logging_config import configure_logging
+from dotenv import load_dotenv
+import os
 
 
 # FLASK CONFIGURATION
 def create_app():
     """
     """
+
+    load_dotenv()
+
     app = Flask(__name__)
     CORS(app)
+
+    # CONFIGURE SERVICES
+    app.config['database'] = Database(db)
+    app.config['authenticator'] = Authenticator()
+    app.config['studentManager'] = Scheduler()
+    # app.config['emailManager'] = EmailManager()
+    app.config['email_manager'] = EmailManager(
+        username=os.getenv('MAILTRAP_USERNAME'),
+        password=os.getenv('MAILTRAP_PASSWORD'),
+        base_url=os.getenv('BASE_URL')
+    )
 
     # DATABASE CONFIGURATION
     configure_db(app)
@@ -36,11 +53,7 @@ def create_app():
     # LOGGING CONFIGURATION
     configure_logging(app)
 
-    # CONFIGURE SERVICES
-    app.config['database'] = Database(db)
-    app.config['authenticator'] = Authenticator()
-    app.config['studentManager'] = Scheduler()
-    app.config['emailManager'] = EmailManager()
+    
 
 
     # ROUTES
@@ -52,4 +65,5 @@ def create_app():
     app.register_blueprint(course_bp, url_prefix='/api')
     app.register_blueprint(schedule_bp, url_prefix='/api')
     app.register_blueprint(authentication_bp, url_prefix='/api')
+    app.register_blueprint(email_bp, url_prefix='/api')
     return app, db
