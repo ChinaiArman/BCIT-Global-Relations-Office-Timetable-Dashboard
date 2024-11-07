@@ -10,8 +10,9 @@ from models.Course import Course
 from models.Student import Student
 from models.Preferences import Preferences
 from models.Enrollments import enrollments
+from models.User import User
 
-from exceptions import InvalidUploadFile, InvalidFileType, DataNotFound, DatabaseError, DataAlreadyExists
+from exceptions import InvalidUploadFile, InvalidFileType, DataNotFound, DatabaseError, DataAlreadyExists, InvalidEmailAddress, EmailAddressAlreadyInUse, UserNotFound
 
 
 # CONSTANTS
@@ -782,3 +783,147 @@ class Database:
             return students
         except Exception as e:
             raise DatabaseError(f"Error fetching course students: {str(e)}")
+
+    def get_user_by_email(self, email: str) -> User:
+        """
+        Get a user by email address.
+        
+        Args
+        ----
+        email (str): User email address.
+        
+        Returns
+        -------
+        user (User): The user object.
+
+        Raises
+        ------
+        InvalidEmailAddress: If the email address is invalid.
+
+        Disclaimer
+        ----------
+        This method was created with the assistance of AI tools (GitHub Copilot). All code created is original and has been reviewed and understood by a human developer.
+        """
+        user = self.db.session.query(User).filter(User.email == email).first()
+        if not user:
+            raise InvalidEmailAddress()
+        return user
+    
+    def create_user(self, username, email, password, verification_code) -> User:
+        """
+        Create a new user in the database.
+
+        Args
+        ----
+        email (str): User email address.
+        password (str): User password.
+        verification_code (str): User verification code.
+
+        Returns
+        -------
+        user (User): The user object.
+
+        Raises
+        ------
+        EmailAddressAlreadyInUse: If the email address is already in use.
+
+        Disclaimer
+        ----------
+        This method was created with the assistance of AI tools (GitHub Copilot). All code created is original and has been reviewed and understood by a human developer.
+        """
+        if self.db.session.query(User).filter(User.email == email).first():
+            raise EmailAddressAlreadyInUse()
+        user = User(username=username, email=email, password=password, verification_code=verification_code, reset_code=None, is_verified=False, is_admin=False)
+        self.db.session.add(user)
+        self.db.session.commit()
+        return user
+    
+    def update_password(self, user: User, password: str) -> None:
+        """
+        Update the password for a user.
+
+        Args
+        ----
+        user (User): The user object.
+        password (str): The new user password.
+
+        Returns
+        -------
+        None
+        """
+        user.password = password
+        user.reset_code = None
+        self.db.session.commit()
+        return
+    
+    def update_reset_code(self, user: User, reset_code: str) -> None:
+        """
+        Update the reset code for a user.
+
+        Args
+        ----
+        user (User): The user object.
+        reset_code (str): The new reset code.
+
+        Returns
+        -------
+        None
+        """
+        user.reset_code = reset_code
+        self.db.session.commit()
+        return
+    
+    def verify_user(self, user: User, api_key: str) -> None:
+        """
+        Verify a user.
+
+        Args
+        ----
+        user (User): The user object.
+        api_key (str): The new user API key.
+
+        Returns
+        -------
+        None
+        """
+        user.is_verified = True
+        user.verification_code = None
+        user.api_key = api_key
+        self.db.session.commit()
+        return
+    
+    def get_user_by_id(self, user_id: int) -> User:
+        """
+        Get a user by ID.
+
+        Args
+        ----
+        user_id (int): User ID.
+
+        Returns
+        -------
+        user (User): The user object.
+
+        Raises
+        ------
+        UserNotFound: If the user is not found.
+
+        Disclaimer
+        ----------
+        This method was created with the assistance of AI tools (GitHub Copilot). All code created is original and has been reviewed and understood by a human developer.
+        """
+        user = self.db.session.query(User).filter(User.id == user_id).first()
+        if not user:
+            raise UserNotFound()
+        return user
+
+    def delete_user(self, user_id: int) -> None:
+        """
+        """
+        # check if user is_admin before delete
+        user = self.get_user_by_id(user_id)
+        if user.is_admin:
+            raise DatabaseError("Cannot delete admin user")
+        self.db.session.query(User).filter(User.id == user_id).delete()
+        self.db.session.commit()
+        return

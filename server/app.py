@@ -50,3 +50,4 @@ def create_app():
     app.register_blueprint(course_bp, url_prefix='/api')
     app.register_blueprint(schedule_bp, url_prefix='/api')
     app.register_blueprint(authentication_bp, url_prefix='/api')
+    return app, db
