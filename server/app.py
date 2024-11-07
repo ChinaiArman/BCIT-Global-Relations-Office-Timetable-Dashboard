@@ -2,13 +2,8 @@
 """
 
 # IMPORTS
-from flask import Flask, jsonify, request, g
-import time
+from flask import Flask, jsonify
 from flask_cors import CORS
-from dotenv import load_dotenv
-import os
-
-from logging_config import configure_logging
 
 from api.student_routes import student_bp
 from api.course_routes import course_bp
@@ -21,61 +16,37 @@ from services.Scheduler import Scheduler
 from services.EmailManager import EmailManager
 
 from db_config import db, configure_db
-
-
-# ENVIRONMENT VARIABLES
-load_dotenv()
-PORT = os.getenv('PORT', 5000)
+from session_config import configure_sessions
+from logging_config import configure_logging
 
 
 # FLASK CONFIGURATION
-app = Flask(__name__)
-CORS(app)
+def create_app():
+    app = Flask(__name__)
+    CORS(app)
+
+    # DATABASE CONFIGURATION
+    configure_db(app)
+
+    # SESSION CONFIGURATION
+    configure_sessions(app, db)
+
+    # LOGGING CONFIGURATION
+    configure_logging(app)
+
+    # CONFIGURE SERVICES
+    app.config['database'] = Database(db)
+    app.config['authenticator'] = Authenticator()
+    app.config['studentManager'] = Scheduler()
+    app.config['emailManager'] = EmailManager()
 
 
-# DATABASE CONFIGURATION
-configure_db(app)
+    # ROUTES
+    @app.route('/', methods=['GET'])
+    def _():
+        return jsonify({"message": "Hello World"})
 
-
-# LOGGING CONFIGURATION
-configure_logging(app)
-@app.before_request
-def log_request():
-    g.start_time = time.time()
-    app.logger.info(f"Incoming request Request: {request.method} {request.path}")
-
-@app.after_request
-def log_response(response):
-    execution_time = time.time() - g.start_time
-    app.logger.info(f"Completed request: {request.method} {request.path} "f"with status {response.status_code} in {execution_time:.4f}s")
-    return response
-
-@app.teardown_request
-def log_request_teardown(error=None):
-    if error is not None:
-        app.logger.error(f"An error occurred: {error}")
-
-
-# CONFIGURE SERVICES
-app.config['database'] = Database(db)
-app.config['authenticator'] = Authenticator()
-app.config['studentManager'] = Scheduler()
-app.config['emailManager'] = EmailManager()
-
-
-# ROUTES
-@app.route('/', methods=['GET'])
-def root():
-    return jsonify({"message": "Hello World"})
-
-app.register_blueprint(student_bp, url_prefix='/api')
-app.register_blueprint(course_bp, url_prefix='/api')
-app.register_blueprint(schedule_bp, url_prefix='/api')
-app.register_blueprint(authentication_bp, url_prefix='/api')
-
-
-# MAIN
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True)
+    app.register_blueprint(student_bp, url_prefix='/api')
+    app.register_blueprint(course_bp, url_prefix='/api')
+    app.register_blueprint(schedule_bp, url_prefix='/api')
+    app.register_blueprint(authentication_bp, url_prefix='/api')

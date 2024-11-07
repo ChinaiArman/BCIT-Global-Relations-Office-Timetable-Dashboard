@@ -4,6 +4,8 @@
 # IMPORTS
 import logging
 from logging.handlers import RotatingFileHandler
+from flask import request, g
+import time
 import os
 
 
@@ -48,7 +50,42 @@ def configure_logging(app) -> None:
     error_handler.setLevel(logging.ERROR)
     error_handler.setFormatter(formatter)
     app.logger.addHandler(error_handler)
+
+    create_response_functions(app)
     return
+
+
+def create_response_functions(app) -> None:
+    """
+    Create functions to log incoming requests, outgoing responses and errors.
+
+    Args
+    ----
+    app (Flask): The Flask application instance.
+
+    Returns
+    -------
+    None
+
+    Disclaimer
+    ----------
+    This function was created with the assistance of AI tools (GitHub Copilot). All code created is original and has been reviewed and understood by a human developer.
+    """
+    @app.before_request
+    def _():
+        g.start_time = time.time()
+        app.logger.info(f"Incoming request Request: {request.method} {request.path}")
+
+    @app.after_request
+    def _(response):
+        execution_time = time.time() - g.start_time
+        app.logger.info(f"Completed request: {request.method} {request.path} "f"with status {response.status_code} in {execution_time:.4f}s")
+        return response
+
+    @app.teardown_request
+    def _(error=None):
+        if error is not None:
+            app.logger.error(f"An error occurred: {error}")
 
 
 def init_log_files() -> None:
