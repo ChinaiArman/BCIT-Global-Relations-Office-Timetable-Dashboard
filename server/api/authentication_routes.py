@@ -59,6 +59,7 @@ def logout() -> tuple:
         return jsonify({"error": str(e)}), 401
 
 @authentication_bp.route('/authenticate/register/', methods=['POST'])
+@admin_required
 def register() -> tuple:
     """
     Register a user.
@@ -78,9 +79,7 @@ def register() -> tuple:
         email = request.json.get('email')
         password = authenticator.encrypt_password(request.json.get('password'))
         verification_code = authenticator.generate_one_time_code()
-        user = db.create_user(username, email, password, verification_code)
-        session.permanent = True
-        session["user_id"] = user.id
+        db.create_user(username, email, password, verification_code)
         # TODO: SEND VERIFICATION EMAIL
         return jsonify({"message": "registration successful"}), 200
     except Exception as e:
