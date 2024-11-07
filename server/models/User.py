@@ -25,8 +25,6 @@ class User(db.Model):
     reset_code = db.Column(db.String(6), nullable=True)
     is_admin = db.Column(db.Boolean, default=False)
 
-    scrapes = db.relationship('Scrape', back_populates='user')
-
     def to_dict(self) -> dict:
         """
         Return the dictionary representation of the user.
