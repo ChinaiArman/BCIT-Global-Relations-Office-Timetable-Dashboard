@@ -33,7 +33,7 @@ class Course(db.Model):
 
     students = db.relationship('Student', secondary=enrollments, back_populates='courses')
 
-    def __repr__(self):
+    def to_dict(self):
         return {
             "id": self.id,
             "status": self.status,

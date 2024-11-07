@@ -334,7 +334,6 @@ class Database:
             self.db.session.commit()
             return invalid_rows
         except Exception as e:
-            self.db.session.rollback()
             raise DatabaseError(f"Error uploading students to the database: {str(e)}")
 
     def get_student_by_id(self, id: int) -> dict:
@@ -361,7 +360,7 @@ class Database:
             raise DatabaseError(f"Error querying into database: {str(e)}")
         if not student:
             raise DataNotFound(f"Unable to find student by ID: {id}")
-        return student.__repr__()
+        return student.to_dict()
 
     def create_student(self, data) -> dict:
         """
@@ -410,7 +409,6 @@ class Database:
             self.db.session.commit()
             return
         except Exception as e:
-            self.db.session.rollback()
             raise DatabaseError(f"Error creating student: {str(e)}")
 
     def update_student(self, id: int, data: dict) -> dict:
@@ -452,7 +450,6 @@ class Database:
             self.db.session.commit()
             return
         except Exception as e:
-            self.db.session.rollback()
             raise DatabaseError(f"Error updating student: {str(e)}")
 
     def delete_student(self, id: int) -> dict:
@@ -504,7 +501,7 @@ class Database:
             students = self.db.session.query(Student).all()
         except Exception as e:
             raise DatabaseError(f"Error querying into database: {str(e)}")
-        return [student.__repr__() for student in students]
+        return [student.to_dict() for student in students]
 
     def export_students(self) -> pd.DataFrame:
         """
@@ -524,7 +521,7 @@ class Database:
             students = self.db.session.query(Student).all()
         except Exception as e:
             raise DatabaseError(f"Error querying into database: {str(e)}")
-        df = pd.DataFrame([student.__repr__() for student in students])
+        df = pd.DataFrame([student.to_dict() for student in students])
         file_path = "exports/students.csv"
         df.to_csv(file_path, index=False)
         return file_path
@@ -558,7 +555,6 @@ class Database:
                 self.db.session.add(preference)
             return
         except Exception as e:
-            self.db.session.rollback()
             raise DatabaseError(f"Error adding student preference: {str(e)}")
     
     def change_student_preferences(self, student_id: int, courses: list) -> dict:
@@ -584,7 +580,6 @@ class Database:
             self.delete_student_preferences(student_id)
             self.add_student_preferences(student_id, courses)
         except Exception as e:
-            self.db.session.rollback()
             raise DatabaseError(f"Error adding student preference: {str(e)}")
         
     def delete_student_preferences(self, student_id):
@@ -609,7 +604,6 @@ class Database:
             self.db.session.query(Preferences).filter(Preferences.student_id == student_id).delete()
             return
         except Exception as e:
-            self.db.session.rollback()
             raise DatabaseError(f"Error deleting student preferences: {str(e)}")
 
     def add_course_to_student(self, student_id: int, course_id: int) -> dict:
@@ -650,7 +644,6 @@ class Database:
             self.db.session.commit()
             return
         except Exception as e:
-            self.db.session.rollback()
             raise DatabaseError(f"Error adding course to student: {str(e)}")   
 
     def remove_course_from_student(self, student_id: int, course_id: int) -> dict:
@@ -690,7 +683,6 @@ class Database:
             self.db.session.commit()
             return
         except Exception as e:
-            self.db.session.rollback()
             raise DatabaseError(f"Error removing course from student: {str(e)}") 
         
     def replace_all_courses_for_student(self, student_id: int, course_list: str) -> dict:
@@ -713,7 +705,6 @@ class Database:
         ...
         """
         try:
-
             new_courses = course_list.split(',')
             new_courses = {int(course) for course in new_courses}
 
@@ -737,7 +728,6 @@ class Database:
             self.db.session.commit()
             return 
         except Exception as e:
-            self.db.session.rollback()
             raise DatabaseError(f"Error replacing all courses for student: {str(e)}")
 
     def get_course_by_course_grouping(self, course_grouping):
@@ -748,10 +738,9 @@ class Database:
                 course.end_date = course.end_date.strftime("%Y-%m-%d")
                 course.begin_time = course.begin_time.strftime("%H:%M")
                 course.end_time = course.end_time.strftime("%H:%M")
-            course_reprs = [course.__repr__() for course in courses]
+            course_reprs = [course.to_dict() for course in courses]
             return course_reprs
         except Exception as e:
-            self.db.session.rollback()
             raise DatabaseError(f"Error fetching course by course grouping: {str(e)}")
 
     def get_course_by_course_code(self, course_code):
@@ -764,10 +753,9 @@ class Database:
                 course.end_date = course.end_date.strftime("%Y-%m-%d")
                 course.begin_time = course.begin_time.strftime("%H:%M")
                 course.end_time = course.end_time.strftime("%H:%M")
-            course_reprs = [course.__repr__() for course in courses]
+            course_reprs = [course.to_dict() for course in courses]
             return course_reprs
         except Exception as e:
-            self.db.session.rollback()
             raise DatabaseError(f"Error fetching course by course code: {str(e)}")
 
     def get_course_by_course_id(self, id):
@@ -779,7 +767,18 @@ class Database:
             course.end_date = course.end_date.strftime("%Y-%m-%d")
             course.begin_time = course.begin_time.strftime("%H:%M")
             course.end_time = course.end_time.strftime("%H:%M")
-            return course.__repr__()
+            return course.to_dict()
         except Exception as e:
-            self.db.session.rollback()
             raise DatabaseError(f"Error fetching course by ID: {str(e)}")
+
+    def get_course_students(self, course_grouping):
+        try:
+            courses = self.db.session.query(Course).filter(Course.course_grouping == course_grouping).all()
+            if not courses:
+                raise DataNotFound(f"Course with course grouping not found: {course_grouping}")
+            students = []
+            for course in courses:
+                students.extend([student.to_dict() for student in course.students])
+            return students
+        except Exception as e:
+            raise DatabaseError(f"Error fetching course students: {str(e)}")

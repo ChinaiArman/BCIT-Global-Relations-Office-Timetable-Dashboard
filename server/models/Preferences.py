@@ -12,7 +12,7 @@ class Preferences(db.Model):
     preference = db.Column(db.String(8), nullable=False) 
     student = db.relationship("Student", back_populates="preferences")
 
-    def __repr__(self):
+    def to_dict(self):
         return {
             "student_id": self.student_id,
             "priority": self.priority,

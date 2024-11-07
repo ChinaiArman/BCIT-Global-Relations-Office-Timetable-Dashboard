@@ -125,16 +125,15 @@ def download_course():
     """
     return jsonify({"message": "course export endpoint"})
 
-@course_bp.route('/course/<string:block>/<string:course_code>/students/', methods=['GET'])
-def get_course_students(block, course_code):
+@course_bp.route('/course/<string:course_grouping>/students/', methods=['GET'])
+def get_course_students(course_grouping):
     """
-    Request: GET /course/<string:block>/<string:course_code>/students/
+    Request: GET /course/<string:course_grouping>/students/
 
     Description: Retrieve a list of students enrolled in a specific course.
 
     Parameters:
-    - block (string): The block of the course.
-    - course_code (string): The code of the course.
+    - course_grouping (string): The course grouping.
 
     Response:
     - list: A list of student objects.
@@ -145,13 +144,12 @@ def get_course_students(block, course_code):
 
     Author: Kate Sullivan
     """
-    course = Course.query.filter_by(block=block, course_code=course_code).first()
-    if course:
-        students = [student.serialize() for student in course.students]
-        return jsonify(students)
-    else:
-        return jsonify({"message": "Course not found"}), 404
-    return jsonify({"message": "get course students endpoint"})
+    try:
+        db = current_app.config['database']
+        response = db.get_course_students(course_grouping)
+        return jsonify(response), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 404
 
 @course_bp.route('/course/download_template', methods=['GET'])
 def download_template():

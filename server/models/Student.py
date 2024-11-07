@@ -20,7 +20,7 @@ class Student(db.Model):
         "Course", secondary=enrollments, back_populates="students"
     )
 
-    def __repr__(self):
+    def to_dict(self):
         return {
             "id": self.id,
             "first_name": self.first_name,
