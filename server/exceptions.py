@@ -45,7 +45,7 @@ class DataAlreadyExists(DatabaseError):
         self.message = message
         super().__init__(self.message)
 
-class IncorrectPassword():
+class IncorrectPassword(Exception):
     """
     Raised when an incorrect password is entered
     """
@@ -53,7 +53,7 @@ class IncorrectPassword():
         self.message = message
         super().__init__(self.message)
 
-class InvalidOneTimeCode():
+class InvalidOneTimeCode(Exception):
     """
     Raised when an invalid one-time code is entered
     """
