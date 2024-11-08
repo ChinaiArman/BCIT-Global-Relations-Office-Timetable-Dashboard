@@ -37,7 +37,6 @@ def create_app():
     app.config['database'] = Database(db)
     app.config['authenticator'] = Authenticator()
     app.config['studentManager'] = Scheduler()
-    # app.config['emailManager'] = EmailManager()
     app.config['email_manager'] = EmailManager(
         username=os.getenv('MAILTRAP_USERNAME'),
         password=os.getenv('MAILTRAP_PASSWORD'),
