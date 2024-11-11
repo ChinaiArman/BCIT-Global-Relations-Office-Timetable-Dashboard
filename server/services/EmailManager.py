@@ -1,23 +1,24 @@
-# IMPORTS
+# EmailManager.py
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import smtplib
+import os
 
 class EmailManager:
     """
-    Handles email operations using Mailtrap for testing
+    Handles email operations using Gmail SMTP
     """
-    def __init__(self, username: str, password: str, base_url: str):
+    def __init__(self, gmail_user: str, gmail_password: str, base_url: str):
         """
-        Initialize EmailManager with Mailtrap credentials
+        Initialize EmailManager with Gmail credentials
         
         Args:
-            username (str): Mailtrap username/API token
-            password (str): Mailtrap password
+            gmail_user (str): Gmail email address
+            gmail_password (str): Gmail app password
             base_url (str): Base URL of your application
         """
-        self.username = username
-        self.password = password
+        self.gmail_user = gmail_user
+        self.gmail_password = gmail_password
         self.base_url = base_url
 
     def send_verification_email(self, to_email: str, username: str, verification_code: str) -> None:
@@ -30,7 +31,7 @@ class EmailManager:
             verification_code (str): Verification code for the user
         """
         msg = MIMEMultipart()
-        msg['From'] = "noreply@yourapp.com"
+        msg['From'] = self.gmail_user
         msg['To'] = to_email
         msg['Subject'] = "Account Verification Request"
 
@@ -55,10 +56,9 @@ class EmailManager:
         msg.attach(MIMEText(body, 'plain'))
 
         try:
-            server = smtplib.SMTP('smtp.mailtrap.io', 2525)
-            server.starttls()
-            server.login(self.username, self.password)
+            server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+            server.login(self.gmail_user, self.gmail_password)
             server.send_message(msg)
-            server.quit()
+            server.close()
         except Exception as e:
             raise Exception(f"Failed to send email: {str(e)}")

@@ -38,8 +38,8 @@ def create_app():
     app.config['authenticator'] = Authenticator()
     app.config['studentManager'] = Scheduler()
     app.config['email_manager'] = EmailManager(
-        username=os.getenv('MAILTRAP_USERNAME'),
-        password=os.getenv('MAILTRAP_PASSWORD'),
+        gmail_user=os.getenv('GMAIL_EMAIL'),
+        gmail_password=os.getenv('GMAIL_PASSWORD'),
         base_url=os.getenv('BASE_URL')
     )
 
