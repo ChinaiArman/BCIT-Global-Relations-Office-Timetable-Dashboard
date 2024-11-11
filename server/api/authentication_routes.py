@@ -58,32 +58,32 @@ def logout() -> tuple:
     except Exception as e:
         return jsonify({"error": str(e)}), 401
 
-@authentication_bp.route('/authenticate/register/', methods=['POST'])
-@admin_required
-def register() -> tuple:
-    """
-    Register a user.
+# @authentication_bp.route('/authenticate/register/', methods=['POST'])
+# @admin_required
+# def register() -> tuple:
+#     """
+#     Register a user.
 
-    Args
-    ----
-    None
+#     Args
+#     ----
+#     None
 
-    Returns
-    -------
-    response (tuple): The response tuple containing the response data and status code.
-    """
-    try:
-        db = current_app.config['database']
-        authenticator = current_app.config['authenticator']
-        username = request.json.get('username')
-        email = request.json.get('email')
-        password = authenticator.encrypt_password(request.json.get('password'))
-        verification_code = authenticator.generate_one_time_code()
-        db.create_user(username, email, password, verification_code)
-        # TODO: SEND VERIFICATION EMAIL
-        return jsonify({"message": "registration successful"}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 401
+#     Returns
+#     -------
+#     response (tuple): The response tuple containing the response data and status code.
+#     """
+#     try:
+#         db = current_app.config['database']
+#         authenticator = current_app.config['authenticator']
+#         username = request.json.get('username')
+#         email = request.json.get('email')
+#         password = authenticator.encrypt_password(request.json.get('password'))
+#         verification_code = authenticator.generate_one_time_code()
+#         db.create_user(username, email, password, verification_code)
+#         # TODO: SEND VERIFICATION EMAIL
+#         return jsonify({"message": "registration successful"}), 200
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 401
 
 @authentication_bp.route('/authenticate/reset-password/', methods=['POST'])
 def reset_password() -> tuple:
@@ -184,3 +184,46 @@ def delete_user() -> tuple:
     except Exception as e:
         return jsonify({"error": str(e)}), 401
 
+@authentication_bp.route('/authenticate/register/', methods=['POST'])
+@admin_required
+def register() -> tuple:
+    """
+    Register a new user (admin only).
+    Sends verification email to the new user.
+    """
+    try:
+        db = current_app.config['database']
+        authenticator = current_app.config['authenticator']
+        email_manager = current_app.config['email_manager']
+        
+        username = request.json.get('username')
+        email = request.json.get('email')
+        password = request.json.get('password')  # Get password from request
+        
+        if not username or not email or not password:
+            return jsonify({"error": "Username, email, and password are required"}), 400
+
+        # Generate verification code
+        verification_code = authenticator.generate_one_time_code()
+        
+        # Encrypt the password
+        encrypted_password = authenticator.encrypt_password(password)
+        
+        # Create unverified user with encrypted password
+        user = db.create_unverified_user(
+            username=username, 
+            email=email, 
+            password=encrypted_password,
+            verification_code=verification_code
+        )
+        
+        # Send verification email
+        email_manager.send_verification_email(
+            to_email=email,
+            username=username,
+            verification_code=verification_code
+        )
+        
+        return jsonify({"message": "User registered. Verification email sent."}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 401
