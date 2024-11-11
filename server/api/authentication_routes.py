@@ -192,6 +192,7 @@ def register() -> tuple:
     """
     Register a new user (admin only).
     Sends verification email to the new user.
+    Checks if the email is already in the system.
     """
     try:
         db = current_app.config['database']
@@ -204,6 +205,11 @@ def register() -> tuple:
         
         if not username or not email or not password:
             return jsonify({"error": "Username, email, and password are required"}), 400
+
+        # Check if the email is already in the system
+        existing_user = db.get_user_by_email(email)
+        if existing_user:
+            return jsonify({"error": "Email is already registered"}), 400
 
         # Generate verification code
         verification_code = authenticator.generate_one_time_code()
