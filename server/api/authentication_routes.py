@@ -137,28 +137,30 @@ def request_password_reset() -> tuple:
         return jsonify({"error": str(e)}), 401
 
 @authentication_bp.route('/authenticate/verify/', methods=['POST'])
-@unverified_login_required
 def verify() -> tuple:
     """
-    Verify a user.
-
-    Args
-    ----
-    None
-
-    Returns
-    -------
-    response (tuple): The response tuple containing the response data and status code.
+    Verify a user's email using their verification code
     """
     try:
         db = current_app.config['database']
-        authenticator = current_app.config['authenticator']
-        user_id = session.get('user_id')
-        user = db.get_user_by_id(user_id)
+        
         verification_code = request.json.get('verification_code')
-        authenticator.verify_code(verification_code, user.verification_code)
+        email = request.json.get('email')
+        
+        if not verification_code or not email:
+            return jsonify({"error": "Verification code and email are required"}), 400
+            
+        # Get user by verification code
+        user = db.get_user_by_verification_code(verification_code)
+        
+        # Verify that the email matches
+        if user.email != email:
+            return jsonify({"error": "Invalid verification code or email"}), 400
+            
+        # Verify the user
         db.verify_user(user)
-        return jsonify({"message": "verification successful"}), 200
+        
+        return jsonify({"message": "Email verified successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 401
 
