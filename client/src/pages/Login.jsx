@@ -12,7 +12,7 @@ const Login = () => {
         try {
             await axios.post('http://localhost:5000/api/authenticate/login/', { email, password }, { withCredentials: true }).then((response) => {
                 if (response.status === 200) {
-                    navigate('/dashboard');
+                    navigate('/');
                 }
             });
         } catch (error) {
