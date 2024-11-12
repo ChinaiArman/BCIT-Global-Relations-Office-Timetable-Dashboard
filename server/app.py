@@ -2,7 +2,7 @@
 """
 
 # IMPORTS
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 from api.student_routes import student_bp
@@ -31,7 +31,7 @@ def create_app():
     load_dotenv()
 
     app = Flask(__name__)
-    CORS(app)
+    CORS(app, resources={r"/api/*": {"origins": "http://localhost:3001", "allow_headers": ["Content-Type"]}}, supports_credentials=True)
 
     # CONFIGURE SERVICES
     app.config['database'] = Database(db)
@@ -59,6 +59,23 @@ def create_app():
     @app.route('/', methods=['GET'])
     def _():
         return jsonify({"message": "Hello World"})
+    
+    # set response headers
+    @app.after_request
+    def _(response):
+        # if OPTIONS request, return response right away
+        if request.method == 'OPTIONS':
+            # set response headers
+            response.headers['Access-Control-Allow-Origin'] = 'http://localhost:3001'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PATCH, DELETE, OPTIONS'
+            return response
+        # set response headers
+        response.headers['Access-Control-Allow-Origin'] = 'http://localhost:3001'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        return response
+            
 
     app.register_blueprint(student_bp, url_prefix='/api')
     app.register_blueprint(course_bp, url_prefix='/api')

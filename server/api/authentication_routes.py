@@ -235,3 +235,18 @@ def register() -> tuple:
         return jsonify({"message": "User registered. Verification email sent."}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 401
+
+@authentication_bp.route('/authenticate/get-user-info/', methods=['GET'])
+@verified_login_required
+def get_user_info() -> tuple:
+    """
+    Get the user info for the logged in user.
+    """
+    try:
+        db = current_app.config['database']
+        user_id = session.get('user_id')
+        user = db.get_user_by_id(user_id)
+        return jsonify({"user": user.to_dict()}), 200
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 401
