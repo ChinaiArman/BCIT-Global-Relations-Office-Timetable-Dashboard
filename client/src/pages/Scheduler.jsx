@@ -151,7 +151,7 @@ const SchedulePage = () => {
   }, [selectedCourses]);
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className='flex-1 overflow-auto relative z-10 bg-gray-900 text-white'>
       <div className="flex h-[calc(100vh-64px)]">
         {/* Left Sidebar */}
         <div className="w-64 bg-gray-900 border-r border-gray-800">
