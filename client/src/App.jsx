@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Sidebar from './components/Sidebar.jsx';
 import { UnverifiedAuthProvider } from './context/UnverifiedAuthContext.jsx';
 import { VerifiedAuthProvider } from './context/VerifiedAuthContext.jsx';
 import { AdminAuthProvider } from './context/AdminContext.jsx';
@@ -15,6 +16,7 @@ import Students from './pages/Students.jsx';
 
 const App = () => {
     return (
+      <div className='flex h-screen bg-gray-900 text-gray-100 overflow-hidden'>
         <UnverifiedAuthProvider>
             <VerifiedAuthProvider>
                 <AdminAuthProvider>
@@ -30,6 +32,7 @@ const App = () => {
                                 path="/"
                                 element={
                                     <PrivateRoute role="verified">
+                                        <Sidebar />
                                         <Dashboard />
                                     </PrivateRoute>
                                 }
@@ -38,6 +41,7 @@ const App = () => {
                                 path="/scheduler"
                                 element={
                                     <PrivateRoute role="verified">
+                                        <Sidebar />
                                         <Scheduler />
                                     </PrivateRoute>
                                 }
@@ -46,6 +50,7 @@ const App = () => {
                                 path="/admin"
                                 element={
                                     <PrivateRoute role="admin">
+                                        <Sidebar />
                                         <Admin />
                                     </PrivateRoute>
                                 }
@@ -54,6 +59,7 @@ const App = () => {
                                 path="/settings"
                                 element={
                                     <PrivateRoute role="verified">
+                                        <Sidebar />
                                         <Settings />
                                     </PrivateRoute>
                                 }
@@ -62,6 +68,7 @@ const App = () => {
                                 path="/students"
                                 element={
                                     <PrivateRoute role="admin">
+                                        <Sidebar />
                                         <Students />
                                     </PrivateRoute>
                                 }
@@ -74,6 +81,7 @@ const App = () => {
                 </AdminAuthProvider>
             </VerifiedAuthProvider>
         </UnverifiedAuthProvider>
+      </div>
     );
 };
 
