@@ -3,10 +3,10 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
-export const useAuth = () => useContext(AuthContext);
+export const useAdminAuth = () => useContext(AuthContext);
 
-export const AuthProvider = ({ children }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+export const AdminAuthProvider = ({ children }) => {
+    const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);  // Track loading state
 
     // Check authentication status
@@ -15,17 +15,17 @@ export const AuthProvider = ({ children }) => {
             const serverUrl = import.meta.env.VITE_SERVER_URL;  // Use your environment variable here
 
             // Use Axios to send the request
-            const response = await axios.get(`${serverUrl}/api/authenticate/get-user-info/`, {
+            const response = await axios.get(`${serverUrl}/api/authenticate/is-admin/`, {
                 withCredentials: true,  // Ensure credentials are included in the request
             });
 
             if (response.status === 200) {
-                setIsAuthenticated(true);  // User is logged in
+                setIsAdmin(true);  // User is logged in
             } else {
-                setIsAuthenticated(false);  // User is not logged in
+                setIsAdmin(false);  // User is not logged in
             }
         } catch (error) {
-            setIsAuthenticated(false);  // User is not logged in
+            setIsAdmin(false);  // User is not logged in
         } finally {
             setLoading(false);  // Authentication check is done
         }
@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, checkAuth, loading }}>
+        <AuthContext.Provider value={{ isAdmin, checkAuth, loading }}>
             {children}
         </AuthContext.Provider>
     );

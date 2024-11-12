@@ -250,3 +250,37 @@ def get_user_info() -> tuple:
     
     except Exception as e:
         return jsonify({"error": str(e)}), 401
+    
+
+@authentication_bp.route('/authenticate/is-admin/', methods=['GET'])
+@admin_required
+def is_admin() -> tuple:
+    """
+    Check if the user is an admin.
+    """
+    try:
+        return jsonify({"message": "User is an admin"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 401
+
+@authentication_bp.route('/authenticate/is-verified/', methods=['GET'])
+@verified_login_required
+def is_verified() -> tuple:
+    """
+    Check if the user is verified.
+    """
+    try:
+        return jsonify({"message": "User is verified"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 401
+    
+@authentication_bp.route('/authenticate/is-unverified/', methods=['GET'])
+@unverified_login_required
+def is_unverified() -> tuple:
+    """
+    Check if the user is unverified.
+    """
+    try:
+        return jsonify({"message": "User is unverified"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 401

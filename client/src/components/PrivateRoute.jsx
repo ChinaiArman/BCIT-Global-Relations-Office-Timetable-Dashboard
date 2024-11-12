@@ -1,16 +1,26 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useUnverifiedAuth } from '../context/UnverifiedAuthContext.jsx';
+import { useVerifiedAuth } from '../context/VerifiedAuthContext.jsx';
+import { useAdminAuth } from '../context/AdminContext.jsx';
 
-// A wrapper component that protects routes
-const PrivateRoute = ({ children }) => {
-    const { isAuthenticated, loading } = useAuth();
+const PrivateRoute = ({ children, role }) => {
+    const { isUnverified, loading: loadingUnverified } = useUnverifiedAuth();
+    const { isVerified, loading: loadingVerified } = useVerifiedAuth();
+    const { isAdmin, loading: loadingAdmin } = useAdminAuth();
+
+    const loading = loadingUnverified || loadingVerified || loadingAdmin;
 
     if (loading) {
-        // You can return a loading spinner or some placeholder
         return <div>Loading...</div>;
     }
 
-    return isAuthenticated ? children : <Navigate to="/login" />;
+    if (role === 'admin' && isAdmin) return children;
+    if (role === 'verified' && (isVerified || isAdmin)) return children;
+    if (role === 'unverified' && isUnverified) return children;
+
+    // Redirect based on role type
+    if (role === 'verified') return <Navigate to="/verify" />;
+    return <Navigate to="/login" />;
 };
 
 export default PrivateRoute;
