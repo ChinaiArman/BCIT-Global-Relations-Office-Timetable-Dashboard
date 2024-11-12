@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { TEAlert } from "tw-elements-react";
 
 const Login = () => {
     const [email, setEmail] = useState('');
