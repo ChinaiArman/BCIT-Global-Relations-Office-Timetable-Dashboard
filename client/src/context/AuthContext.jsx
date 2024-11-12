@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import axios from 'axios';
 
 const AuthContext = createContext();
 
@@ -11,17 +12,19 @@ export const AuthProvider = ({ children }) => {
     // Check authentication status
     const checkAuth = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/authenticate/get-user-info/', {
-                credentials: 'include',  // Ensure credentials are included in the request
+            const serverUrl = import.meta.env.VITE_SERVER_URL;  // Use your environment variable here
+
+            // Use Axios to send the request
+            const response = await axios.get(`${serverUrl}/api/authenticate/get-user-info/`, {
+                withCredentials: true,  // Ensure credentials are included in the request
             });
 
-            if (response.ok) {
+            if (response.status === 200) {
                 setIsAuthenticated(true);  // User is logged in
             } else {
                 setIsAuthenticated(false);  // User is not logged in
             }
         } catch (error) {
-            console.error("Error checking authentication:", error);
             setIsAuthenticated(false);  // User is not logged in
         } finally {
             setLoading(false);  // Authentication check is done
