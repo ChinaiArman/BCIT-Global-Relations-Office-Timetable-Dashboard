@@ -29,12 +29,12 @@ const NotFound = () => {
                     <p className="text-xl text-gray-400">Sorry, the page you're looking for isn't there.</p>
                 </div>
 
-                {/* Back to Login Button */}
+                {/* Back to Home Button */}
                 <a 
-                    href="/login" 
+                    href="/" 
                     className="transform rounded-sm bg-indigo-600 px-8 py-3 font-bold duration-300 hover:bg-indigo-400 text-center"
                 >
-                    BACK TO LOGIN
+                    BACK HOME
                 </a>
 
                 {/* Additional Help Text */}
