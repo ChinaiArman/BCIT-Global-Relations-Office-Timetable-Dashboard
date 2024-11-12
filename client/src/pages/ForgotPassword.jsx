@@ -6,7 +6,7 @@ const ForgotPassword = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    const handleForgotPassword = async (e) => {
+    const handleForgotPassword = async (e) => { 
         e.preventDefault();
         try {
             const serverUrl = import.meta.env.VITE_SERVER_URL;
