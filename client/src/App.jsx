@@ -8,6 +8,7 @@ import Admin from './pages/Admin.jsx';
 import Settings from './pages/Settings.jsx';
 import NotFound from './pages/NotFound.jsx';
 import Verify from './pages/Verify.jsx';
+import ForgotPassword from './pages/ForgotPassword.jsx';
 
 const App = () => {
     return (
@@ -17,6 +18,7 @@ const App = () => {
                     {/* Public Routes */}
                     <Route path="/login" element={<Login />} />
                     <Route path="/verify" element={<Verify />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
 
                     {/* Protected Routes */}
                     <Route
