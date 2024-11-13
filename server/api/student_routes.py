@@ -314,3 +314,28 @@ def replace_all_courses_for_student_route(student_id, course_list):
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
+@student_bp.route("/student/flip-mark-done/<string:student_id>", methods=["POST"])
+@verified_login_required
+def flip_mark_student_done(student_id):
+    """
+    Request: POST /student/mark-done/<string:student_id
+
+    Description: Mark a student as done.
+
+    Parameters:
+    - student_id (string): The student ID.
+
+    Response:
+    - message: Success or error message.
+
+    Status Codes:
+    - 200: Student marked as done.
+    - 400: Invalid request.
+    - 500: Internal server error.
+    """
+    try:
+        db = current_app.config["database"]
+        db.flip_mark_done(student_id)
+        return jsonify({"message": "Student marked as done"}), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400

@@ -749,18 +749,22 @@ class Database:
         except Exception as e:
             raise DatabaseError(f"Error fetching course by course grouping: {str(e)}")
 
-    def get_course_by_course_code(self, course_code):
+    def get_all_course_groupings_by_course_code(self, course_code):
         try:
             courses = self.db.session.query(Course).filter(Course.course_code == course_code).all()
-            if not courses:
-                raise DataNotFound(f"Course with course code not found: {course_code}")
             for course in courses:
                 course.start_date = course.start_date.strftime("%Y-%m-%d")
                 course.end_date = course.end_date.strftime("%Y-%m-%d")
                 course.begin_time = course.begin_time.strftime("%H:%M")
                 course.end_time = course.end_time.strftime("%H:%M")
             course_reprs = [course.to_dict() for course in courses]
-            return course_reprs
+            # create a dictionary with course_grouping as key and list of courses as value
+            course_groupings = {}
+            for course in course_reprs:
+                if course["course_grouping"] not in course_groupings:
+                    course_groupings[course["course_grouping"]] = []
+                course_groupings[course["course_grouping"]].append(course)
+            return course_groupings
         except Exception as e:
             raise DatabaseError(f"Error fetching course by course code: {str(e)}")
 
@@ -1032,3 +1036,11 @@ class Database:
             "total_schedules_finalized": total_students_with_schedules_finalized,
             "total_students_without_course": total_students_without_course
         }
+
+    def flip_mark_done(self, student_id) -> None:
+        """
+        """
+        student = self.db.session.query(Student).filter(Student.id == student_id).first()
+        student.is_completed = not student.is_completed
+        self.db.session.commit()
+        return

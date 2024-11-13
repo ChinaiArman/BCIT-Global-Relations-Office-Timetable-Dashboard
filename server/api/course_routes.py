@@ -13,33 +13,19 @@ course_bp = Blueprint('course_bp', __name__)
 
 
 # ROUTES
-@course_bp.route('/course/course_code/<string:course_code>/', methods=['GET'])
+@course_bp.route('/course/get-all-course-groupings-by-course-code/<string:course_code>/', methods=['GET'])
 @verified_login_required
-def get_course_by_course_code(course_code):
+def get_all_course_groupings_by_course_code(course_code):
     """
-    Request: GET /course/course_code/<string:course_code>/
-
-    Description: Retrieve a course by its course code.
-
-    Parameters:
-    - course_code (string): The course code.
-
-    Response:
-    - courses (list): A list of courses matching the course code.
-
-    Status Codes:
-    - 200: Course data successfully retrieved.
-    - 404: Course not found.
-    - 500: Internal server error.
-
-    Author: ``@KateSullivan``
     """
     try:
         db = current_app.config['database']
-        response = db.get_course_by_course_code(course_code)
+        response = db.get_all_course_groupings_by_course_code(course_code)
         return jsonify(response), 200
     except Exception as e:
-        return jsonify({"error": "Internal server error", "message": str(e)}), 500
+        return jsonify({"message": str(e)}), 404
+
+    
 
 @course_bp.route('/course/course_grouping/<string:course_grouping>/', methods=['GET'])
 @verified_login_required
