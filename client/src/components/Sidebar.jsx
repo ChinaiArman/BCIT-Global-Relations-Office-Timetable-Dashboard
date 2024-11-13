@@ -1,14 +1,14 @@
-import { House , DollarSign, Menu, Settings, ShoppingBag, ShoppingCart, TrendingUp, Users } from "lucide-react";
+import { House, DatabaseZap, Menu, Settings, GraduationCap, ShieldCheck, CalendarCog } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 const SIDEBAR_ITEMS = [
 	{ name: "Home", icon: House, color: "#6366f1", href: "/" },
-	{ name: "Students", icon: ShoppingBag, color: "#8B5CF6", href: "/products" },
-	{ name: "Scheduler", icon: Users, color: "#EC4899", href: "/users" },
-	{ name: "Database", icon: DollarSign, color: "#10B981", href: "/sales" },
-	{ name: "Admin", icon: ShoppingCart, color: "#F59E0B", href: "/orders" },
+	{ name: "Students", icon: GraduationCap, color: "#8B5CF6", href: "/products" },
+	{ name: "Scheduler", icon: CalendarCog, color: "#EC4899", href: "/users" },
+	{ name: "Database", icon: DatabaseZap, color: "#3B82F6", href: "/sales" },
+	{ name: "Admin", icon: ShieldCheck, color: "#F59E0B", href: "/orders" },
 	{ name: "Settings", icon: Settings, color: "#6EE7B7", href: "/settings" },
 ];
 
