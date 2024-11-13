@@ -11,6 +11,7 @@ import Admin from './pages/Admin.jsx';
 import Settings from './pages/Settings.jsx';
 import NotFound from './pages/NotFound.jsx';
 import Verify from './pages/Verify.jsx';
+import Database from './pages/Database.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
 import Students from './pages/Students.jsx';
 
@@ -28,6 +29,15 @@ const App = () => {
                             <Route path="/forgot-password" element={<ForgotPassword />} />
 
                             {/* Protected Routes */}
+                            <Route
+                                path="/database"
+                                element={
+                                    <PrivateRoute role="verified">
+                                        <Sidebar />
+                                        <Database />
+                                    </PrivateRoute>
+                                }
+                            />
                             <Route
                                 path="/"
                                 element={
@@ -67,7 +77,7 @@ const App = () => {
                             <Route
                                 path="/students"
                                 element={
-                                    <PrivateRoute role="admin">
+                                    <PrivateRoute role="verified">
                                         <Sidebar />
                                         <Students />
                                     </PrivateRoute>
