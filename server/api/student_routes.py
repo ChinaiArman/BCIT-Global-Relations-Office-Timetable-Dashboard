@@ -157,7 +157,7 @@ def upload_student():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-@student_bp.route("/student/get_all", methods=["GET"])
+@student_bp.route("/student/get-all", methods=["GET"])
 @verified_login_required
 def get_all_students():
     """

@@ -404,7 +404,8 @@ class Database:
                 first_name=row["Legal First Name"],
                 last_name=row["Legal Last Name"],
                 term_code=row["Term Code"],
-                email=row["BCIT Email"]
+                email=row["BCIT Email"],
+                is_completed=False
             )
             self.db.session.add(student)
 
@@ -441,7 +442,7 @@ class Database:
             if not student:
                 raise DataNotFound(f"Student with ID not found: {id}")
             
-            updatable_columns = ['first_name', 'last_name', 'term_code', 'email']
+            updatable_columns = ['first_name', 'last_name', 'term_code', 'email', 'is_completed']
             for key, value in data.items():
                 if key in updatable_columns and value is not None:
                     setattr(student, key, value)

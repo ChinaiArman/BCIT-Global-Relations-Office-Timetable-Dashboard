@@ -1,18 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
-
-const userData = [
-	{ id: 1, name: "John Doe", email: "john@example.com", role: "Customer", status: "Active" },
-	{ id: 2, name: "Jane Smith", email: "jane@example.com", role: "Admin", status: "Active" },
-	{ id: 3, name: "Bob Johnson", email: "bob@example.com", role: "Customer", status: "Inactive" },
-	{ id: 4, name: "Alice Brown", email: "alice@example.com", role: "Customer", status: "Active" },
-	{ id: 5, name: "Charlie Wilson", email: "charlie@example.com", role: "Moderator", status: "Active" },
-];
+import { useNavigate } from "react-router-dom"; // Import useNavigate for routing
 
 const UsersTable = () => {
 	const [searchTerm, setSearchTerm] = useState("");
-	const [filteredUsers, setFilteredUsers] = useState(userData);
+	const [userData, setUserData] = useState([]); // Store all fetched users
+	const [filteredUsers, setFilteredUsers] = useState([]); // Store the filtered users for display
+	const navigate = useNavigate(); // For navigating to the /students page
+
+	useEffect(() => {
+		// Fetch student data from the API
+		const fetchStudentData = async () => {
+			try {
+				const serverUrl = import.meta.env.VITE_SERVER_URL;
+				const response = await axios.get(`${serverUrl}/api/student/get-all`, {
+					withCredentials: true,
+				});
+				const students = response.data.map((student) => ({
+					id: student.id,
+					name: `${student.first_name} ${student.last_name}`,
+					email: student.email,
+					// set status to Complete if student has courses, else set to Incomplete
+					status: student.is_completed ? "Complete" : "Incomplete",
+				}));
+				console.log("Students:", students);
+				setUserData(students);
+				setFilteredUsers(students); // Initialize filtered users with all students
+			} catch (error) {
+				console.error("Error fetching student data:", error);
+			}
+		};
+		fetchStudentData();
+	}, []);
 
 	const handleSearch = (e) => {
 		const term = e.target.value.toLowerCase();
@@ -21,6 +42,14 @@ const UsersTable = () => {
 			(user) => user.name.toLowerCase().includes(term) || user.email.toLowerCase().includes(term)
 		);
 		setFilteredUsers(filtered);
+	};
+
+	// Limit the displayed students to 5
+	const studentsToDisplay = filteredUsers.slice(0, 5);
+
+	// Handle redirect to /students
+	const handleViewMore = () => {
+		navigate("/students");
 	};
 
 	return (
@@ -52,13 +81,13 @@ const UsersTable = () => {
 								Name
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+								Student ID
+							</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Email
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Role
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Status
+								Schedule Status
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Actions
@@ -67,7 +96,7 @@ const UsersTable = () => {
 					</thead>
 
 					<tbody className='divide-y divide-gray-700'>
-						{filteredUsers.map((user) => (
+						{studentsToDisplay.map((user) => (
 							<motion.tr
 								key={user.id}
 								initial={{ opacity: 0 }}
@@ -88,18 +117,16 @@ const UsersTable = () => {
 								</td>
 
 								<td className='px-6 py-4 whitespace-nowrap'>
-									<div className='text-sm text-gray-300'>{user.email}</div>
+									<div className='text-sm text-gray-300'>{user.id}</div>
 								</td>
 								<td className='px-6 py-4 whitespace-nowrap'>
-									<span className='px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-800 text-blue-100'>
-										{user.role}
-									</span>
+									<div className='text-sm text-gray-300'>{user.email}</div>
 								</td>
 
 								<td className='px-6 py-4 whitespace-nowrap'>
 									<span
 										className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-											user.status === "Active"
+											user.status === "Complete"
 												? "bg-green-800 text-green-100"
 												: "bg-red-800 text-red-100"
 										}`}
@@ -117,6 +144,18 @@ const UsersTable = () => {
 					</tbody>
 				</table>
 			</div>
+
+			{/* View More Button */}
+			{filteredUsers.length > 5 && (
+				<div className='mt-4 text-center'>
+					<button
+						onClick={handleViewMore}
+						className='bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700'
+					>
+						View More
+					</button>
+				</div>
+			)}
 		</motion.div>
 	);
 };
