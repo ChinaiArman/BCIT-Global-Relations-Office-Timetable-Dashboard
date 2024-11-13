@@ -14,18 +14,24 @@ const CourseColors = [
     { bg: 'bg-indigo-500/15', text: 'text-indigo-400', check: 'checked:bg-indigo-500', border: 'border-indigo-500/30' }
 ];
 
-const SchedulerSidebar = ({ studentInfo }) => {
+const SchedulerSidebar = ({ studentInfo, onSelectedCoursesChange }) => {
     const [selectedCourses, setSelectedCourses] = useState([]);
-        return (
+
+    const handleSelectedCoursesChange = (courses) => {
+        setSelectedCourses(courses);
+        onSelectedCoursesChange(courses); // Pass the selected courses to parent
+    };
+
+    return (
         <div className="w-64 bg-gray-900 border-r border-gray-800 p-6 min-h-screen flex flex-col">
             <StudentInfo studentInfo={studentInfo} />
             <CourseList
                 studentInfo={studentInfo}
-                onSelectedCoursesChange={setSelectedCourses}
+                onSelectedCoursesChange={handleSelectedCoursesChange} // Pass the handler to CourseList
             />
             <ConflictList selectedCourses={selectedCourses} />
         </div>
-    )
+    );
 };
 
 
@@ -46,7 +52,6 @@ const StudentInfo = ({ studentInfo }) => {
             if (response.status === 200) {
                 // Flip the completion status after successful API response
                 setIsCompleted(prevState => !prevState);
-                console.log('Student schedule status flipped');
             }
         } catch (error) {
             console.error('Error making POST request:', error);
@@ -187,7 +192,7 @@ const CourseList = ({ studentInfo, onSelectedCoursesChange }) => {
     };
 
     return (
-        <div className="flex-grow">
+        <div>
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold text-white">Courses</h2>
                 <button className="text-blue-400 hover:text-blue-300">
@@ -285,7 +290,6 @@ const ConflictList = ({ selectedCourses }) => {
 
     useEffect(() => {
         const detectedConflicts = [];
-        console.log(selectedCourses);
 
         // Iterate over each course
         for (let i = 0; i < selectedCourses.length; i++) {
