@@ -13,7 +13,6 @@ const CourseColors = [
 ];
 
 const Calendar = ({ courseSchedules }) => {
-    console.log(courseSchedules)
     const TimeSlots = Array.from({ length: 15 }, (_, i) => i + 8); // Time slots from 8:00 to 22:00
     const Days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
