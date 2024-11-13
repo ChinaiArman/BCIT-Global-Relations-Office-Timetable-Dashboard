@@ -131,27 +131,11 @@ const CourseList = ({ studentInfo, onSelectedCoursesChange }) => {
     }, [coursesState]);
 
 
-    const handleGroupingSelect = (courseCode, groupingId, isChecked, isOpen) => {
-        console.log(courseCode, groupingId, isChecked, isOpen);
-        if (isChecked && isOpen) {
-            // When the checkbox is checked and dropdown is open, select the grouping
-            setCoursesState((prevState) => ({
-                ...prevState,
-                [courseCode]: { ...prevState[courseCode], selectedGrouping: groupingId },
-            }));
-        } else if (!isChecked) {
-            // When the checkbox is unchecked, clear the selected grouping (uncheck the radio button)
-            setCoursesState((prevState) => ({
-                ...prevState,
-                [courseCode]: { ...prevState[courseCode], selectedGrouping: '' },
-            }));
-        } else if (!isOpen) {
-            // If the dropdown is closed but checkbox is checked, we still need to handle the state properly
-            setCoursesState((prevState) => ({
-                ...prevState,
-                [courseCode]: { ...prevState[courseCode], isOpen: false, selectedGrouping: '' },
-            }));
-        }
+    const handleGroupingSelect = (courseCode, groupingId) => {
+        setCoursesState((prevState) => ({
+            ...prevState,
+            [courseCode]: { ...prevState[courseCode], selectedGrouping: groupingId },
+        }));
     };
 
     const toggleDropdown = async (courseCode) => {
@@ -195,7 +179,6 @@ const CourseList = ({ studentInfo, onSelectedCoursesChange }) => {
                 }));
             }
         } else {
-            // If closing the dropdown, remove the course groupings from the array
             setCoursesState((prevState) => ({
                 ...prevState,
                 [courseCode]: { ...prevState[courseCode], isOpen: false, selectedGrouping: '' },
@@ -225,7 +208,7 @@ const CourseList = ({ studentInfo, onSelectedCoursesChange }) => {
                         isLoading={courseState.isLoading}
                         groupings={courseState.groupings}
                         onOpen={() => toggleDropdown(courseCode)} // Ensure onOpen is passed correctly
-                        onGroupingSelect={(groupingId, isOpen) => handleGroupingSelect(courseCode, groupingId, isOpen)}
+                        onGroupingSelect={(groupingId) => handleGroupingSelect(courseCode, groupingId)}
                     />
                 );
             })}
@@ -277,7 +260,7 @@ const CourseItem = ({
                                         name={`course-grouping-${courseCode}`}
                                         value={groupingId}
                                         checked={selectedGrouping === groupingId}
-                                        onChange={() => onGroupingSelect(groupingId, isOpen)} // Handle selection
+                                        onChange={() => onGroupingSelect(groupingId)} // Handle selection
                                         className="mr-2 h-4 w-4 text-indigo-400"
                                     />
                                     <label
