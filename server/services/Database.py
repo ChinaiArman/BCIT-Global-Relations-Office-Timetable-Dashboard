@@ -286,6 +286,7 @@ class Database:
         row["BCIT Student Number"] = row["BCIT Student Number"][:9]
         row["Legal First Name"] = row["Legal First Name"][:50]
         row["Legal Last Name"] = row["Legal Last Name"][:50]
+        row["BCIT Email"] = row["BCIT Email"][:100]
         row["Term Code"] = int(row["Term Code"])
         preference_columns = [
             col for col in row.index if col.startswith("Course Code Preference")
@@ -323,6 +324,7 @@ class Database:
                         id=row["BCIT Student Number"],
                         first_name=row["Legal First Name"],
                         last_name=row["Legal Last Name"],
+                        email=row["BCIT Email"],
                         term_code=row["Term Code"],
                     )
                     self.db.session.add(student)
@@ -391,6 +393,7 @@ class Database:
                 "Legal First Name": data.get("first_name"),
                 "Legal Last Name": data.get("last_name"),
                 "Term Code": data.get("term_code"),
+                "BCIT Email": data.get("email")
             }
             for i, preference in enumerate(data.get("preferences")):
                 student[f"Course Code Preference #{i+1}"] = preference
@@ -400,7 +403,8 @@ class Database:
                 id=row["BCIT Student Number"],
                 first_name=row["Legal First Name"],
                 last_name=row["Legal Last Name"],
-                term_code=row["Term Code"]
+                term_code=row["Term Code"],
+                email=row["BCIT Email"]
             )
             self.db.session.add(student)
 
@@ -437,7 +441,7 @@ class Database:
             if not student:
                 raise DataNotFound(f"Student with ID not found: {id}")
             
-            updatable_columns = ['first_name', 'last_name', 'term_code']
+            updatable_columns = ['first_name', 'last_name', 'term_code', 'email']
             for key, value in data.items():
                 if key in updatable_columns and value is not None:
                     setattr(student, key, value)
