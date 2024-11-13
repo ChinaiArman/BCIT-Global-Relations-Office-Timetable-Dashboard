@@ -48,7 +48,7 @@ const App = () => {
                                 }
                             />
                             <Route
-                                path="/scheduler"
+                                path="/scheduler/:studentId"
                                 element={
                                     <PrivateRoute role="verified">
                                         <Sidebar />

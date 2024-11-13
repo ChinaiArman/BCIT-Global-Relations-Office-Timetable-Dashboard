@@ -1,82 +1,76 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { PlusCircle, ChevronDown } from 'lucide-react';
 import axios from 'axios';
 
 const CourseColors = {
-  'ACCG5150': { bg: 'bg-emerald-500/15', text: 'text-emerald-400', check: 'checked:bg-emerald-500', border: 'border-emerald-500/30' },
-  'MATH1310': { bg: 'bg-orange-500/15', text: 'text-orange-400', check: 'checked:bg-orange-500', border: 'border-orange-500/30' },
-  'COMM1116': { bg: 'bg-sky-500/15', text: 'text-sky-400', check: 'checked:bg-sky-500', border: 'border-sky-500/30' },
-  'ACIT3771': { bg: 'bg-violet-500/15', text: 'text-violet-400', check: 'checked:bg-violet-500', border: 'border-violet-500/30' },
-  'ACIT3640': { bg: 'bg-amber-500/15', text: 'text-amber-400', check: 'checked:bg-amber-500', border: 'border-amber-500/30' },
-  'HIST1535': { bg: 'bg-rose-500/15', text: 'text-rose-400', check: 'checked:bg-rose-500', border: 'border-rose-500/30' },
-  'BIO1345': { bg: 'bg-pink-500/15', text: 'text-pink-400', check: 'checked:bg-pink-500', border: 'border-pink-500/30' },
+	'ACCG5150': { bg: 'bg-emerald-500/15', text: 'text-emerald-400', check: 'checked:bg-emerald-500', border: 'border-emerald-500/30' },
+  	'MATH1310': { bg: 'bg-orange-500/15', text: 'text-orange-400', check: 'checked:bg-orange-500', border: 'border-orange-500/30' },
+  	'COMM1116': { bg: 'bg-sky-500/15', text: 'text-sky-400', check: 'checked:bg-sky-500', border: 'border-sky-500/30' },
+  	'ACIT3771': { bg: 'bg-violet-500/15', text: 'text-violet-400', check: 'checked:bg-violet-500', border: 'border-violet-500/30' },
+  	'ACIT3640': { bg: 'bg-amber-500/15', text: 'text-amber-400', check: 'checked:bg-amber-500', border: 'border-amber-500/30' },
+  	'HIST1535': { bg: 'bg-rose-500/15', text: 'text-rose-400', check: 'checked:bg-rose-500', border: 'border-rose-500/30' },
+  	'BIO1345': { bg: 'bg-pink-500/15', text: 'text-pink-400', check: 'checked:bg-pink-500', border: 'border-pink-500/30' },
 };
 
-const TimeSlots = () => Array.from({ length: 22 }, (_, i) => i + 8);
+const TimeSlots = () => Array.from({ length: 15 }, (_, i) => i + 8);
 const Days = () => ['MON', 'TUES', 'WED', 'THUR', 'FRI', 'SAT', 'SUN'];
 
 const dayMap = {
-  'Mon': 'MON',
-  'Tue': 'TUES',
-  'Wed': 'WED',
-  'Thu': 'THUR',
-  'Fri': 'FRI',
-  'Sat': 'SAT',
-  'Sun': 'SUN'
+	'Mon': 'MON',
+  	'Tue': 'TUES',
+  	'Wed': 'WED',
+  	'Thu': 'THUR',
+  	'Fri': 'FRI',
+  	'Sat': 'SAT',
+  	'Sun': 'SUN'
 };
 
 const checkTimeOverlap = (event1, event2) => {
-  const start1 = event1.startTime;
-  const end1 = event1.endTime;
-  const start2 = event2.startTime;
-  const end2 = event2.endTime;
+  	const start1 = event1.startTime;
+  	const end1 = event1.endTime;
+  	const start2 = event2.startTime;
+ 	const end2 = event2.endTime;
   
-  return start1 < end2 && start2 < end1;
+  	return start1 < end2 && start2 < end1;
 };
 
 const formatTime = (time) => {
-  const hours = Math.floor(time);
-  const minutes = Math.round((time - hours) * 60);
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  	const hours = Math.floor(time);
+  	const minutes = Math.round((time - hours) * 60);
+  	return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 };
 
 const CourseSelection = ({ course, isSelected, onToggle, onGroupingSelect }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedGrouping, setSelectedGrouping] = useState('');
-  const [groupings, setGroupings] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  	const { studentId } = useParams();
+  	const [isOpen, setIsOpen] = useState(false);
+  	const [selectedGrouping, setSelectedGrouping] = useState('');
+  	const [groupings, setGroupings] = useState([]);
+  	const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchCourseGroupings = async () => {
-      if (isSelected && course.id) {
-        setIsLoading(true);
-        try {
-          const serverUrl = import.meta.env.VITE_SERVER_URL;
-          const response = await axios.get(
-            `${serverUrl}/api/course/course_code/${course.id}/`,
-            { 
-              withCredentials: true,
-              headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-              }
-            }
-          );
-          
-          if (Array.isArray(response.data)) {
-            const uniqueGroupings = [...new Set(response.data.map(course => course.course_grouping))];
-            setGroupings(uniqueGroupings);
-          }
-        } catch (error) {
-          console.error('Error fetching course groupings:', error);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchCourseGroupings();
-  }, [isSelected, course.id]);
+  	useEffect(() => {
+    	const fetchCourseGroupings = async () => {
+			if (isSelected && course.id) {
+				setIsLoading(true);
+				try {
+					const serverUrl = import.meta.env.VITE_SERVER_URL;
+					const response = await axios.get(
+					`${serverUrl}/api/course/course_code/${course.id}/`, { 
+						withCredentials: true,
+					});
+					if (Array.isArray(response.data)) {
+						const uniqueGroupings = [...new Set(response.data.map(course => course.course_grouping))];
+						setGroupings(uniqueGroupings);
+					}
+				} catch (error) {
+					console.error('Error fetching course groupings:', error);
+				} finally {
+					setIsLoading(false);
+				}
+			}
+		};
+		fetchCourseGroupings();
+  	}, [isSelected, course.id]);
 
   const handleGroupingSelect = async (grouping) => {
     setSelectedGrouping(grouping);
@@ -303,50 +297,54 @@ const SchedulePage = () => {
           <div className="bg-gray-900 border border-gray-800 rounded-lg h-full min-w-[1200px]">
             <div className="grid grid-cols-8 h-full">
               {/* Time column */}
-              <div className="col-span-1 border-r border-gray-800">
-                <div className="h-12 sticky top-0 bg-gray-900 z-10"></div>
-                {TimeSlots().map((time) => (
-                  <div key={time} className="h-12 border-t border-gray-800 flex items-center justify-end pr-3 text-sm text-gray-400 font-medium">
-                    {time}:30
-                  </div>
-                ))}
-              </div>
+              <div className="col-span-1 border-r border-gray-800 flex flex-col" style={{ height: '100%' }}>
+  <div className="h-12 sticky top-0 bg-gray-900 z-10"></div>
+  {TimeSlots().map((time) => (
+    <div
+      key={time}
+      className="border-t border-gray-800 flex items-center justify-end pr-3 text-sm text-gray-400 font-medium flex-grow"
+    >
+      {time}:30
+    </div>
+  ))}
+</div>
+
 
               {/* Days columns */}
               {Days().map((day) => (
-                <div key={day} className="col-span-1 border-r border-gray-800 last:border-r-0">
-                  <div className="h-12 flex items-center justify-center font-medium sticky top-0 bg-gray-900 z-10 border-b border-gray-800 text-white">
-                    {day}
-                  </div>
-                  <div className="relative">
-                    {TimeSlots().map((time) => (
-                      <div key={time} className="h-12 border-t border-gray-800"></div>
-                    ))}
-                    {courseSchedules
-                      .filter((event) => event.day === day)
-                      .map((event, idx) => {
-                        const hasConflict = isTimeSlotInConflict(event.day, event.startTime, event.endTime);
-                        
-                        return (
-                          <div
-                            key={idx}
-                            className={`absolute w-11/12 left-1/2 -translate-x-1/2 
-                              ${hasConflict ? 'bg-red-500/20 border-red-500' : CourseColors[event.course].bg} 
-                              ${CourseColors[event.course].text} 
-                              border 
-                              rounded-lg p-2 text-sm font-medium flex items-center justify-center 
-                              transition-colors duration-200
-                              ${hasConflict ? 'shadow-lg shadow-red-500/20' : ''}`}
-                            style={{
-                              top: `${(event.startTime - 8) * 48}px`,
-                              height: `${(event.endTime - event.startTime) * 48}px`,
-                            }}
-                          >
-                            <div className="text-center">
-                              <div className="font-semibold">{event.course}</div>
-                              <div className="text-xs opacity-75">{event.grouping}</div>
-                              <div className="text-xs opacity-75">{event.room}</div>
-                            </div>
+  <div key={day} className="col-span-1 border-r border-gray-800 last:border-r-0 flex flex-col" style={{ height: '100%' }}>
+    <div className="h-12 flex items-center justify-center font-medium sticky top-0 bg-gray-900 z-10 border-b border-gray-800 text-white">
+      {day}
+    </div>
+    <div className="relative flex flex-col flex-grow">
+      {TimeSlots().map((time) => (
+        <div key={time} className="h-12 border-t border-gray-800 flex-grow"></div>
+      ))}
+      {courseSchedules
+        .filter((event) => event.day === day)
+        .map((event, idx) => {
+          const hasConflict = isTimeSlotInConflict(event.day, event.startTime, event.endTime);
+          
+          return (
+            <div
+              key={idx}
+              className={`absolute w-11/12 left-1/2 -translate-x-1/2 
+                ${hasConflict ? 'bg-red-500/20 border-red-500' : CourseColors[event.course].bg} 
+                ${CourseColors[event.course].text} 
+                border 
+                rounded-lg p-2 text-sm font-medium flex items-center justify-center 
+                transition-colors duration-200
+                ${hasConflict ? 'shadow-lg shadow-red-500/20' : ''}`}
+              style={{
+                top: `${(event.startTime - 8) * 48}px`,
+                height: `${(event.endTime - event.startTime) * 48}px`,
+              }}
+            >
+              <div className="text-center">
+                <div className="font-semibold">{event.course}</div>
+                <div className="text-xs opacity-75">{event.grouping}</div>
+                <div className="text-xs opacity-75">{event.room}</div>
+              </div>
                           </div>
                         );
                       })}

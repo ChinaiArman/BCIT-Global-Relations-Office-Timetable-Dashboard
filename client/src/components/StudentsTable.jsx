@@ -48,7 +48,7 @@ const StudentsTable = () => {
 
 	// Redirect to the schedule page when the edit button is clicked
 	const handleEditClick = (id) => {
-		navigate(`/schedule/${id}`); // Redirect to the schedule page with the student ID
+		navigate(`/scheduler/${id}`); // Redirect to the schedule page with the student ID
 	};
 
 	return (
