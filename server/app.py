@@ -10,6 +10,7 @@ from api.course_routes import course_bp
 from api.schedule_routes import schedule_bp
 from api.authentication_routes import authentication_bp
 from api.email_routes import email_bp
+from api.database_routes import database_bp
 
 from services.Database import Database
 from services.Authenticator import Authenticator
@@ -82,4 +83,5 @@ def create_app():
     app.register_blueprint(schedule_bp, url_prefix='/api')
     app.register_blueprint(authentication_bp, url_prefix='/api')
     app.register_blueprint(email_bp, url_prefix='/api')
+    app.register_blueprint(database_bp, url_prefix='/api')
     return app, db

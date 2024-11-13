@@ -1013,3 +1013,16 @@ class Database:
             self.db.session.rollback()
             raise DatabaseError(f"Error verifying user and setting password: {str(e)}")
 
+    def get_jumbotron_data(self) -> dict:
+        """
+        """
+        total_students = self.db.session.query(Student).count()
+        total_students_with_course = self.db.session.query(Student).filter(Student.courses.any()).count()
+        total_students_without_course = total_students - total_students_with_course
+        total_courses = self.db.session.query(Course).count()
+        return {
+            "total_students": total_students,
+            "total_students_with_course": total_students_with_course,
+            "total_students_without_course": total_students_without_course,
+            "total_courses": total_courses
+        }
