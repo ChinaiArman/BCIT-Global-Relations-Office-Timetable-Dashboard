@@ -130,26 +130,33 @@ const CourseList = ({ studentInfo, onSelectedCoursesChange }) => {
                 courseCode,
                 groupingId: state.selectedGrouping,
                 schedule: state.groupings[state.selectedGrouping], // Assuming groupings include timing details
+                courseColor: state.courseColor,  // Add the course color here
             }));
         
         onSelectedCoursesChange(selectedCourses);
     }, [coursesState]);
 
 
-    const handleGroupingSelect = (courseCode, groupingId) => {
+    const handleGroupingSelect = (courseCode, groupingId, courseColor) => {
         setCoursesState((prevState) => ({
             ...prevState,
-            [courseCode]: { ...prevState[courseCode], selectedGrouping: groupingId },
+            [courseCode]: {
+                ...prevState[courseCode],
+                selectedGrouping: groupingId,
+                courseColor: courseColor,  // Add the course color here
+            },
         }));
     };
 
-    const toggleDropdown = async (courseCode) => {
+
+    const toggleDropdown = async (courseCode, courseColor) => {
         // Toggle the dropdown state (isOpen)
         setCoursesState((prevState) => ({
             ...prevState,
             [courseCode]: {
                 ...prevState[courseCode],
                 isOpen: !prevState[courseCode].isOpen,
+                courseColor: courseColor,  // Add the course color here
             },
         }));
 
@@ -186,7 +193,7 @@ const CourseList = ({ studentInfo, onSelectedCoursesChange }) => {
         } else {
             setCoursesState((prevState) => ({
                 ...prevState,
-                [courseCode]: { ...prevState[courseCode], isOpen: false, selectedGrouping: '' },
+                [courseCode]: { ...prevState[courseCode], isOpen: false, selectedGrouping: '', courseColor: courseColor },  // Keep the color here as well
             }));
         }
     };
@@ -212,8 +219,8 @@ const CourseList = ({ studentInfo, onSelectedCoursesChange }) => {
                         selectedGrouping={courseState.selectedGrouping}
                         isLoading={courseState.isLoading}
                         groupings={courseState.groupings}
-                        onOpen={() => toggleDropdown(courseCode)} // Ensure onOpen is passed correctly
-                        onGroupingSelect={(groupingId) => handleGroupingSelect(courseCode, groupingId)}
+                        onOpen={() => toggleDropdown(courseCode, courseColor)} // Ensure onOpen is passed correctly
+                        onGroupingSelect={(groupingId) => handleGroupingSelect(courseCode, groupingId, courseColor)}
                     />
                 );
             })}

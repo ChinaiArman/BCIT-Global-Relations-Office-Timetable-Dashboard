@@ -12,14 +12,16 @@ const CourseColors = [
     { bg: 'bg-indigo-500/15', text: 'text-indigo-400', check: 'checked:bg-indigo-500', border: 'border-indigo-500/30' }
 ];
 
-const Calendar = ({ courseSchedules, courseState }) => {
+const Calendar = ({ courseSchedules }) => {
+    console.log(courseSchedules)
     const TimeSlots = Array.from({ length: 15 }, (_, i) => i + 8); // Time slots from 8:00 to 22:00
     const Days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
     // A function to check if two courses on the same day overlap (i.e., have a time conflict)
-    const isTimeSlotInConflict = (day, startTime, endTime, conflicts) => {
+    const isTimeSlotInConflict = (day, startTime, endTime, conflicts, currentCourseCode) => {
         return conflicts.some(conflict =>
             conflict.day === day &&
+            conflict.course !== currentCourseCode && // Exclude the current course from being compared with itself
             startTime < conflict.endTime &&
             endTime > conflict.startTime
         );
@@ -33,15 +35,13 @@ const Calendar = ({ courseSchedules, courseState }) => {
                 const startTime = parseTime(schedule.begin_time);
                 const endTime = parseTime(schedule.end_time);
 
-                // Get the color for this course based on its groupingId
-                const groupingId = course.groupingId;
-                const colorIndex = groupingId % CourseColors.length;
-                const courseColor = CourseColors[colorIndex];
+                // Get the color for this course directly from courseColor
+                const courseColor = course.courseColor;
 
                 // Return the event in a form that fits your calendar structure
                 return {
                     course: course.courseCode,
-                    grouping: groupingId,
+                    grouping: course.groupingId,
                     room: schedule.building_room,
                     day: schedule.day.toUpperCase(), // Ensure it's uppercase for matching
                     startTime,
@@ -91,7 +91,7 @@ const Calendar = ({ courseSchedules, courseState }) => {
                                 {events
                                     .filter((event) => event.day === day)
                                     .map((event, idx) => {
-                                        const hasConflict = isTimeSlotInConflict(event.day, event.startTime, event.endTime, events);
+                                        const hasConflict = isTimeSlotInConflict(event.day, event.startTime, event.endTime, events, event.course);
                                         return (
                                             <div
                                                 key={idx}
