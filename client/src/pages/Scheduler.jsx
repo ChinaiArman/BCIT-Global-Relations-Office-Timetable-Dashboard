@@ -4,10 +4,10 @@ import axios from 'axios';
 
 const CourseColors = {
   'ACCG5150': { bg: 'bg-emerald-500/15', text: 'text-emerald-400', check: 'checked:bg-emerald-500', border: 'border-emerald-500/30' },
-  'CHEM2214': { bg: 'bg-orange-500/15', text: 'text-orange-400', check: 'checked:bg-orange-500', border: 'border-orange-500/30' },
-  'MATH1123': { bg: 'bg-sky-500/15', text: 'text-sky-400', check: 'checked:bg-sky-500', border: 'border-sky-500/30' },
-  'PSYC2213': { bg: 'bg-violet-500/15', text: 'text-violet-400', check: 'checked:bg-violet-500', border: 'border-violet-500/30' },
-  'MAN3145': { bg: 'bg-amber-500/15', text: 'text-amber-400', check: 'checked:bg-amber-500', border: 'border-amber-500/30' },
+  'MATH1310': { bg: 'bg-orange-500/15', text: 'text-orange-400', check: 'checked:bg-orange-500', border: 'border-orange-500/30' },
+  'COMM1116': { bg: 'bg-sky-500/15', text: 'text-sky-400', check: 'checked:bg-sky-500', border: 'border-sky-500/30' },
+  'ACIT3771': { bg: 'bg-violet-500/15', text: 'text-violet-400', check: 'checked:bg-violet-500', border: 'border-violet-500/30' },
+  'ACIT3640': { bg: 'bg-amber-500/15', text: 'text-amber-400', check: 'checked:bg-amber-500', border: 'border-amber-500/30' },
   'HIST1535': { bg: 'bg-rose-500/15', text: 'text-rose-400', check: 'checked:bg-rose-500', border: 'border-rose-500/30' },
   'BIO1345': { bg: 'bg-pink-500/15', text: 'text-pink-400', check: 'checked:bg-pink-500', border: 'border-pink-500/30' },
 };
@@ -25,6 +25,21 @@ const dayMap = {
   'Sun': 'SUN'
 };
 
+const checkTimeOverlap = (event1, event2) => {
+  const start1 = event1.startTime;
+  const end1 = event1.endTime;
+  const start2 = event2.startTime;
+  const end2 = event2.endTime;
+  
+  return start1 < end2 && start2 < end1;
+};
+
+const formatTime = (time) => {
+  const hours = Math.floor(time);
+  const minutes = Math.round((time - hours) * 60);
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+};
+
 const CourseSelection = ({ course, isSelected, onToggle, onGroupingSelect }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedGrouping, setSelectedGrouping] = useState('');
@@ -37,7 +52,6 @@ const CourseSelection = ({ course, isSelected, onToggle, onGroupingSelect }) => 
         setIsLoading(true);
         try {
           const serverUrl = import.meta.env.VITE_SERVER_URL;
-          console.log('Fetching course groupings for:', course.id);
           const response = await axios.get(
             `${serverUrl}/api/course/course_code/${course.id}/`,
             { 
@@ -49,14 +63,9 @@ const CourseSelection = ({ course, isSelected, onToggle, onGroupingSelect }) => 
             }
           );
           
-          console.log('API Response:', response.data);
-          
           if (Array.isArray(response.data)) {
             const uniqueGroupings = [...new Set(response.data.map(course => course.course_grouping))];
-            console.log('Unique groupings:', uniqueGroupings);
             setGroupings(uniqueGroupings);
-          } else {
-            console.error('Unexpected API response format:', response.data);
           }
         } catch (error) {
           console.error('Error fetching course groupings:', error);
@@ -106,7 +115,7 @@ const CourseSelection = ({ course, isSelected, onToggle, onGroupingSelect }) => 
         </button>
         
         {isOpen && isSelected && groupings.length > 0 && (
-          <div className="absolute z-50 w-full mt-1 bg-gray-800 border border-gray-700 rounded-md shadow-lg">
+          <div className="absolute z-50 w-full mt-1 bg-gray-800 border border-gray-700 rounded-md shadow-lg max-h-48 overflow-y-auto">
             {groupings.map((grouping) => (
               <button
                 key={grouping}
@@ -126,18 +135,49 @@ const CourseSelection = ({ course, isSelected, onToggle, onGroupingSelect }) => 
 const SchedulePage = () => {
   const [selectedCourses, setSelectedCourses] = useState([
     { id: 'ACCG5150', selected: true },
-    { id: 'CHEM2214', selected: false },
-    { id: 'MATH1123', selected: true },
-    { id: 'PSYC2213', selected: true },
-    { id: 'MAN3145', selected: false },
+    { id: 'MATH1310', selected: true },
+    { id: 'COMM1116', selected: true },
+    { id: 'ACIT3771', selected: true },
+    { id: 'ACIT3640', selected: true },
     { id: 'HIST1535', selected: false },
     { id: 'BIO1345', selected: false },
   ]);
 
   const [courseSchedules, setCourseSchedules] = useState([]);
+  const [conflicts, setConflicts] = useState([]);
+
+  useEffect(() => {
+    const newConflicts = [];
+    
+    for (let i = 0; i < courseSchedules.length; i++) {
+      for (let j = i + 1; j < courseSchedules.length; j++) {
+        const event1 = courseSchedules[i];
+        const event2 = courseSchedules[j];
+        
+        if (event1.day === event2.day && checkTimeOverlap(event1, event2)) {
+          newConflicts.push({
+            day: event1.day,
+            startTime: Math.min(event1.startTime, event2.startTime),
+            endTime: Math.max(event1.endTime, event2.endTime),
+            courses: [
+              {
+                id: event1.course,
+                grouping: event1.grouping
+              },
+              {
+                id: event2.course,
+                grouping: event2.grouping
+              }
+            ]
+          });
+        }
+      }
+    }
+    
+    setConflicts(newConflicts);
+  }, [courseSchedules]);
 
   const handleGroupingSelect = async (courseId, grouping) => {
-    console.log('Fetching schedule for:', grouping);
     try {
       const serverUrl = import.meta.env.VITE_SERVER_URL;
       const response = await axios.get(
@@ -150,8 +190,6 @@ const SchedulePage = () => {
           }
         }
       );
-
-      console.log('Schedule API Response:', response.data);
 
       if (Array.isArray(response.data)) {
         const newScheduleItems = response.data.map(course => {
@@ -171,14 +209,10 @@ const SchedulePage = () => {
           };
         });
 
-        console.log('New schedule items:', newScheduleItems);
-
         setCourseSchedules(prev => [
           ...prev.filter(schedule => schedule.course !== courseId),
           ...newScheduleItems
         ]);
-      } else {
-        console.error('Unexpected API response format:', response.data);
       }
     } catch (error) {
       console.error('Error fetching course details:', error);
@@ -190,10 +224,17 @@ const SchedulePage = () => {
       course.id === courseId ? { ...course, selected: !course.selected } : course
     ));
     
-    // Remove course schedules when unchecking a course
     if (selectedCourses.find(c => c.id === courseId)?.selected) {
       setCourseSchedules(prev => prev.filter(schedule => schedule.course !== courseId));
     }
+  };
+
+  const isTimeSlotInConflict = (day, startTime, endTime) => {
+    return conflicts.some(conflict => 
+      conflict.day === day && 
+      startTime < conflict.endTime && 
+      endTime > conflict.startTime
+    );
   };
 
   return (
@@ -237,14 +278,27 @@ const SchedulePage = () => {
 
             <div className="mt-6">
               <h2 className="text-lg font-semibold mb-3 text-white">Conflicts</h2>
-              <div className="text-sm text-red-400 font-medium">
-                Thursday @11:30 - 12:30
+              <div className="space-y-2">
+                {conflicts.length > 0 ? (
+                  conflicts.map((conflict, index) => (
+                    <div key={index} className="text-sm text-red-400 font-medium">
+                      {conflict.day} @{formatTime(conflict.startTime)} - {formatTime(conflict.endTime)}
+                      <div className="text-xs opacity-75 mt-1">
+                        {conflict.courses.map(course => course.id).join(' & ')}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-sm text-green-400 font-medium">
+                    No conflicts detected
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Main Schedule Grid */}
+                {/* Main Schedule Grid */}
         <div className="flex-1 p-6 overflow-x-auto">
           <div className="bg-gray-900 border border-gray-800 rounded-lg h-full min-w-[1200px]">
             <div className="grid grid-cols-8 h-full">
@@ -270,22 +324,32 @@ const SchedulePage = () => {
                     ))}
                     {courseSchedules
                       .filter((event) => event.day === day)
-                      .map((event, idx) => (
-                        <div
-                          key={idx}
-                          className={`absolute w-11/12 left-1/2 -translate-x-1/2 ${CourseColors[event.course].bg} ${CourseColors[event.course].text} border ${CourseColors[event.course].border} rounded-lg p-2 text-sm font-medium flex items-center justify-center`}
-                          style={{
-                            top: `${(event.startTime - 8) * 48}px`,
-                            height: `${(event.endTime - event.startTime) * 48}px`,
-                          }}
-                        >
-                          <div className="text-center">
-                            <div>{event.course}</div>
-                            <div className="text-xs opacity-75">{event.grouping}</div>
-                            <div className="text-xs opacity-75">{event.room}</div>
+                      .map((event, idx) => {
+                        const hasConflict = isTimeSlotInConflict(event.day, event.startTime, event.endTime);
+                        
+                        return (
+                          <div
+                            key={idx}
+                            className={`absolute w-11/12 left-1/2 -translate-x-1/2 
+                              ${hasConflict ? 'bg-red-500/20 border-red-500' : CourseColors[event.course].bg} 
+                              ${CourseColors[event.course].text} 
+                              border 
+                              rounded-lg p-2 text-sm font-medium flex items-center justify-center 
+                              transition-colors duration-200
+                              ${hasConflict ? 'shadow-lg shadow-red-500/20' : ''}`}
+                            style={{
+                              top: `${(event.startTime - 8) * 48}px`,
+                              height: `${(event.endTime - event.startTime) * 48}px`,
+                            }}
+                          >
+                            <div className="text-center">
+                              <div className="font-semibold">{event.course}</div>
+                              <div className="text-xs opacity-75">{event.grouping}</div>
+                              <div className="text-xs opacity-75">{event.room}</div>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                   </div>
                 </div>
               ))}
@@ -298,3 +362,6 @@ const SchedulePage = () => {
 };
 
 export default SchedulePage;
+
+
+
