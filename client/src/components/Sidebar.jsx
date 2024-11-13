@@ -1,6 +1,6 @@
 import { House, DatabaseZap, Menu, Settings, GraduationCap, ShieldCheck, CalendarCog } from "lucide-react";
 import { useAdminAuth } from '../context/AdminContext.jsx';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
@@ -15,10 +15,24 @@ const SIDEBAR_ITEMS = [
 const Sidebar = () => {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 	const { isAdmin } = useAdminAuth();
+	const [sidebarItems, setSidebarItems] = useState(SIDEBAR_ITEMS);
 
-	if (isAdmin) {
-		SIDEBAR_ITEMS.splice(4, 0, { name: "Admin", icon: ShieldCheck, color: "#F59E0B", href: "/admin" });
-	}
+	useEffect(() => {
+		// Add "Admin" item only once when `isAdmin` becomes true
+		if (isAdmin) {
+			setSidebarItems(prevItems => {
+				// Check if "Admin" item already exists before adding
+				if (!prevItems.some(item => item.name === "Admin")) {
+					return [
+						...prevItems.slice(0, 4),
+						{ name: "Admin", icon: ShieldCheck, color: "#F59E0B", href: "/admin" },
+						...prevItems.slice(4),
+					];
+				}
+				return prevItems; // Return the unchanged array if "Admin" already exists
+			});
+		}
+	}, [isAdmin]); // Only runs when `isAdmin` changes
 
 	return (
 		<motion.div
@@ -38,7 +52,7 @@ const Sidebar = () => {
 				</motion.button>
 
 				<nav className='mt-8 flex-grow'>
-					{SIDEBAR_ITEMS.map((item) => (
+					{sidebarItems.map((item) => (
 						<Link key={item.href} to={item.href}>
 							<motion.div className='flex items-center p-4 text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors mb-2'>
 								<item.icon size={20} style={{ color: item.color, minWidth: "20px" }} />
