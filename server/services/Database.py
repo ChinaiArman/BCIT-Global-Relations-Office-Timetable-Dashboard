@@ -1022,12 +1022,13 @@ class Database:
         """
         """
         total_students = self.db.session.query(Student).count()
-        total_students_with_course = self.db.session.query(Student).filter(Student.courses.any()).count()
-        total_students_without_course = total_students - total_students_with_course
-        total_courses = self.db.session.query(Course).count()
+        total_students_with_schedules_finalized = self.db.session.query(Student).filter(Student.is_completed == True).count()
+        total_students_with_courses = self.db.session.query(Student).filter(Student.courses.any()).count()
+        total_students_with_schedules_in_progress = total_students_with_courses - total_students_with_schedules_finalized
+        total_students_without_course = total_students - total_students_with_courses
         return {
             "total_students": total_students,
-            "total_students_with_course": total_students_with_course,
-            "total_students_without_course": total_students_without_course,
-            "total_courses": total_courses
+            "total_schedules_in_progress": total_students_with_schedules_in_progress,
+            "total_schedules_finalized": total_students_with_schedules_finalized,
+            "total_students_without_course": total_students_without_course
         }

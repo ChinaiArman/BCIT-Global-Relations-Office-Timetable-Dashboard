@@ -4,10 +4,10 @@ import { motion } from "framer-motion";
 import { Search } from "lucide-react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate for routing
 
-const UsersTable = () => {
+const StudentsTable = () => {
 	const [searchTerm, setSearchTerm] = useState("");
-	const [userData, setUserData] = useState([]); // Store all fetched users
-	const [filteredUsers, setFilteredUsers] = useState([]); // Store the filtered users for display
+	const [userData, setUserData] = useState([]); // Store all fetched students
+	const [filteredStudents, setFilteredStudents] = useState([]); // Store the filtered students for display
 	const navigate = useNavigate(); // For navigating to the /students page
 
 	useEffect(() => {
@@ -22,12 +22,12 @@ const UsersTable = () => {
 					id: student.id,
 					name: `${student.first_name} ${student.last_name}`,
 					email: student.email,
-					// set status to Complete if student has courses, else set to Incomplete
-					status: student.is_completed ? "Complete" : "Incomplete",
+					// if is_completed is true, status is "Complete", otherwise if courses is empty, status is "Incomplete", otherwise status is "In Progress"
+					status: student.is_completed ? "Complete" : student.courses.length === 0 ? "Incomplete" : "In Progress",
 				}));
 				console.log("Students:", students);
 				setUserData(students);
-				setFilteredUsers(students); // Initialize filtered users with all students
+				setFilteredStudents(students); // Initialize filtered students with all students
 			} catch (error) {
 				console.error("Error fetching student data:", error);
 			}
@@ -41,11 +41,11 @@ const UsersTable = () => {
 		const filtered = userData.filter(
 			(user) => user.name.toLowerCase().includes(term) || user.email.toLowerCase().includes(term)
 		);
-		setFilteredUsers(filtered);
+		setFilteredStudents(filtered);
 	};
 
 	// Limit the displayed students to 5
-	const studentsToDisplay = filteredUsers.slice(0, 5);
+	const studentsToDisplay = filteredStudents.slice(0, 5);
 
 	// Handle redirect to /students
 	const handleViewMore = () => {
@@ -60,11 +60,11 @@ const UsersTable = () => {
 			transition={{ delay: 0.2 }}
 		>
 			<div className='flex justify-between items-center mb-6'>
-				<h2 className='text-xl font-semibold text-gray-100'>Users</h2>
+				<h2 className='text-xl font-semibold text-gray-100'>Students</h2>
 				<div className='relative'>
 					<input
 						type='text'
-						placeholder='Search users...'
+						placeholder='Search students...'
 						className='bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
 						value={searchTerm}
 						onChange={handleSearch}
@@ -127,8 +127,10 @@ const UsersTable = () => {
 									<span
 										className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
 											user.status === "Complete"
-												? "bg-green-800 text-green-100"
-												: "bg-red-800 text-red-100"
+											? "bg-green-800 text-green-100"
+											: user.status === "Incomplete"
+											? "bg-red-800 text-red-100"
+											: "bg-yellow-800 text-yellow-100"
 										}`}
 									>
 										{user.status}
@@ -146,17 +148,17 @@ const UsersTable = () => {
 			</div>
 
 			{/* View More Button */}
-			{filteredUsers.length > 5 && (
-				<div className='mt-4 text-center'>
-					<button
-						onClick={handleViewMore}
-						className='bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700'
-					>
-						View More
-					</button>
+			{filteredStudents.length > 5 && (
+				<div className='m-4 text-center'>
+					<a 
+                    	href="/students" 
+                    	className="transform rounded-sm bg-indigo-600 px-8 py-3 font-bold duration-300 hover:bg-indigo-400 text-center"
+                	>
+                    	VIEW MORE
+                	</a>
 				</div>
 			)}
 		</motion.div>
 	);
 };
-export default UsersTable;
+export default StudentsTable;
