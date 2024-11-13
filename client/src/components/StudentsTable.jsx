@@ -25,7 +25,6 @@ const StudentsTable = () => {
 					// if is_completed is true, status is "Complete", otherwise if courses is empty, status is "Incomplete", otherwise status is "In Progress"
 					status: student.is_completed ? "Complete" : student.courses.length === 0 ? "Incomplete" : "In Progress",
 				}));
-				console.log("Students:", students);
 				setUserData(students);
 				setFilteredStudents(students); // Initialize filtered students with all students
 			} catch (error) {
@@ -47,9 +46,9 @@ const StudentsTable = () => {
 	// Limit the displayed students to 5
 	const studentsToDisplay = filteredStudents.slice(0, 5);
 
-	// Handle redirect to /students
-	const handleViewMore = () => {
-		navigate("/students");
+	// Redirect to the schedule page when the edit button is clicked
+	const handleEditClick = (id) => {
+		navigate(`/schedule/${id}`); // Redirect to the schedule page with the student ID
 	};
 
 	return (
@@ -138,7 +137,12 @@ const StudentsTable = () => {
 								</td>
 
 								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-									<button className='text-indigo-400 hover:text-indigo-300 mr-2'>Edit</button>
+									<button
+										className='text-indigo-400 hover:text-indigo-300 mr-2'
+										onClick={() => handleEditClick(user.id)} // Add onClick handler
+									>
+										Edit
+									</button>
 									<button className='text-red-400 hover:text-red-300'>Delete</button>
 								</td>
 							</motion.tr>
