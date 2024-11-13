@@ -17,7 +17,7 @@ const CourseColors = [
 const SchedulerSidebar = ({ studentInfo }) => {
     const [selectedCourses, setSelectedCourses] = useState([]);
         return (
-        <div className="w-64 bg-gray-900 border-r border-gray-800 p-6 h-full flex flex-col">
+        <div className="w-64 bg-gray-900 border-r border-gray-800 p-6 min-h-screen flex flex-col">
             <StudentInfo studentInfo={studentInfo} />
             <CourseList
                 studentInfo={studentInfo}
@@ -280,31 +280,41 @@ const CourseItem = ({
 };
 
 
-
 const ConflictList = ({ selectedCourses }) => {
     const [conflicts, setConflicts] = useState([]);
 
     useEffect(() => {
         const detectedConflicts = [];
         console.log(selectedCourses);
+
+        // Iterate over each course
         for (let i = 0; i < selectedCourses.length; i++) {
             for (let j = i + 1; j < selectedCourses.length; j++) {
                 const courseA = selectedCourses[i];
                 const courseB = selectedCourses[j];
 
-                // Check for day and time conflicts
-                if (courseA.schedule.day === courseB.schedule.day) {
-                    const startA = parseTime(courseA.schedule.begin_time);
-                    const endA = parseTime(courseA.schedule.end_time);
-                    const startB = parseTime(courseB.schedule.begin_time);
-                    const endB = parseTime(courseB.schedule.end_time);
-                    if ((startA < endB) && (startB < endA)) {
-                        detectedConflicts.push({
-                            day: courseA.schedule.day,
-                            startTime: courseA.schedule.begin_time,
-                            endTime: courseA.schedule.end_time,
-                            courses: [courseA.course_code, courseB.course_code],
-                        });
+                // Iterate over each schedule in course A and B
+                for (let a = 0; a < courseA.schedule.length; a++) {
+                    for (let b = 0; b < courseB.schedule.length; b++) {
+                        const scheduleA = courseA.schedule[a];
+                        const scheduleB = courseB.schedule[b];
+
+                        // Check for day and time conflicts
+                        if (scheduleA.day === scheduleB.day) {
+                            const startA = parseTime(scheduleA.begin_time);
+                            const endA = parseTime(scheduleA.end_time);
+                            const startB = parseTime(scheduleB.begin_time);
+                            const endB = parseTime(scheduleB.end_time);
+
+                            if ((startA < endB) && (startB < endA)) {
+                                detectedConflicts.push({
+                                    day: scheduleA.day,
+                                    startTime: scheduleA.begin_time,
+                                    endTime: scheduleA.end_time,
+                                    courses: [courseA.groupingId, courseB.groupingId], // Show grouping names
+                                });
+                            }
+                        }
                     }
                 }
             }
@@ -314,7 +324,7 @@ const ConflictList = ({ selectedCourses }) => {
     }, [selectedCourses]);
 
     return (
-        <div className="mt-6">
+        <div className="mt-6 pb-5 flex-grow">
             <h2 className="text-lg font-semibold mb-3 text-white">Conflicts</h2>
             <div className="space-y-2">
                 {conflicts.length > 0 ? (
@@ -322,7 +332,7 @@ const ConflictList = ({ selectedCourses }) => {
                         <div key={index} className="text-sm text-red-400 font-medium">
                             {conflict.day} @{conflict.startTime} - {conflict.endTime}
                             <div className="text-xs opacity-75 mt-1">
-                                {conflict.courses.join(' & ')}
+                                {conflict.courses.join(' & ')}  {/* Displaying the grouping names */}
                             </div>
                         </div>
                     ))
