@@ -911,6 +911,29 @@ class Database:
         if not user:
             raise UserNotFound()
         return user
+    
+    def get_all_users_info(self) -> list[dict]:
+        """
+        Get all users.
+
+        Returns
+        -------
+        users (list[dict]): A list of dicts, each containing specified information of a user.
+        """
+        users = self.db.session.query(User.id, User.username, User.email, User.is_verified, User.is_admin).all()
+        if not users:
+            raise UserNotFound()
+        users = [
+            {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "is_verified": user.is_verified,
+                "is_admin": user.is_admin
+            }
+            for user in users
+        ]
+        return users
 
     def delete_user(self, user_id: int) -> None:
         """

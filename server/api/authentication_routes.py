@@ -284,3 +284,17 @@ def is_unverified() -> tuple:
         return jsonify({"message": "User is unverified"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 401
+    
+
+@authentication_bp.route('/authenticate/get-users/', methods=['GET'])
+@admin_required
+def get_all_users_info() -> tuple:
+    """
+    Get the user info for all users.
+    """
+    try:
+        db = current_app.config['database']
+        response = db.get_all_users_info()
+        return jsonify(response), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 401
