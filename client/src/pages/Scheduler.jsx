@@ -15,14 +15,17 @@ const CourseColors = {
 const TimeSlots = () => Array.from({ length: 22 }, (_, i) => i + 8);
 const Days = () => ['MON', 'TUES', 'WED', 'THUR', 'FRI', 'SAT', 'SUN'];
 
-const Schedule = () => [
-  { course: 'ACCG5150', day: 'MON', startTime: 11.5, endTime: 13 },
-  { course: 'MATH1123', day: 'TUES', startTime: 10, endTime: 11.5 },
-  { course: 'PSYC2213', day: 'WED', startTime: 12, endTime: 13.5 },
-  { course: 'PSYC2213', day: 'SAT', startTime: 12, endTime: 13.5 },
-];
+const dayMap = {
+  'Mon': 'MON',
+  'Tue': 'TUES',
+  'Wed': 'WED',
+  'Thu': 'THUR',
+  'Fri': 'FRI',
+  'Sat': 'SAT',
+  'Sun': 'SUN'
+};
 
-const CourseSelection = ({ course, isSelected, onToggle }) => {
+const CourseSelection = ({ course, isSelected, onToggle, onGroupingSelect }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedGrouping, setSelectedGrouping] = useState('');
   const [groupings, setGroupings] = useState([]);
@@ -34,14 +37,27 @@ const CourseSelection = ({ course, isSelected, onToggle }) => {
         setIsLoading(true);
         try {
           const serverUrl = import.meta.env.VITE_SERVER_URL;
+          console.log('Fetching course groupings for:', course.id);
           const response = await axios.get(
             `${serverUrl}/api/course/course_code/${course.id}/`,
-            { withCredentials: true }
+            { 
+              withCredentials: true,
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              }
+            }
           );
           
-          // Extract unique course groupings from the response
-          const uniqueGroupings = [...new Set(response.data.map(course => course.course_grouping))];
-          setGroupings(uniqueGroupings);
+          console.log('API Response:', response.data);
+          
+          if (Array.isArray(response.data)) {
+            const uniqueGroupings = [...new Set(response.data.map(course => course.course_grouping))];
+            console.log('Unique groupings:', uniqueGroupings);
+            setGroupings(uniqueGroupings);
+          } else {
+            console.error('Unexpected API response format:', response.data);
+          }
         } catch (error) {
           console.error('Error fetching course groupings:', error);
         } finally {
@@ -52,6 +68,14 @@ const CourseSelection = ({ course, isSelected, onToggle }) => {
 
     fetchCourseGroupings();
   }, [isSelected, course.id]);
+
+  const handleGroupingSelect = async (grouping) => {
+    setSelectedGrouping(grouping);
+    setIsOpen(false);
+    if (onGroupingSelect) {
+      onGroupingSelect(course.id, grouping);
+    }
+  };
 
   return (
     <div className="flex items-center justify-between gap-2">
@@ -87,10 +111,7 @@ const CourseSelection = ({ course, isSelected, onToggle }) => {
               <button
                 key={grouping}
                 className="w-full px-2 py-1 text-sm text-left text-gray-300 hover:bg-gray-700"
-                onClick={() => {
-                  setSelectedGrouping(grouping);
-                  setIsOpen(false);
-                }}
+                onClick={() => handleGroupingSelect(grouping)}
               >
                 {grouping}
               </button>
@@ -113,42 +134,67 @@ const SchedulePage = () => {
     { id: 'BIO1345', selected: false },
   ]);
 
-  const [courseGroupings, setCourseGroupings] = useState({});
+  const [courseSchedules, setCourseSchedules] = useState([]);
+
+  const handleGroupingSelect = async (courseId, grouping) => {
+    console.log('Fetching schedule for:', grouping);
+    try {
+      const serverUrl = import.meta.env.VITE_SERVER_URL;
+      const response = await axios.get(
+        `${serverUrl}/api/course/course_grouping/${grouping}/`,
+        { 
+          withCredentials: true,
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      console.log('Schedule API Response:', response.data);
+
+      if (Array.isArray(response.data)) {
+        const newScheduleItems = response.data.map(course => {
+          const [beginHour, beginMinute] = course.begin_time.split(':').map(Number);
+          const [endHour, endMinute] = course.end_time.split(':').map(Number);
+          
+          const beginTime = beginHour + (beginMinute / 60);
+          const endTime = endHour + (endMinute / 60);
+
+          return {
+            course: courseId,
+            day: dayMap[course.day] || course.day.toUpperCase(),
+            startTime: beginTime,
+            endTime: endTime,
+            grouping: course.course_grouping,
+            room: course.building_room
+          };
+        });
+
+        console.log('New schedule items:', newScheduleItems);
+
+        setCourseSchedules(prev => [
+          ...prev.filter(schedule => schedule.course !== courseId),
+          ...newScheduleItems
+        ]);
+      } else {
+        console.error('Unexpected API response format:', response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching course details:', error);
+    }
+  };
 
   const toggleCourse = (courseId) => {
     setSelectedCourses(selectedCourses.map(course => 
       course.id === courseId ? { ...course, selected: !course.selected } : course
     ));
+    
+    // Remove course schedules when unchecking a course
+    if (selectedCourses.find(c => c.id === courseId)?.selected) {
+      setCourseSchedules(prev => prev.filter(schedule => schedule.course !== courseId));
+    }
   };
-
-  useEffect(() => {
-    const fetchCourseGroupings = async (courseId) => {
-      try {
-        const serverUrl = import.meta.env.VITE_SERVER_URL;
-        const response = await axios.get(
-          `${serverUrl}/api/course/course_id/${courseId}/`,
-          { withCredentials: true }
-        );
-        
-        // Assuming the response includes course_grouping data
-        // Modify this according to your actual API response structure
-        const uniqueGroupings = [...new Set(response.data.map(course => course.course_grouping))];
-        setCourseGroupings(prev => ({
-          ...prev,
-          [courseId]: uniqueGroupings
-        }));
-      } catch (error) {
-        console.error('Error fetching course groupings:', error);
-      }
-    };
-
-    // Fetch groupings for selected courses
-    selectedCourses.forEach(course => {
-      if (course.selected && !courseGroupings[course.id]) {
-        fetchCourseGroupings(course.id);
-      }
-    });
-  }, [selectedCourses]);
 
   return (
     <div className='flex-1 overflow-auto relative z-10 bg-gray-900 text-white'>
@@ -183,7 +229,7 @@ const SchedulePage = () => {
                     course={course}
                     isSelected={course.selected}
                     onToggle={() => toggleCourse(course.id)}
-                    groupings={courseGroupings[course.id]}
+                    onGroupingSelect={handleGroupingSelect}
                   />
                 ))}
               </div>
@@ -199,8 +245,8 @@ const SchedulePage = () => {
         </div>
 
         {/* Main Schedule Grid */}
-        <div className="flex-1 p-6">
-          <div className="bg-gray-900 border border-gray-800 rounded-lg h-full">
+        <div className="flex-1 p-6 overflow-x-auto">
+          <div className="bg-gray-900 border border-gray-800 rounded-lg h-full min-w-[1200px]">
             <div className="grid grid-cols-8 h-full">
               {/* Time column */}
               <div className="col-span-1 border-r border-gray-800">
@@ -222,7 +268,7 @@ const SchedulePage = () => {
                     {TimeSlots().map((time) => (
                       <div key={time} className="h-12 border-t border-gray-800"></div>
                     ))}
-                    {Schedule()
+                    {courseSchedules
                       .filter((event) => event.day === day)
                       .map((event, idx) => (
                         <div
@@ -233,7 +279,11 @@ const SchedulePage = () => {
                             height: `${(event.endTime - event.startTime) * 48}px`,
                           }}
                         >
-                          {event.course}
+                          <div className="text-center">
+                            <div>{event.course}</div>
+                            <div className="text-xs opacity-75">{event.grouping}</div>
+                            <div className="text-xs opacity-75">{event.room}</div>
+                          </div>
                         </div>
                       ))}
                   </div>
