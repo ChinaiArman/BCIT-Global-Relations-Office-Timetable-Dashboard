@@ -207,7 +207,11 @@ def register() -> tuple:
             return jsonify({"error": "Username, email, and password are required"}), 400
 
         # Check if the email is already in the system
-        existing_user = db.get_user_by_email(email)
+        try:
+            existing_user = db.get_user_by_email(email)
+            return jsonify({"error": "Email is already registered"}), 400
+        except InvalidEmailAddress as e:
+            existing_user = False
         if existing_user:
             return jsonify({"error": "Email is already registered"}), 400
 
