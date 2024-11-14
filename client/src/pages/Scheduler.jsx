@@ -8,6 +8,7 @@ const SchedulePage = () => {
 	const { studentId } = useParams();
 	const [studentInfo, setStudentInfo] = useState({});
 	const [loading, setLoading] = useState(true);
+	const [selectedCourses, setSelectedCourses] = useState([]); // Track selected courses here
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -32,8 +33,9 @@ const SchedulePage = () => {
 	return (
 		<div className='flex-1 overflow-auto relative z-10 bg-gray-900 text-white'>
 			<div className="flex h-[calc(100vh-64px)]">
-				<SchedulerSidebar studentInfo={studentInfo} />
-				<Calendar courseSchedules={studentInfo.courses} />
+				<SchedulerSidebar studentInfo={studentInfo} onSelectedCoursesChange={setSelectedCourses} />
+				{/* Pass selected courses to Calendar */}
+				<Calendar courseSchedules={selectedCourses} />
 			</div>
 		</div>
 	);
