@@ -7,7 +7,8 @@ const Database = () => {
   const [courseFile, setCourseFile] = useState(null);
   const [studentFile, setStudentFile] = useState(null);
   const [message, setMessage] = useState({ type: '', text: '' });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isCourseLoading, setIsCourseLoading] = useState(false);
+  const [isStudentLoading, setIsStudentLoading] = useState(false);
 
   const handleCourseUpload = async (e) => {
     e.preventDefault();
@@ -18,8 +19,8 @@ const Database = () => {
 
     const formData = new FormData();
     formData.append('file', courseFile);
+    setIsCourseLoading(true);
 
-    setIsLoading(true);
     try {
       const serverUrl = import.meta.env.VITE_SERVER_URL;
       const response = await fetch(`${serverUrl}/api/course/import`, {
@@ -34,22 +35,22 @@ const Database = () => {
         throw new Error(data.message || 'Error uploading course data');
       }
 
-      setMessage({ 
-        type: 'success', 
+      setMessage({
+        type: 'success',
         text: data.message,
-        details: data.invalid_rows?.length > 0 
+        details: data.invalid_rows?.length > 0
           ? `${data.invalid_rows.length} rows failed to upload.`
           : null
       });
       setCourseFile(null);
       e.target.reset();
     } catch (error) {
-      setMessage({ 
-        type: 'error', 
-        text: error.message || 'Error uploading course data' 
+      setMessage({
+        type: 'error',
+        text: error.message || 'Error uploading course data'
       });
     } finally {
-      setIsLoading(false);
+      setIsCourseLoading(false);
     }
   };
 
@@ -62,8 +63,8 @@ const Database = () => {
 
     const formData = new FormData();
     formData.append('file', studentFile);
+    setIsStudentLoading(true);
 
-    setIsLoading(true);
     try {
       const serverUrl = import.meta.env.VITE_SERVER_URL;
       const response = await fetch(`${serverUrl}/api/student/import`, {
@@ -78,22 +79,22 @@ const Database = () => {
         throw new Error(data.message || 'Error uploading student data');
       }
 
-      setMessage({ 
-        type: 'success', 
+      setMessage({
+        type: 'success',
         text: data.message,
-        details: data.invalid_rows?.length > 0 
+        details: data.invalid_rows?.length > 0
           ? `${data.invalid_rows.length} rows failed to upload.`
           : null
       });
       setStudentFile(null);
       e.target.reset();
     } catch (error) {
-      setMessage({ 
-        type: 'error', 
-        text: error.message || 'Error uploading student data' 
+      setMessage({
+        type: 'error',
+        text: error.message || 'Error uploading student data'
       });
     } finally {
-      setIsLoading(false);
+      setIsStudentLoading(false);
     }
   };
 
@@ -101,24 +102,21 @@ const Database = () => {
     <div className="flex-1 overflow-auto relative z-10 bg-gray-900 text-white p-8">
       <div className="max-w-4xl mx-auto space-y-8">
         <h1 className="text-2xl font-bold mb-8">Database Management</h1>
-
         <StatusMessage message={message} />
-
         <UploadWindow
           title="Upload Course Data"
           fileType="Course Data"
           fileExtension="XLSX"
-          isLoading={isLoading}
+          isLoading={isCourseLoading}
           selectedFile={courseFile}
           onFileChange={setCourseFile}
           onSubmit={handleCourseUpload}
         />
-
         <UploadWindow
           title="Upload Student Data"
           fileType="Student Data"
           fileExtension="CSV"
-          isLoading={isLoading}
+          isLoading={isStudentLoading}
           selectedFile={studentFile}
           onFileChange={setStudentFile}
           onSubmit={handleStudentUpload}
