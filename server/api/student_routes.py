@@ -227,92 +227,20 @@ def download_template():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-@student_bp.route("/student/add_course/student/<string:student_id>/course/<string:course_id>/", methods=["PUT"])
+@student_bp.route("/student/replace-course-groupings/<string:student_id>", methods=["PUT"])
 @verified_login_required
-def add_course_to_student_route(student_id, course_id):
+def replace_courses_with_new_course_groupings(student_id):
     """
-    Request: PUT /student/add_course/student/<string:student_id>/course/<string:course_id>/
-
-    Description: Add a course to a student.
-
-    Parameters:
-    - student_id (string): The student ID.
-    - course_id (string): The course ID.
-
-    Response:
-    - message: Success or error message.
-
-    Status Codes:
-    - 200: Course added successfully.
-    - 400: Invalid request.
-    - 500: Internal server error.
-
-    Author: ``@KateSullivan``
     """
     try:
         db = current_app.config["database"]
-        db.add_course_to_student(student_id, course_id)
-        return jsonify({"message": "Course added successfully"}), 200
+        data = request.get_json()
+        db.remove_all_course_groupings(student_id)
+        db.add_courses_by_groupings(student_id, data["course_groupings"])
+        return jsonify({"message": "Course groupings added to student successfully"}), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 400
-
-@student_bp.route("/student/remove_course/student/<string:student_id>/course/<string:course_id>/", methods=["PUT"])
-@verified_login_required
-def remove_course_from_student_route(student_id, course_id):
-    """
-    Request: PUT /student/remove_course/student/<string:student_id>/course/<string:course_id>/
-
-    Description: Remove a course from a student.
-
-    Parameters:
-    - student_id (string): The student ID.
-    - course_id (string): The course ID.
-
-    Response:
-    - message: Success or error message.
-
-    Status Codes:
-    - 200: Course removed successfully.
-    - 400: Invalid request.
-    - 500: Internal server error.
-
-    Author: ``@KateSullivan``
-    """
-    try:
-        db = current_app.config["database"]
-        db.remove_course_from_student(student_id, course_id)
-        return jsonify({"message": "Course removed successfully"}), 200
-    except Exception as e:
-        return jsonify({"message": str(e)}), 400
-
-@student_bp.route("/student/replace_all_courses/student/<string:student_id>/course_list/<string:course_list>", methods=["PUT"])
-@verified_login_required
-def replace_all_courses_for_student_route(student_id, course_list):
-    """
-    Request: PUT /student/replace_all_courses/student/<string:student_id>/course_list/<string:course_list>
-
-    Description: Replace all courses for a student.
-
-    Parameters:
-    - student_id (string): The student ID.
-    - course_list (string): The comma-separated list of course IDs.
-
-    Response:
-    - message: Success or error message.
-
-    Status Codes:
-    - 200: Courses replaced successfully.
-    - 400: Invalid request.
-    - 500: Internal server error.
-
-    Author: ``@KateSullivan``
-    """
-    try:
-        db = current_app.config["database"]
-        db.replace_all_courses_for_student(student_id, course_list)
-        return jsonify({"message": "Courses replaced successfully"}), 200
-    except Exception as e:
-        return jsonify({"message": str(e)}), 400
+    
 
 @student_bp.route("/student/flip-mark-done/<string:student_id>", methods=["POST"])
 @verified_login_required

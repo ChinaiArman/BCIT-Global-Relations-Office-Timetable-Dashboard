@@ -51,7 +51,7 @@ def create_app():
     configure_sessions(app, db)
 
     # LOGGING CONFIGURATION
-    configure_logging(app)
+    # configure_logging(app)
 
     
 

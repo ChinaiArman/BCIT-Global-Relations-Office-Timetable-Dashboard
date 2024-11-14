@@ -192,6 +192,7 @@ class Database:
         ... # Invalid rows returned
         ... # Courses uploaded to the database
         """
+        self.db.session.query(enrollments).delete()
         self.db.session.query(Course).delete()
         self.db.session.commit()
         self.db.session.execute(text("ALTER TABLE courses AUTO_INCREMENT = 1"))
@@ -314,6 +315,7 @@ class Database:
         ...
         """
         try:
+            self.db.session.query(enrollments).delete()
             self.db.session.query(Preferences).delete()
             self.db.session.query(Student).delete()
             invalid_rows = []
@@ -752,13 +754,19 @@ class Database:
     def get_all_course_groupings_by_course_code(self, course_code):
         try:
             courses = self.db.session.query(Course).filter(Course.course_code == course_code).all()
+            groupings_to_remove = []
             for course in courses:
+                if course.status != "Active":
+                    groupings_to_remove.append(course.course_grouping)
+                if course.num_enrolled >= course.max_capacity:
+                    groupings_to_remove.append(course.course_grouping)
                 course.start_date = course.start_date.strftime("%Y-%m-%d")
                 course.end_date = course.end_date.strftime("%Y-%m-%d")
                 course.begin_time = course.begin_time.strftime("%H:%M")
                 course.end_time = course.end_time.strftime("%H:%M")
+            for grouping in groupings_to_remove:
+                courses = [course for course in courses if course.course_grouping != grouping]
             course_reprs = [course.to_dict() for course in courses]
-            # create a dictionary with course_grouping as key and list of courses as value
             course_groupings = {}
             for course in course_reprs:
                 if course["course_grouping"] not in course_groupings:
@@ -1084,5 +1092,27 @@ class Database:
         """
         student = self.db.session.query(Student).filter(Student.id == student_id).first()
         student.is_completed = not student.is_completed
+        self.db.session.commit()
+        return
+
+    def remove_all_course_groupings(self, student_id) -> None:
+        """
+        """
+        student = self.db.session.query(Student).filter(Student.id == student_id).first()
+        for course in student.courses:
+            course.num_enrolled -= 1
+        student.courses = []
+        self.db.session.commit()
+        return
+    
+    def add_courses_by_groupings(self, student_id, groupings_list):
+        """
+        """
+        student = self.db.session.query(Student).filter(Student.id == student_id).first()
+        for grouping in groupings_list:
+            courses = self.db.session.query(Course).filter(Course.course_grouping == grouping).all()
+            for course in courses:
+                student.courses.append(course)
+                course.num_enrolled += 1
         self.db.session.commit()
         return
