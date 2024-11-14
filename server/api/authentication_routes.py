@@ -230,12 +230,12 @@ def register() -> tuple:
             verification_code=verification_code
         )
         
-        # # Send verification email
-        # email_manager.send_verification_email(
-        #     to_email=email,
-        #     username=username,
-        #     verification_code=verification_code
-        # )
+        # Send verification email
+        email_manager.send_verification_email(
+            to_email=email,
+            username=username,
+            verification_code=verification_code
+        )
         
         return jsonify({"message": "User registered. Verification email sent."}), 200
     except Exception as e:
