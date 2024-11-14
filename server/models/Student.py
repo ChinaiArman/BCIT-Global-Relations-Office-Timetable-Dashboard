@@ -23,7 +23,7 @@ class Student(db.Model):
     )
 
     def to_dict(self):
-        return {
+        student = {
             "id": self.id,
             "first_name": self.first_name,
             "last_name": self.last_name,
@@ -31,5 +31,12 @@ class Student(db.Model):
             "email": self.email,
             "is_completed": self.is_completed,
             "preferences": [course.preference for course in self.preferences],
-            "courses": [course.course_code for course in self.courses],
+            "courses": []
         }
+        for course in self.courses:
+            course.start_date = course.start_date.strftime("%Y-%m-%d")
+            course.end_date = course.end_date.strftime("%Y-%m-%d")
+            course.begin_time = course.begin_time.strftime("%H:%M")
+            course.end_time = course.end_time.strftime("%H:%M")
+            student["courses"].append(course.to_dict())
+        return student
