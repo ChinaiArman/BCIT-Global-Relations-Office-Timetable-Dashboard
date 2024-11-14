@@ -9,30 +9,31 @@ const StudentsTable = ({ isDashboard = false }) => {
   const [userData, setUserData] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
 
+  const fetchStudents = async () => {
+    try {
+      const serverUrl = import.meta.env.VITE_SERVER_URL;
+      const response = await axios.get(`${serverUrl}/api/student/get-all`, {
+        withCredentials: true,
+      });
+      const students = response.data.map((student) => ({
+        id: student.id,
+        name: `${student.first_name} ${student.last_name}`,
+        email: student.email,
+        status: student.is_completed 
+          ? "Complete" 
+          : student.courses.length === 0 
+          ? "Incomplete" 
+          : "In Progress",
+      }));
+      setUserData(students);
+      setFilteredStudents(students);
+    } catch (error) {
+      console.error("Error fetching student data:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchStudentData = async () => {
-      try {
-        const serverUrl = import.meta.env.VITE_SERVER_URL;
-        const response = await axios.get(`${serverUrl}/api/student/get-all`, {
-          withCredentials: true,
-        });
-        const students = response.data.map((student) => ({
-          id: student.id,
-          name: `${student.first_name} ${student.last_name}`,
-          email: student.email,
-          status: student.is_completed 
-            ? "Complete" 
-            : student.courses.length === 0 
-            ? "Incomplete" 
-            : "In Progress",
-        }));
-        setUserData(students);
-        setFilteredStudents(students);
-      } catch (error) {
-        console.error("Error fetching student data:", error);
-      }
-    };
-    fetchStudentData();
+    fetchStudents();
   }, []);
 
   const handleSearch = (e) => {
@@ -42,6 +43,22 @@ const StudentsTable = ({ isDashboard = false }) => {
       (user) => user.name.toLowerCase().includes(term) || user.email.toLowerCase().includes(term)
     );
     setFilteredStudents(filtered);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this student?")) {
+      try {
+        const serverUrl = import.meta.env.VITE_SERVER_URL;
+        await axios.delete(`${serverUrl}/api/student/${id}/`, {
+          withCredentials: true,
+        });
+        // Refresh the student list after successful deletion
+        await fetchStudents();
+      } catch (error) {
+        console.error("Error deleting student:", error);
+        alert("Failed to delete student. Please try again.");
+      }
+    }
   };
 
   // Create a display array based on whether this is dashboard or full view
@@ -138,7 +155,12 @@ const StudentsTable = ({ isDashboard = false }) => {
                   >
                     Edit
                   </a>
-                  <button className="text-red-400 hover:text-red-300">Delete</button>
+                  <button 
+                    className="text-red-400 hover:text-red-300"
+                    onClick={() => handleDelete(user.id)}
+                  >
+                    Delete
+                  </button>
                 </td>
               </motion.tr>
             ))}
