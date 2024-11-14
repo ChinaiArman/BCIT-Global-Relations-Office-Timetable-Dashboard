@@ -92,7 +92,7 @@ const Dashboard = () => {
 					</motion.div>
 				)}
 
-				<StudentsTable />
+				<StudentsTable isDashboard={true} />
 
 				{/* USER CHARTS */}
 				<div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8'>
