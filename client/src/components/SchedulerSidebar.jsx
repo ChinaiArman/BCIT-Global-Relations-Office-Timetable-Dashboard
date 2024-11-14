@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp, PlusCircle, CalendarCheck, CalendarSearch } from 'lucide-react';
+import { PlusCircle, CalendarCheck, CalendarSearch } from 'lucide-react';
 import axios from 'axios';
 
 const CourseColors = [
@@ -24,7 +24,7 @@ const SchedulerSidebar = ({ studentInfo, onSelectedCoursesChange }) => {
 
     return (
         <div className="w-64 bg-gray-900 border-r border-gray-800 p-6 min-h-screen flex flex-col">
-            <StudentInfo studentInfo={studentInfo} />
+            <StudentInfo studentInfo={studentInfo} selectedCourses={selectedCourses} />
             <CourseList
                 studentInfo={studentInfo}
                 onSelectedCoursesChange={handleSelectedCoursesChange} // Pass the handler to CourseList
@@ -35,7 +35,7 @@ const SchedulerSidebar = ({ studentInfo, onSelectedCoursesChange }) => {
 };
 
 
-const StudentInfo = ({ studentInfo }) => {
+const StudentInfo = ({ studentInfo, selectedCourses }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isCompleted, setIsCompleted] = useState(studentInfo.is_completed); // Local state to track completion
 
@@ -57,6 +57,19 @@ const StudentInfo = ({ studentInfo }) => {
             console.error('Error making POST request:', error);
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const uploadCourseGroupings = async () => {
+        const groupingIds = selectedCourses.map(course => course.groupingId);
+        console.log(groupingIds);
+        try {
+            const response = await axios.put(`${import.meta.env.VITE_SERVER_URL}/api/student/replace-course-groupings/${studentInfo.id}`, { "course_groupings": groupingIds },{ withCredentials: true });
+            if (response.status === 200) {
+                console.log('Course groupings uploaded successfully');
+            }
+        } catch (error) {
+            console.error('Error uploading course groupings:', error);
         }
     };
 
@@ -96,12 +109,22 @@ const StudentInfo = ({ studentInfo }) => {
             <div className="mt-4 flex justify-center">
                 <button
                     onClick={markAsDone}
-                    className={`rounded-sm px-4 py-2 font-bold text-sm text-white duration-300 hover:bg-red-400 text-center ${
-                        isCompleted ? 'bg-red-500' : 'bg-indigo-600'
+                    className={`rounded-sm px-4 py-2 font-bold text-sm text-white duration-300 text-center ${
+                        isCompleted ? 'bg-red-500 hover:bg-red-400' : 'bg-indigo-600 hover:bg-indigo-500'
                     }`}
                     disabled={isSubmitting}
                 >
                     {isSubmitting ? 'Submitting...' : isCompleted ? 'MARK AS INCOMPLETE' : 'MARK AS DONE'}
+                </button>
+            </div>
+
+            {/* Save Button */}
+            <div className="mt-4 flex justify-center">
+                <button
+                    onClick={uploadCourseGroupings}
+                    className="rounded-sm px-4 py-2 font-bold text-sm text-white duration-300 hover:bg-green-400 text-center bg-green-600"
+                >
+                    Save
                 </button>
             </div>
         </div>
