@@ -1,4 +1,4 @@
-import { House, DatabaseZap, Menu, Settings, GraduationCap, ShieldCheck, CalendarCog } from "lucide-react";
+import { House, DatabaseZap, Menu, Settings, GraduationCap, ShieldCheck } from "lucide-react";
 import { useAdminAuth } from '../context/AdminContext.jsx';
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -7,9 +7,8 @@ import { Link } from "react-router-dom";
 const SIDEBAR_ITEMS = [
 	{ name: "Home", icon: House, color: "#6366f1", href: "/" },
 	{ name: "Students", icon: GraduationCap, color: "#8B5CF6", href: "/students" },
-	{ name: "Scheduler", icon: CalendarCog, color: "#EC4899", href: "/scheduler" },
-	{ name: "Database", icon: DatabaseZap, color: "#3B82F6", href: "/database" },
-	{ name: "Settings", icon: Settings, color: "#6EE7B7", href: "/settings" },
+	{ name: "Database", icon: DatabaseZap, color: "#6EE7B7", href: "/database" },
+	{ name: "Settings", icon: Settings, color: "#F59E0B", href: "/settings" },
 ];
 
 const Sidebar = () => {
@@ -25,7 +24,7 @@ const Sidebar = () => {
 				if (!prevItems.some(item => item.name === "Admin")) {
 					return [
 						...prevItems.slice(0, 4),
-						{ name: "Admin", icon: ShieldCheck, color: "#F59E0B", href: "/admin" },
+						{ name: "Admin", icon: ShieldCheck, color: "#EC4899", href: "/admin" },
 						...prevItems.slice(4),
 					];
 				}

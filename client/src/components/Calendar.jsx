@@ -13,6 +13,8 @@ const CourseColors = [
 ];
 
 const Calendar = ({ courseSchedules }) => {
+    const TOTAL_MINUTES = 900;
+    const START_HOUR = 8 * 60; // 8:00 in minutes
     const TimeSlots = Array.from({ length: 15 }, (_, i) => i + 8); // Time slots from 8:00 to 22:00
     const Days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
@@ -24,6 +26,16 @@ const Calendar = ({ courseSchedules }) => {
             startTime < conflict.endTime &&
             endTime > conflict.startTime
         );
+    };
+
+    const calculatePosition = (startTime, endTime) => {
+        const topPercentage = ((startTime - START_HOUR - 30) / TOTAL_MINUTES) * 100;
+        const heightPercentage = ((endTime - startTime) / TOTAL_MINUTES) * 100;
+
+        return {
+            top: `${topPercentage}%`,
+            height: `${heightPercentage}%`
+        };
     };
 
     // This function will transform the course data into the structure needed for the calendar
@@ -91,13 +103,17 @@ const Calendar = ({ courseSchedules }) => {
                                     .filter((event) => event.day === day)
                                     .map((event, idx) => {
                                         const hasConflict = isTimeSlotInConflict(event.day, event.startTime, event.endTime, events, event.course);
+                                        
+                                        // Calculate top position and height dynamically based on the event's times
+                                        const { top, height } = calculatePosition(event.startTime, event.endTime);
+
                                         return (
                                             <div
                                                 key={idx}
                                                 className={`absolute w-11/12 left-1/2 -translate-x-1/2 ${hasConflict ? 'bg-red-500/20 border-red-500' : event.color.bg} ${hasConflict ? 'border-red-500' : event.color.border} text-white border rounded-lg p-2 text-sm font-medium flex items-center justify-center transition-colors duration-200 ${hasConflict ? 'shadow-lg shadow-red-500/20' : ''}`}
                                                 style={{
-                                                    top: `${(event.startTime - 8 * 60) * 48 / 60}px`, // Convert to pixels (48px per 30 minutes)
-                                                    height: `${(event.endTime - event.startTime) * 48 / 60}px`, // Convert to pixels (48px per 30 minutes)
+                                                    top,
+                                                    height
                                                 }}
                                             >
                                                 <div className="text-center">
