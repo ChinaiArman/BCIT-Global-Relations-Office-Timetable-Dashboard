@@ -935,6 +935,25 @@ class Database:
         ]
         return users
 
+
+    def change_user_admin_status(self, user_id: int) -> None:
+        """
+        Change the admin status of a user.
+
+        Args
+        ----
+        user_id (int): User ID.
+
+        Returns
+        -------
+        None
+        """
+        user = self.get_user_by_id(user_id)
+        user.is_admin = not user.is_admin
+        self.db.session.commit()
+        return
+
+
     def delete_user(self, user_id: int) -> None:
         """
         Delete a user by ID.

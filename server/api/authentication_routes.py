@@ -5,6 +5,7 @@
 from flask import Blueprint, jsonify, request, current_app, session
 
 from services.decorators import verified_login_required, admin_required, unverified_login_required
+from exceptions import InvalidEmailAddress
 
 
 # DEFINE BLUEPRINT
@@ -229,12 +230,12 @@ def register() -> tuple:
             verification_code=verification_code
         )
         
-        # Send verification email
-        email_manager.send_verification_email(
-            to_email=email,
-            username=username,
-            verification_code=verification_code
-        )
+        # # Send verification email
+        # email_manager.send_verification_email(
+        #     to_email=email,
+        #     username=username,
+        #     verification_code=verification_code
+        # )
         
         return jsonify({"message": "User registered. Verification email sent."}), 200
     except Exception as e:
@@ -302,3 +303,23 @@ def get_all_users_info() -> tuple:
         return jsonify(response), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 401
+    
+    
+@authentication_bp.route('/authenticate/change-role/', methods=['PATCH'])
+@admin_required
+def change_user_role() -> tuple:
+    """
+    Change the role of a specific user.
+    """
+    try:
+        db = current_app.config['database']
+        user_id = request.json.get('user_id')
+        
+        if not user_id:
+            return jsonify({"error": "user_id required"}), 400
+
+        db.change_user_admin_status(user_id)
+        
+        return jsonify({"message": f"Role for user {user_id} successfully updated"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
