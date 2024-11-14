@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, AlertCircle } from "lucide-react";
+import { Search, PlusCircle, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import AddStudentModal from "./AddStudentModal";
 
-// Custom Modal Component
+// Delete Modal Component
 const DeleteModal = ({ isOpen, onClose, onConfirm, studentName }) => {
   if (!isOpen) return null;
 
@@ -55,6 +56,7 @@ const StudentsTable = ({ isDashboard = false }) => {
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const fetchStudents = async () => {
     try {
@@ -112,6 +114,13 @@ const StudentsTable = ({ isDashboard = false }) => {
     }
   };
 
+  const handleAddModalClose = (shouldRefetch = false) => {
+    setIsAddModalOpen(false);
+    if (shouldRefetch) {
+      fetchStudents();
+    }
+  };
+
   const displayStudents = isDashboard 
     ? filteredStudents.slice(0, 5) 
     : filteredStudents;
@@ -125,7 +134,16 @@ const StudentsTable = ({ isDashboard = false }) => {
         transition={{ delay: 0.2 }}
       >
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-gray-100">Students</h2>
+          <div className="flex items-center gap-4">
+            <h2 className="text-xl font-semibold text-gray-100">Students</h2>
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+            >
+              <PlusCircle size={20} />
+              <span>Add Student</span>
+            </button>
+          </div>
           <div className="relative">
             <input
               type="text"
@@ -241,6 +259,12 @@ const StudentsTable = ({ isDashboard = false }) => {
             }}
             onConfirm={handleDeleteConfirm}
             studentName={studentToDelete?.name}
+          />
+        )}
+        {isAddModalOpen && (
+          <AddStudentModal
+            isOpen={isAddModalOpen}
+            onClose={handleAddModalClose}
           />
         )}
       </AnimatePresence>
