@@ -1,7 +1,7 @@
 import React, { useState } from "react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 import UploadWindow from '../components/UploadWindow';
-import MessageDisplay from '../components/MessageDisplay';
-import DatabaseLayout from '../components/DatabaseLayout';
+import StatusMessage from '../components/StatusMessage';
 
 const Database = () => {
   const [courseFile, setCourseFile] = useState(null);
@@ -99,9 +99,10 @@ const Database = () => {
   };
 
   return (
-    <DatabaseLayout>
-      <MessageDisplay message={message} />
-      <div className="space-y-6">
+    <div className="flex-1 overflow-auto relative z-10 bg-gray-900 text-white p-8">
+      <div className="max-w-4xl mx-auto space-y-8">
+        <h1 className="text-2xl font-bold mb-8">Database Management</h1>
+        <StatusMessage message={message} />
         <UploadWindow
           title="Upload Course Data"
           fileType="Course Data"
@@ -121,7 +122,7 @@ const Database = () => {
           onSubmit={handleStudentUpload}
         />
       </div>
-    </DatabaseLayout>
+    </div>
   );
 };
 
