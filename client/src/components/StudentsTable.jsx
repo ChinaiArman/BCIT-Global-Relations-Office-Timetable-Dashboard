@@ -70,7 +70,7 @@ const StudentsTable = ({ isDashboard = false }) => {
         email: student.email,
         status: student.is_completed 
           ? "Complete" 
-          : student.courses.length === 0 
+          : student.course_codes.length === 0 
           ? "Incomplete" 
           : "In Progress",
       }));
