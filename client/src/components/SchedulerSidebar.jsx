@@ -108,9 +108,7 @@ const StudentInfo = ({ studentInfo, selectedCourses }) => {
             <div className="mt-4 flex justify-center">
                 <button
                     onClick={markAsDone}
-                    className={`rounded-sm px-4 py-2 font-bold text-sm text-white duration-300 text-center ${
-                        isCompleted ? 'bg-red-500 hover:bg-red-400' : 'bg-indigo-600 hover:bg-indigo-500'
-                    }`}
+                    className={'rounded-sm px-4 py-2 font-bold text-sm text-white duration-300 text-center bg-indigo-600 hover:bg-indigo-500'}
                     disabled={isSubmitting}
                 >
                     {isSubmitting ? 'Submitting...' : isCompleted ? 'MARK AS INCOMPLETE' : 'MARK AS DONE'}
