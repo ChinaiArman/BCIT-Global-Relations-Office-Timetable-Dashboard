@@ -2,7 +2,7 @@ import { House, DatabaseZap, Menu, Settings, GraduationCap, ShieldCheck, LogOut 
 import { useAdminAuth } from '../context/AdminContext.jsx';
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const SIDEBAR_ITEMS = [
@@ -13,6 +13,7 @@ const SIDEBAR_ITEMS = [
 ];
 
 const Sidebar = () => {
+	const navigate = useNavigate();
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 	const { isAdmin } = useAdminAuth();
 	const [sidebarItems, setSidebarItems] = useState(SIDEBAR_ITEMS);
@@ -25,7 +26,7 @@ const Sidebar = () => {
 			});
 
 			if (response.status === 200) {
-				window.location.href = "/login";
+				navigate("/login");
 			}
 		} catch (err) {
 			console.error("Logout failed:", err);
