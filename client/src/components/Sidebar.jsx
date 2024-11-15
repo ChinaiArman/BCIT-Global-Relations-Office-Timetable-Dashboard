@@ -2,7 +2,7 @@ import { House, DatabaseZap, Menu, Settings, GraduationCap, ShieldCheck, LogOut 
 import { useAdminAuth } from '../context/AdminContext.jsx';
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
 const SIDEBAR_ITEMS = [
@@ -14,6 +14,7 @@ const SIDEBAR_ITEMS = [
 
 const Sidebar = () => {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 	const { isAdmin } = useAdminAuth();
 	const [sidebarItems, setSidebarItems] = useState(SIDEBAR_ITEMS);
@@ -66,26 +67,33 @@ const Sidebar = () => {
 				</motion.button>
 
 				<nav className='mt-8 flex-grow'>
-					{sidebarItems.map((item) => (
-						<Link key={item.href} to={item.href}>
-							<motion.div className='flex items-center p-4 text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors mb-2'>
-								<item.icon size={20} style={{ color: item.color, minWidth: "20px" }} />
-								<AnimatePresence>
-									{isSidebarOpen && (
-										<motion.span
-											className='ml-4 whitespace-nowrap'
-											initial={{ opacity: 0, width: 0 }}
-											animate={{ opacity: 1, width: "auto" }}
-											exit={{ opacity: 0, width: 0 }}
-											transition={{ duration: 0.2, delay: 0.3 }}
-										>
-											{item.name}
-										</motion.span>
-									)}
-								</AnimatePresence>
-							</motion.div>
-						</Link>
-					))}
+					{sidebarItems.map((item) => {
+                        const isActive = location.pathname === item.href;  // Check if the current route matches the item's href
+                        return (
+                            <Link key={item.href} to={item.href}>
+                                <motion.div
+                                    className={`flex items-center p-4 text-sm font-medium rounded-lg transition-colors mb-2 ${
+                                        isActive ? "bg-gray-700" : "hover:bg-gray-700"
+                                    }`}
+                                >
+                                    <item.icon size={20} style={{ color: item.color, minWidth: "20px" }} />
+                                    <AnimatePresence>
+                                        {isSidebarOpen && (
+                                            <motion.span
+                                                className="ml-4 whitespace-nowrap"
+                                                initial={{ opacity: 0, width: 0 }}
+                                                animate={{ opacity: 1, width: "auto" }}
+                                                exit={{ opacity: 0, width: 0 }}
+                                                transition={{ duration: 0.2, delay: 0.3 }}
+                                            >
+                                                {item.name}
+                                            </motion.span>
+                                        )}
+                                    </AnimatePresence>
+                                </motion.div>
+                            </Link>
+                        );
+                    })}
 				</nav>
 				
                 <div className='mt-auto'>
