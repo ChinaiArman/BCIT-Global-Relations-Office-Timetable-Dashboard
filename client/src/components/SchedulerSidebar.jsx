@@ -233,7 +233,6 @@ const CourseList = ({ studentInfo, onSelectedCoursesChange }) => {
     };
 
     const removeCourse = (courseCode) => {
-        console.log("removeCourse:", courseCode);
         setCoursesState((prevState) => ({
             ...prevState,
             [courseCode]: {
@@ -292,10 +291,6 @@ const CourseItem = ({
 }) => {
     const [preselectionHandled, setPreselectionHandled] = useState(false);
     const [isChecked, setIsChecked] = useState(isPreselected);
-    if (isPreselected) {
-        console.log("Preselected course:", Object.keys(preselectedGrouping)[0]);
-        console.log("selectedGrouping:", selectedGrouping);
-    }
 
     const handleCheckboxClick = (e) => {
         const isChecked = e.target.checked;
@@ -313,7 +308,6 @@ const CourseItem = ({
     useEffect(() => {
     // Ensure that we only handle preselection once
     if (isPreselected && !preselectionHandled) {
-        console.log("Handling preselection for course:", courseCode);
 
         // Trigger necessary actions
         onOpen();  // Open the dropdown
