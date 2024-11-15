@@ -34,7 +34,7 @@ class Course(db.Model):
     students = db.relationship('Student', secondary=enrollments, back_populates='courses')
 
     def to_dict(self):
-        return {
+        course = {
             "id": self.id,
             "status": self.status,
             "block": self.block,
@@ -43,11 +43,7 @@ class Course(db.Model):
             "course_code": self.course_code,
             "course_type": self.course_type,
             "day": self.day,
-            "begin_time": self.begin_time,
-            "end_time": self.end_time,
             "building_room": self.building_room,
-            "start_date": self.start_date,
-            "end_date": self.end_date,
             "max_capacity": self.max_capacity,
             "num_enrolled": self.num_enrolled,
             "is_full_time": self.is_full_time,
@@ -55,3 +51,20 @@ class Course(db.Model):
             "instructor": self.instructor,
             "students": [student.id for student in self.students]
         }
+        try:
+            course["start_date"] = self.start_date.strftime("%Y-%m-%d")
+        except:
+            course["start_date"] = self.start_date
+        try:
+            course["end_date"] = self.end_date.strftime("%Y-%m-%d")
+        except:
+            course["end_date"] = self.end_date
+        try:
+            course["begin_time"] = self.begin_time.strftime("%H:%M")
+        except:
+            course["begin_time"] = self.begin_time
+        try:
+            course["end_time"] = self.end_time.strftime("%H:%M")
+        except:
+            course["end_time"] = self.end_time
+        return course
