@@ -63,7 +63,7 @@ const Sidebar = () => {
 					onClick={() => setIsSidebarOpen(!isSidebarOpen)}
 					className='p-4 rounded-full hover:bg-gray-700 transition-colors max-w-fit'
 				>
-					<Menu size={24} />
+					<Menu size={20} />
 				</motion.button>
 
 				<nav className='mt-8 flex-grow'>
