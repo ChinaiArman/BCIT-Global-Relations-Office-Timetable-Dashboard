@@ -208,7 +208,7 @@ const CourseList = ({ studentInfo, onSelectedCoursesChange }) => {
 
             try {
                 const response = await axios.get(
-                    `${import.meta.env.VITE_SERVER_URL}/api/course/get-all-course-groupings-by-course-code/${courseCode}`,
+                    `${import.meta.env.VITE_SERVER_URL}/api/course/get-all-course-groupings-by-course-code/${courseCode}/${studentInfo.id}`,
                     { withCredentials: true }
                 );
                 const groupingsData = response.data;

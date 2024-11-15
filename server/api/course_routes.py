@@ -13,14 +13,14 @@ course_bp = Blueprint('course_bp', __name__)
 
 
 # ROUTES
-@course_bp.route('/course/get-all-course-groupings-by-course-code/<string:course_code>/', methods=['GET'])
+@course_bp.route('/course/get-all-course-groupings-by-course-code/<string:course_code>/<string:student_id>', methods=['GET'])
 @verified_login_required
-def get_all_course_groupings_by_course_code(course_code):
+def get_all_course_groupings_by_course_code(course_code, student_id):
     """
     """
     try:
         db = current_app.config['database']
-        response = db.get_all_course_groupings_by_course_code(course_code)
+        response = db.get_all_course_groupings_by_course_code(course_code, student_id)
         return jsonify(response), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 404
