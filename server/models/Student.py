@@ -35,10 +35,22 @@ class Student(db.Model):
             "course_codes": [],
         }
         for course in self.courses:
-            course.start_date = course.start_date.strftime("%Y-%m-%d")
-            course.end_date = course.end_date.strftime("%Y-%m-%d")
-            course.begin_time = course.begin_time.strftime("%H:%M")
-            course.end_time = course.end_time.strftime("%H:%M")
+            try:
+                course.start_date = course.start_date.strftime("%Y-%m-%d")
+            except:
+                pass
+            try:
+                course.end_date = course.end_date.strftime("%Y-%m-%d")
+            except:
+                pass
+            try:
+                course.begin_time = course.begin_time.strftime("%H:%M")
+            except:
+                pass
+            try:
+                course.end_time = course.end_time.strftime("%H:%M")
+            except:
+                pass
         for course in self.courses:
             if course.course_code in student["courses"]:
                 student["courses"][course.course_code][course.course_grouping].append(course.to_dict())
