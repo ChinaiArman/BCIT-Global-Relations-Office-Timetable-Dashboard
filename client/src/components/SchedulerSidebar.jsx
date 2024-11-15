@@ -245,6 +245,9 @@ const CourseList = ({ studentInfo, onSelectedCoursesChange }) => {
 
     return (
         <div>
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-white">Courses</h2>
+            </div>
             {studentInfo.preferences.map((courseCode, index) => {
                 const courseColor = CourseColors[index % CourseColors.length];
                 const courseState = coursesState[courseCode];
