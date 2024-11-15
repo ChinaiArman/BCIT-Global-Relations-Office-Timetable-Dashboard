@@ -268,18 +268,21 @@ const CourseItem = ({
     preselectedGrouping,
 }) => {
     const [preselectionHandled, setPreselectionHandled] = useState(false);
+    const [isChecked, setIsChecked] = useState(isPreselected);
 
-    // Handle checkbox click to open/close the dropdown
+    // Handle checkbox click to open/close the dropdown and update isChecked state
     const handleCheckboxClick = (e) => {
+        setIsChecked(e.target.checked);
         onOpen(e);
     };
 
-    // Apply preselection only once when `isPreselected` is true
+    // Apply preselection and check the checkbox only once when `isPreselected` is true
     useEffect(() => {
         if (isPreselected && !preselectionHandled) {
             onOpen();
             onGroupingSelect(preselectedGrouping);
             setPreselectionHandled(true);
+            setIsChecked(true);
         }
     }, [isPreselected, preselectionHandled, onOpen, onGroupingSelect, preselectedGrouping]);
 
@@ -291,6 +294,7 @@ const CourseItem = ({
                         type="checkbox"
                         className={`mr-3 h-4 w-4 rounded border-gray-700 ${courseColor.check} focus:ring-offset-gray-900`}
                         onChange={handleCheckboxClick}
+                        checked={isChecked} // Set checked state based on isChecked
                     />
                     <span className={`font-medium ${courseColor.text}`}>{courseCode}</span>
                 </div>
