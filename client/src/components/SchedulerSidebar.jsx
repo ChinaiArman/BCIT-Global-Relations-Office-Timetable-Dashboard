@@ -62,7 +62,6 @@ const StudentInfo = ({ studentInfo, selectedCourses }) => {
 
     const uploadCourseGroupings = async () => {
         const groupingIds = selectedCourses.map(course => course.groupingId);
-        console.log(groupingIds);
         try {
             const response = await axios.put(`${import.meta.env.VITE_SERVER_URL}/api/student/replace-course-groupings/${studentInfo.id}`, { "course_groupings": groupingIds },{ withCredentials: true });
             if (response.status === 200) {
@@ -133,7 +132,6 @@ const StudentInfo = ({ studentInfo, selectedCourses }) => {
 
 
 const CourseList = ({ studentInfo, onSelectedCoursesChange }) => {
-    console.log(studentInfo)
     const [coursesState, setCoursesState] = useState(
         studentInfo.preferences.reduce((acc, courseCode) => {
             acc[courseCode] = {
@@ -146,20 +144,40 @@ const CourseList = ({ studentInfo, onSelectedCoursesChange }) => {
         }, {})
     );
 
-    useEffect(() => {
-        // Prepare a selected courses object to pass upwards
-        const selectedCourses = Object.entries(coursesState)
-            .filter(([, state]) => state.selectedGrouping) // Only selected groupings
-            .map(([courseCode, state]) => ({
-                courseCode,
-                groupingId: state.selectedGrouping,
-                schedule: state.groupings[state.selectedGrouping], // Assuming groupings include timing details
-                courseColor: state.courseColor,  // Add the course color here
-            }));
-        
-        onSelectedCoursesChange(selectedCourses);
-    }, [coursesState]);
+    const allSelectedGroupingsHaveSchedules = () => {
+        return Object.entries(coursesState).every(([courseCode, state]) => {
+            const selectedGrouping = state.selectedGrouping;
+            return selectedGrouping ? state.groupings[selectedGrouping] : true;
+        });
+    };
 
+    useEffect(() => {
+        if (allSelectedGroupingsHaveSchedules()) {
+            const selectedCourses = Object.entries(coursesState)
+                .filter(([, state]) => state.selectedGrouping)
+                .map(([courseCode, state]) => ({
+                    courseCode,
+                    groupingId: state.selectedGrouping,
+                    schedule: state.groupings[state.selectedGrouping],
+                    courseColor: state.courseColor,
+                }));
+
+            onSelectedCoursesChange(selectedCourses);
+        }
+    }, [coursesState]); 
+
+    const handleScheduleUpdate = (courseCode, groupingId, schedule) => {
+        setCoursesState((prevState) => ({
+            ...prevState,
+            [courseCode]: {
+                ...prevState[courseCode],
+                groupings: {
+                    ...prevState[courseCode].groupings,
+                    [groupingId]: schedule,
+                }
+            }
+        }));
+    };
 
     const handleGroupingSelect = (courseCode, groupingId, courseColor) => {
         setCoursesState((prevState) => ({
@@ -167,24 +185,21 @@ const CourseList = ({ studentInfo, onSelectedCoursesChange }) => {
             [courseCode]: {
                 ...prevState[courseCode],
                 selectedGrouping: groupingId,
-                courseColor: courseColor,  // Add the course color here
+                courseColor: courseColor,
             },
         }));
     };
 
-
     const toggleDropdown = async (courseCode, courseColor) => {
-        // Toggle the dropdown state (isOpen)
         setCoursesState((prevState) => ({
             ...prevState,
             [courseCode]: {
                 ...prevState[courseCode],
                 isOpen: !prevState[courseCode].isOpen,
-                courseColor: courseColor,  // Add the course color here
+                courseColor: courseColor,
             },
         }));
 
-        // If opening the dropdown, load groupings if necessary
         if (!coursesState[courseCode].isOpen) {
             setCoursesState((prevState) => ({
                 ...prevState,
@@ -214,22 +229,22 @@ const CourseList = ({ studentInfo, onSelectedCoursesChange }) => {
                     [courseCode]: { ...prevState[courseCode], isLoading: false },
                 }));
             }
-        } else {
-            setCoursesState((prevState) => ({
-                ...prevState,
-                [courseCode]: { ...prevState[courseCode], isOpen: false, selectedGrouping: '', courseColor: courseColor },  // Keep the color here as well
-            }));
         }
+    };
+
+    const removeCourse = (courseCode) => {
+        setCoursesState((prevState) => ({
+            ...prevState,
+            [courseCode]: {
+                ...prevState[courseCode],
+                selectedGrouping: '', // Deselect the grouping
+                isOpen: false, // Close the dropdown
+            }
+        }));
     };
 
     return (
         <div>
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold text-white">Courses</h2>
-                <button className="text-blue-400 hover:text-blue-300">
-                    <PlusCircle className="w-5 h-5" />
-                </button>
-            </div>
             {studentInfo.preferences.map((courseCode, index) => {
                 const courseColor = CourseColors[index % CourseColors.length];
                 const courseState = coursesState[courseCode];
@@ -243,8 +258,10 @@ const CourseList = ({ studentInfo, onSelectedCoursesChange }) => {
                         selectedGrouping={courseState.selectedGrouping}
                         isLoading={courseState.isLoading}
                         groupings={courseState.groupings}
-                        onOpen={() => toggleDropdown(courseCode, courseColor)} // Ensure onOpen is passed correctly
+                        onOpen={() => toggleDropdown(courseCode, courseColor)}
                         onGroupingSelect={(groupingId) => handleGroupingSelect(courseCode, groupingId, courseColor)}
+                        onScheduleUpdate={(groupingId, schedule) => handleScheduleUpdate(courseCode, groupingId, schedule)}
+                        onDeselectCourse={() => removeCourse(courseCode)}
                         isPreselected={studentInfo.course_codes.includes(courseCode)}
                         preselectedGrouping={studentInfo.course_codes.includes(courseCode) ? studentInfo.courses[courseCode] : ''}
                     />
@@ -264,23 +281,36 @@ const CourseItem = ({
     groupings,
     onOpen,
     onGroupingSelect,
+    onScheduleUpdate,
+    onDeselectCourse,
     isPreselected,
     preselectedGrouping,
 }) => {
     const [preselectionHandled, setPreselectionHandled] = useState(false);
     const [isChecked, setIsChecked] = useState(isPreselected);
 
-    // Handle checkbox click to open/close the dropdown and update isChecked state
     const handleCheckboxClick = (e) => {
-        setIsChecked(e.target.checked);
-        onOpen(e);
+        const isChecked = e.target.checked;
+        setIsChecked(isChecked);
+
+        if (isChecked) {
+            // Open the dropdown and add the course to selectedCourses
+            onOpen();
+        } else {
+            // Mark course as deselected
+            onDeselectCourse();
+        }
     };
 
-    // Apply preselection and check the checkbox only once when `isPreselected` is true
     useEffect(() => {
         if (isPreselected && !preselectionHandled) {
             onOpen();
-            onGroupingSelect(preselectedGrouping);
+            onGroupingSelect(Object.keys(preselectedGrouping)[0]);
+
+            if (!preselectedGrouping[Object.keys(preselectedGrouping)[0]]) {
+                fetchSchedule(Object.keys(preselectedGrouping)[0]);
+            }
+            
             setPreselectionHandled(true);
             setIsChecked(true);
         }
@@ -294,7 +324,7 @@ const CourseItem = ({
                         type="checkbox"
                         className={`mr-3 h-4 w-4 rounded border-gray-700 ${courseColor.check} focus:ring-offset-gray-900`}
                         onChange={handleCheckboxClick}
-                        checked={isChecked} // Set checked state based on isChecked
+                        checked={isChecked}
                     />
                     <span className={`font-medium ${courseColor.text}`}>{courseCode}</span>
                 </div>

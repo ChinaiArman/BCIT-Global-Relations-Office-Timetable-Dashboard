@@ -26,7 +26,6 @@ def get_all_course_groupings_by_course_code(course_code):
         return jsonify({"message": str(e)}), 404
 
     
-
 @course_bp.route('/course/course_grouping/<string:course_grouping>/', methods=['GET'])
 @verified_login_required
 def get_course_by_course_grouping(course_grouping):
@@ -151,6 +150,4 @@ def download_template():
     """
     """
     return jsonify({"message": "course download template endpoint"})
-
-
-
+    
