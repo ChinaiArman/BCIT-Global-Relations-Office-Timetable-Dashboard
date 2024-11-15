@@ -161,7 +161,6 @@ const CourseList = ({ studentInfo, onSelectedCoursesChange }) => {
                     schedule: state.groupings[state.selectedGrouping],
                     courseColor: state.courseColor,
                 }));
-
             onSelectedCoursesChange(selectedCourses);
         }
     }, [coursesState]); 
@@ -218,10 +217,11 @@ const CourseList = ({ studentInfo, onSelectedCoursesChange }) => {
                     [courseCode]: {
                         ...prevState[courseCode],
                         groupings: groupingsData,
-                        selectedGrouping: Object.keys(groupingsData)[0] || '',
+                        selectedGrouping: prevState[courseCode].selectedGrouping || Object.keys(groupingsData)[0] || '',
                         isLoading: false,
                     },
                 }));
+
             } catch (error) {
                 console.error("Error fetching groupings:", error);
                 setCoursesState((prevState) => ({
@@ -233,6 +233,7 @@ const CourseList = ({ studentInfo, onSelectedCoursesChange }) => {
     };
 
     const removeCourse = (courseCode) => {
+        console.log("removeCourse:", courseCode);
         setCoursesState((prevState) => ({
             ...prevState,
             [courseCode]: {
@@ -291,6 +292,10 @@ const CourseItem = ({
 }) => {
     const [preselectionHandled, setPreselectionHandled] = useState(false);
     const [isChecked, setIsChecked] = useState(isPreselected);
+    if (isPreselected) {
+        console.log("Preselected course:", Object.keys(preselectedGrouping)[0]);
+        console.log("selectedGrouping:", selectedGrouping);
+    }
 
     const handleCheckboxClick = (e) => {
         const isChecked = e.target.checked;
@@ -306,18 +311,27 @@ const CourseItem = ({
     };
 
     useEffect(() => {
-        if (isPreselected && !preselectionHandled) {
-            onOpen();
-            onGroupingSelect(Object.keys(preselectedGrouping)[0]);
+    // Ensure that we only handle preselection once
+    if (isPreselected && !preselectionHandled) {
+        console.log("Handling preselection for course:", courseCode);
 
-            if (!preselectedGrouping[Object.keys(preselectedGrouping)[0]]) {
-                fetchSchedule(Object.keys(preselectedGrouping)[0]);
-            }
-            
-            setPreselectionHandled(true);
-            setIsChecked(true);
+        // Trigger necessary actions
+        onOpen();  // Open the dropdown
+        onGroupingSelect(Object.keys(preselectedGrouping)[0]);  // Select preselected grouping
+        // Fetch schedule if necessary
+        const preselectedId = Object.keys(preselectedGrouping)[0];
+        if (!preselectedGrouping[preselectedId]) {
+            fetchSchedule(preselectedId);  // Load schedule if not already available
         }
-    }, [isPreselected, preselectionHandled, onOpen, onGroupingSelect, preselectedGrouping]);
+
+        // Update the schedule with the preselected group info
+        onScheduleUpdate(preselectedId, preselectedGrouping[preselectedId]);
+
+        // Mark preselection as handled
+        setIsChecked(true);
+        setPreselectionHandled(true);
+    }
+}, [isPreselected, preselectionHandled, onOpen, onGroupingSelect, preselectedGrouping, onScheduleUpdate]);
 
     return (
         <div>
