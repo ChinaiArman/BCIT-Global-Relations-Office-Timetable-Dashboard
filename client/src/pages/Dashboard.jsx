@@ -74,13 +74,13 @@ const Dashboard = () => {
 						<StatCard 
 							name='Schedules Completed'
 							icon={CalendarCheck}
-							value={schedulingStats.totalSchedulesInProgress}
+							value={schedulingStats.totalSchedulesFinalized}
 							color='#10B981' 
 						/>
 						<StatCard
 							name='Schedules In Progress'
 							icon={CalendarSearch}
-							value={schedulingStats.totalSchedulesFinalized}
+							value={schedulingStats.totalSchedulesInProgress}
 							color='#F59E0B'
 						/>
 						<StatCard
