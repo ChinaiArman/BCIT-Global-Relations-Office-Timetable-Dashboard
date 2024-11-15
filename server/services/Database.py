@@ -751,14 +751,15 @@ class Database:
         except Exception as e:
             raise DatabaseError(f"Error fetching course by course grouping: {str(e)}")
 
-    def get_all_course_groupings_by_course_code(self, course_code):
+    def get_all_course_groupings_by_course_code(self, course_code, student_id):
+        student = self.db.session.query(Student).filter(Student.id == student_id).first()
         try:
             courses = self.db.session.query(Course).filter(Course.course_code == course_code).all()
             groupings_to_remove = []
             for course in courses:
                 if course.status != "Active":
                     groupings_to_remove.append(course.course_grouping)
-                if course.num_enrolled >= course.max_capacity:
+                if course.num_enrolled >= course.max_capacity and student not in course.students:
                     groupings_to_remove.append(course.course_grouping)
                 course.start_date = course.start_date.strftime("%Y-%m-%d")
                 course.end_date = course.end_date.strftime("%Y-%m-%d")
