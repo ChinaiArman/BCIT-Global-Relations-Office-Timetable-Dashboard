@@ -3,6 +3,8 @@ import { AlertCircle, CheckCircle2 } from "lucide-react";
 import UploadWindow from '../components/UploadWindow';
 import StatusMessage from '../components/StatusMessage';
 
+import Header from "../components/Header";
+
 const Database = () => {
   const [courseFile, setCourseFile] = useState(null);
   const [studentFile, setStudentFile] = useState(null);
@@ -99,29 +101,31 @@ const Database = () => {
   };
 
   return (
-    <div className="flex-1 overflow-auto relative z-10 bg-gray-900 text-white p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <h1 className="text-2xl font-bold mb-8">Database Management</h1>
-        <StatusMessage message={message} />
-        <UploadWindow
-          title="Upload Course Data"
-          fileType="Course Data"
-          fileExtension="XLSX"
-          isLoading={isCourseLoading}
-          selectedFile={courseFile}
-          onFileChange={setCourseFile}
-          onSubmit={handleCourseUpload}
-        />
-        <UploadWindow
-          title="Upload Student Data"
-          fileType="Student Data"
-          fileExtension="CSV"
-          isLoading={isStudentLoading}
-          selectedFile={studentFile}
-          onFileChange={setStudentFile}
-          onSubmit={handleStudentUpload}
-        />
-      </div>
+    <div className='flex-1 overflow-auto relative z-10 bg-gray-900 text-white'>
+      <Header title='Database' />
+      <main className='max-w-7xl mx-auto py-6 px-4 lg:px-8'>
+        <div className="max-w-4xl mx-auto space-y-8">
+          <StatusMessage message={message} />
+          <UploadWindow
+            title="Upload Course Data"
+            fileType="Course Data"
+            fileExtension="XLSX"
+            isLoading={isCourseLoading}
+            selectedFile={courseFile}
+            onFileChange={setCourseFile}
+            onSubmit={handleCourseUpload}
+          />
+          <UploadWindow
+            title="Upload Student Data"
+            fileType="Student Data"
+            fileExtension="CSV"
+            isLoading={isStudentLoading}
+            selectedFile={studentFile}
+            onFileChange={setStudentFile}
+            onSubmit={handleStudentUpload}
+          />
+        </div>
+      </main>
     </div>
   );
 };
