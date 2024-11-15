@@ -83,7 +83,7 @@ def get_course_by_id(id):
         return jsonify({"error": "Internal server error", "message": str(e)}), 500
 
 @course_bp.route('/course/import', methods=['PUT'])
-# @verified_login_required
+@verified_login_required
 def upload_course():
     """
     Request: PUT /course/import

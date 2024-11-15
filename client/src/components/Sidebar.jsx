@@ -1,8 +1,9 @@
-import { House, DatabaseZap, Menu, Settings, GraduationCap, ShieldCheck } from "lucide-react";
+import { House, DatabaseZap, Menu, Settings, GraduationCap, ShieldCheck, LogOut } from "lucide-react";
 import { useAdminAuth } from '../context/AdminContext.jsx';
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 const SIDEBAR_ITEMS = [
 	{ name: "Home", icon: House, color: "#6366f1", href: "/" },
@@ -15,6 +16,21 @@ const Sidebar = () => {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 	const { isAdmin } = useAdminAuth();
 	const [sidebarItems, setSidebarItems] = useState(SIDEBAR_ITEMS);
+
+	const logout = async () => {
+		try {
+			const serverUrl = import.meta.env.VITE_SERVER_URL;
+			const response = await axios.post(`${serverUrl}/api/authenticate/logout/`, {}, {
+			  withCredentials: true,
+			});
+
+			if (response.status === 200) {
+				window.location.href = "/login";
+			}
+		} catch (err) {
+			console.error("Logout failed:", err);
+		}
+	}
 
 	useEffect(() => {
 		// Add "Admin" item only once when `isAdmin` becomes true
@@ -70,6 +86,28 @@ const Sidebar = () => {
 						</Link>
 					))}
 				</nav>
+				
+                <div className='mt-auto'>
+                    <motion.button
+                        onClick={logout}
+                        className='flex items-center p-4 text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors w-full'
+                    >
+                        <LogOut size={20} style={{ color: "#EF4444", minWidth: "20px" }} />
+                        <AnimatePresence>
+                            {isSidebarOpen && (
+                                <motion.span
+                                    className='ml-4 whitespace-nowrap text-red-400'
+                                    initial={{ opacity: 0, width: 0 }}
+                                    animate={{ opacity: 1, width: "auto" }}
+                                    exit={{ opacity: 0, width: 0 }}
+                                    transition={{ duration: 0.2, delay: 0.3 }}
+                                >
+                                    Logout
+                                </motion.span>
+                            )}
+                        </AnimatePresence>
+                    </motion.button>
+                </div>
 			</div>
 		</motion.div>
 	);
