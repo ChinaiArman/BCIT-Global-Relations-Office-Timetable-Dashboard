@@ -133,6 +133,7 @@ const StudentInfo = ({ studentInfo, selectedCourses }) => {
 
 
 const CourseList = ({ studentInfo, onSelectedCoursesChange }) => {
+    console.log(studentInfo)
     const [coursesState, setCoursesState] = useState(
         studentInfo.preferences.reduce((acc, courseCode) => {
             acc[courseCode] = {
@@ -244,6 +245,8 @@ const CourseList = ({ studentInfo, onSelectedCoursesChange }) => {
                         groupings={courseState.groupings}
                         onOpen={() => toggleDropdown(courseCode, courseColor)} // Ensure onOpen is passed correctly
                         onGroupingSelect={(groupingId) => handleGroupingSelect(courseCode, groupingId, courseColor)}
+                        isPreselected={studentInfo.course_codes.includes(courseCode)}
+                        preselectedGrouping={studentInfo.course_codes.includes(courseCode) ? studentInfo.courses[courseCode] : ''}
                     />
                 );
             })}
@@ -261,11 +264,24 @@ const CourseItem = ({
     groupings,
     onOpen,
     onGroupingSelect,
+    isPreselected,
+    preselectedGrouping,
 }) => {
-    // Function to handle checkbox click
+    const [preselectionHandled, setPreselectionHandled] = useState(false);
+
+    // Handle checkbox click to open/close the dropdown
     const handleCheckboxClick = (e) => {
-        onOpen(e); // Trigger dropdown opening/closing when checkbox is clicked
+        onOpen(e);
     };
+
+    // Apply preselection only once when `isPreselected` is true
+    useEffect(() => {
+        if (isPreselected && !preselectionHandled) {
+            onOpen();
+            onGroupingSelect(preselectedGrouping);
+            setPreselectionHandled(true);
+        }
+    }, [isPreselected, preselectionHandled, onOpen, onGroupingSelect, preselectedGrouping]);
 
     return (
         <div>
@@ -274,7 +290,7 @@ const CourseItem = ({
                     <input
                         type="checkbox"
                         className={`mr-3 h-4 w-4 rounded border-gray-700 ${courseColor.check} focus:ring-offset-gray-900`}
-                        onChange={handleCheckboxClick} // Add onChange to handle click
+                        onChange={handleCheckboxClick}
                     />
                     <span className={`font-medium ${courseColor.text}`}>{courseCode}</span>
                 </div>
@@ -284,7 +300,7 @@ const CourseItem = ({
                     {isLoading ? (
                         <div className="p-2 text-gray-300 text-center">Loading...</div>
                     ) : Object.keys(groupings).length === 0 ? (
-                        <div className="p-2 text-gray-300 text-center">No groupings available</div> // Handling empty groupings
+                        <div className="p-2 text-gray-300 text-center">No groupings available</div>
                     ) : (
                         <div className="p-2">
                             {Object.keys(groupings).map((groupingId) => (
@@ -295,7 +311,7 @@ const CourseItem = ({
                                         name={`course-grouping-${courseCode}`}
                                         value={groupingId}
                                         checked={selectedGrouping === groupingId}
-                                        onChange={() => onGroupingSelect(groupingId)} // Handle selection
+                                        onChange={() => onGroupingSelect(groupingId)}
                                         className="mr-2 h-4 w-4 text-indigo-400"
                                     />
                                     <label
