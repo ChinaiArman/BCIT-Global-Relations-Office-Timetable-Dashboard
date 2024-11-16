@@ -5,12 +5,14 @@
 import pandas as pd
 from sqlalchemy import text, delete, insert, update
 from datetime import datetime
+from sqlalchemy import or_
 
 from models.Course import Course
 from models.Student import Student
 from models.Preferences import Preferences
 from models.Enrollments import enrollments
 from models.User import User
+from models.ScheduleProgression import ScheduleProgression
 
 from exceptions import InvalidUploadFile, InvalidFileType, DataNotFound, DatabaseError, DataAlreadyExists, InvalidEmailAddress, EmailAddressAlreadyInUse, UserNotFound
 
@@ -407,7 +409,8 @@ class Database:
                 last_name=row["Legal Last Name"],
                 term_code=row["Term Code"],
                 email=row["BCIT Email"],
-                is_completed=False
+                is_completed=False,
+                is_approved_by_program_heads=False
             )
             self.db.session.add(student)
 
@@ -1078,7 +1081,7 @@ class Database:
         """
         total_students = self.db.session.query(Student).count()
         total_students_with_schedules_finalized = self.db.session.query(Student).filter(Student.is_completed == True).count()
-        total_students_with_courses = self.db.session.query(Student).filter(Student.courses.any()).count()
+        total_students_with_courses = self.db.session.query(Student).filter(or_(Student.courses.any(), Student.is_completed == True)).count()
         total_students_with_schedules_in_progress = total_students_with_courses - total_students_with_schedules_finalized
         total_students_without_course = total_students - total_students_with_courses
         return {
@@ -1093,6 +1096,34 @@ class Database:
         """
         student = self.db.session.query(Student).filter(Student.id == student_id).first()
         student.is_completed = not student.is_completed
+        today = datetime.now().date()
+        today = today.strftime("%Y-%m-%d")
+        schedule_progression = self.db.session.query(ScheduleProgression).filter(ScheduleProgression.date == today).first()
+        if not schedule_progression:
+            schedule_progression = ScheduleProgression(date=today, num_schedules_completed=0, num_approvals_from_program_heads=0)
+            self.db.session.add(schedule_progression)
+        if student.is_completed:
+            schedule_progression.num_schedules_completed += 1
+        else:
+            schedule_progression.num_schedules_completed -= 1
+        self.db.session.commit()
+        return
+    
+    def flip_program_head_approval(self, student_id) -> None:
+        """
+        """
+        student = self.db.session.query(Student).filter(Student.id == student_id).first()
+        student.is_approved_by_program_heads = not student.is_approved_by_program_heads
+        today = datetime.now().date()
+        today = today.strftime("%Y-%m-%d")
+        schedule_progression = self.db.session.query(ScheduleProgression).filter(ScheduleProgression.date == today).first()
+        if not schedule_progression:
+            schedule_progression = ScheduleProgression(date=today, num_schedules_completed=0, num_approvals_from_program_heads=0)
+            self.db.session.add(schedule_progression)
+        if student.is_approved_by_program_heads:
+            schedule_progression.num_approvals_from_program_heads += 1
+        else:
+            schedule_progression.num_approvals_from_program_heads -= 1
         self.db.session.commit()
         return
 

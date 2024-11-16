@@ -16,6 +16,7 @@ class Student(db.Model):
     email = db.Column(db.String(100), nullable=False, unique=True)
     term_code = db.Column(db.Integer, nullable=False)
     is_completed = db.Column(db.Boolean, default=False)
+    is_approved_by_program_heads = db.Column(db.Boolean, default=False)
 
     preferences = db.relationship("Preferences", back_populates="student")
     courses = db.relationship(
@@ -30,6 +31,7 @@ class Student(db.Model):
             "term_code": self.term_code,
             "email": self.email,
             "is_completed": self.is_completed,
+            "is_approved_by_program_heads": self.is_approved_by_program_heads,
             "preferences": [course.preference for course in self.preferences],
             "courses": {},
             "course_codes": [],

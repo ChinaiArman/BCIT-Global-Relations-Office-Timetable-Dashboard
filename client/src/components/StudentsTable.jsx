@@ -68,11 +68,14 @@ const StudentsTable = ({ isDashboard = false }) => {
         id: student.id,
         name: `${student.first_name} ${student.last_name}`,
         email: student.email,
-        status: student.is_completed 
+        schedule_status: student.is_completed 
           ? "Complete" 
           : student.course_codes.length === 0 
           ? "Incomplete" 
           : "In Progress",
+        approval_status: student.is_approved_by_program_heads
+          ? "Approved"
+          : "Pending",
       }));
       setUserData(students);
       setFilteredStudents(students);
@@ -173,6 +176,9 @@ const StudentsTable = ({ isDashboard = false }) => {
                   Schedule Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Approval Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -207,14 +213,25 @@ const StudentsTable = ({ isDashboard = false }) => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        user.status === "Complete"
+                        user.schedule_status === "Complete"
                           ? "bg-green-800 text-green-100"
-                          : user.status === "Incomplete"
+                          : user.schedule_status === "Incomplete"
                           ? "bg-red-800 text-red-100"
                           : "bg-yellow-800 text-yellow-100"
                       }`}
                     >
-                      {user.status}
+                      {user.schedule_status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        user.approval_status === "Approved"
+                          ? "bg-green-800 text-green-100"
+                          : "bg-yellow-800 text-yellow-100"
+                      }`}
+                    >
+                      {user.approval_status}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
