@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PlusCircle, CalendarCheck, CalendarSearch } from 'lucide-react';
+import { CalendarCheck, CalendarSearch, Stamp, MailQuestion } from 'lucide-react';
 import axios from 'axios';
 
 const CourseColors = [
@@ -36,11 +36,13 @@ const SchedulerSidebar = ({ studentInfo, onSelectedCoursesChange }) => {
 
 
 const StudentInfo = ({ studentInfo, selectedCourses }) => {
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isCompleted, setIsCompleted] = useState(studentInfo.is_completed); // Local state to track completion
+    const [isCompleted, setIsCompleted] = useState(studentInfo.is_completed);
+    const [isSubmittingCompleteStatus, setIsSubmittingCompleteStatus] = useState(false);
+    const [isDepartmentApproval, setIsDepartmentApproval] = useState(studentInfo.is_approved_by_program_heads);
+    const [isSubmittingDepartmentApprovalStatus, setIsSubmittingDepartmentApprovalStatus] = useState(false);
 
     const markAsDone = async () => {
-        setIsSubmitting(true);
+        setIsSubmittingCompleteStatus(true);
 
         try {
             const response = await axios.post(
@@ -56,7 +58,28 @@ const StudentInfo = ({ studentInfo, selectedCourses }) => {
         } catch (error) {
             console.error('Error making POST request:', error);
         } finally {
-            setIsSubmitting(false);
+            setIsSubmittingCompleteStatus(false);
+        }
+    };
+
+    const markDepartmentApproval = async () => {
+        setIsSubmittingDepartmentApprovalStatus(true);
+
+        try {
+            const response = await axios.post(
+                `${import.meta.env.VITE_SERVER_URL}/api/student/flip-department-approval/${studentInfo.id}`,
+                null,
+                { withCredentials: true }
+            );
+
+            if (response.status === 200) {
+                // Flip the completion status after successful API response
+                setIsDepartmentApproval(prevState => !prevState);
+            }
+        } catch (error) {
+            console.error('Error making POST request:', error);
+        } finally {
+            setIsSubmittingDepartmentApprovalStatus(false);
         }
     };
 
@@ -88,7 +111,7 @@ const StudentInfo = ({ studentInfo, selectedCourses }) => {
                 </div>
             </div>
 
-            {/* Status */}
+            {/* Mark as Done Status */}
             <div
                 className={`text-sm font-medium flex items-center justify-center mt-3 ${
                     isCompleted ? 'text-emerald-400' : 'text-yellow-400'
@@ -104,14 +127,41 @@ const StudentInfo = ({ studentInfo, selectedCourses }) => {
                 {isCompleted ? 'Schedule Finalized' : 'Schedule In Progress'}
             </div>
 
-            {/* Mark Done Button */}
+            {/* Department Approval Status */}
+            <div
+                className={`text-sm font-medium flex items-center justify-center mt-3 ${
+                    isDepartmentApproval ? 'text-emerald-400' : 'text-yellow-400'
+                }`}
+            >
+                <span className="mr-1">
+                    {isDepartmentApproval ? (
+                        <Stamp size={20} className="mr-2 text-emerald-400" />
+                    ) : (
+                        <MailQuestion size={20} className="mr-2 text-yellow-400" />
+                    )}
+                </span>
+                {isDepartmentApproval ? 'Department Approved' : 'Missing Approval'}
+            </div>
+
+            {/* Mark As Done Button */}
             <div className="mt-4 flex justify-center">
                 <button
                     onClick={markAsDone}
-                    className={'rounded-sm px-4 py-2 font-bold text-sm text-white duration-300 text-center bg-indigo-600 hover:bg-indigo-500'}
-                    disabled={isSubmitting}
+                    className="rounded-sm w-48 px-4 py-2 font-bold text-sm text-white duration-300 text-center bg-indigo-600 hover:bg-indigo-500"
+                    disabled={isSubmittingCompleteStatus}
                 >
-                    {isSubmitting ? 'Submitting...' : isCompleted ? 'MARK AS INCOMPLETE' : 'MARK AS DONE'}
+                    {isSubmittingCompleteStatus ? 'Submitting...' : isCompleted ? 'MARK INCOMPLETE' : 'MARK DONE'}
+                </button>
+            </div>
+
+            {/* Mark Approval Button */}
+            <div className="mt-4 flex justify-center">
+                <button
+                    onClick={markDepartmentApproval}
+                    className="rounded-sm w-48 px-4 py-2 font-bold text-sm text-white duration-300 text-center bg-indigo-600 hover:bg-indigo-500"
+                    disabled={isSubmittingDepartmentApprovalStatus}
+                >
+                    {isSubmittingDepartmentApprovalStatus ? 'Submitting...' : isDepartmentApproval ? 'REMOVE APPROVAL' : 'MARK APPROVED'}
                 </button>
             </div>
 
@@ -119,11 +169,12 @@ const StudentInfo = ({ studentInfo, selectedCourses }) => {
             <div className="mt-4 flex justify-center">
                 <button
                     onClick={uploadCourseGroupings}
-                    className="rounded-sm px-4 py-2 font-bold text-sm text-white duration-300 hover:bg-green-400 text-center bg-green-600"
+                    className="rounded-sm w-48 px-4 py-2 font-bold text-sm text-white duration-300 text-center bg-green-600 hover:bg-green-500"
                 >
                     Save
                 </button>
             </div>
+
         </div>
     );
 };

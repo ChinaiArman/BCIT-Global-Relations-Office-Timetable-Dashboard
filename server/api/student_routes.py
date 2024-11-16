@@ -267,3 +267,16 @@ def flip_mark_student_done(student_id):
         return jsonify({"message": "Student marked as done"}), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 400
+    
+
+@student_bp.route("/student/flip-department-approval/<string:student_id>", methods=["POST"])
+@verified_login_required
+def flip_department_approval(student_id):
+    """
+    """
+    try:
+        db = current_app.config["database"]
+        db.flip_program_head_approval(student_id)
+        return jsonify({"message": "Student marked as done"}), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
