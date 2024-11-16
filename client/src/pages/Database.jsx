@@ -105,6 +105,7 @@ const Database = () => {
       <Header title='Database' />
       <main className='max-w-7xl mx-auto py-6 px-4 lg:px-8'>
         <div className="max-w-4xl mx-auto space-y-8">
+          <h1 className="text-2xl font-bold mb-8">Course</h1>
           <StatusMessage message={message} />
           <UploadWindow
             title="Upload Course Data"
@@ -115,6 +116,8 @@ const Database = () => {
             onFileChange={setCourseFile}
             onSubmit={handleCourseUpload}
           />
+
+          <h1 className="text-2xl font-bold mb-8">Student</h1>
           <UploadWindow
             title="Upload Student Data"
             fileType="Student Data"
@@ -124,6 +127,7 @@ const Database = () => {
             onFileChange={setStudentFile}
             onSubmit={handleStudentUpload}
           />
+          <h1 className="text-2xl font-bold mb-8">Download</h1>
         </div>
       </main>
     </div>

@@ -319,16 +319,16 @@ const UsersTable = () => {
               />
             </div>
 
-            <div className="flex justify-between mt-6">
+            <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={closeModal}
-                className="text-sm text-white bg-red-600 hover:bg-red-500 px-4 py-2 rounded-lg"
+                className="px-4 py-2 rounded bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors"
               >
               Cancel
               </button>
               <button
                 onClick={handleAddUser}
-                className="text-sm text-white bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg"
+                className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors"
               >
                 Add User
               </button>
