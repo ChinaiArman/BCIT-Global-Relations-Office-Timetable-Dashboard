@@ -81,7 +81,7 @@ const UserInfoCard = () => {
         e.preventDefault();
         try {
             const serverUrl = import.meta.env.VITE_SERVER_URL;
-            const response = await axios.post(`${serverUrl}/api/authenticate/update-user-info/`, profileData, {
+            const response = await axios.put(`${serverUrl}/api/authenticate/update-user-info/`, profileData, {
                 withCredentials: true,
             });
 
@@ -103,7 +103,7 @@ const UserInfoCard = () => {
 
         try {
             const serverUrl = import.meta.env.VITE_SERVER_URL;
-            axios.post(`${serverUrl}/api/authenticate/change-password/`, passwordData, {
+            axios.put(`${serverUrl}/api/authenticate/change-password/`, passwordData, {
                 withCredentials: true,
             });
         } catch (err) { 

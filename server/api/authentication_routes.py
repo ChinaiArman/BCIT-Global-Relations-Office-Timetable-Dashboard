@@ -324,7 +324,7 @@ def change_user_role() -> tuple:
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@authentication_bp.route('/authenticate/change-password/', methods=['POST'])
+@authentication_bp.route('/authenticate/change-password/', methods=['PUT'])
 @verified_login_required
 def change_password() -> tuple:
     """
@@ -349,7 +349,7 @@ def change_password() -> tuple:
     except Exception as e:
         return jsonify({"error": str(e)}), 401
     
-@authentication_bp.route('/authenticate/update-user-info/', methods=['POST'])
+@authentication_bp.route('/authenticate/update-user-info/', methods=['PUT'])
 @verified_login_required
 def update_user_info() -> tuple:
     """
