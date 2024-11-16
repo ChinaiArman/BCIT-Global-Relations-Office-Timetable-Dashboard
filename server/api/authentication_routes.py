@@ -335,8 +335,8 @@ def change_password() -> tuple:
         authenticator = current_app.config['authenticator']
         user_id = session.get('user_id')
         user = db.get_user_by_id(user_id)
-        old_password = request.json.get('old_password')
-        new_password = request.json.get('new_password')
+        old_password = request.json.get('oldPassword')
+        new_password = request.json.get('password')
         
         if not old_password or not new_password:
             return jsonify({"error": "Old password and new password are required"}), 400

@@ -72,7 +72,9 @@ const UserInfoCard = () => {
 
             return newData;
         });
-        setIsPasswordSaveEnabled(true);
+        if (passwordData.oldPassword && passwordData.password && passwordData.confirmPassword) {
+            setIsPasswordSaveEnabled(true);
+        }
     };
 
     const handleProfileSave = async (e) => {
@@ -101,7 +103,7 @@ const UserInfoCard = () => {
 
         try {
             const serverUrl = import.meta.env.VITE_SERVER_URL;
-            axios.post(`${serverUrl}/api/authenticate/update-password/`, passwordData, {
+            axios.post(`${serverUrl}/api/authenticate/change-password/`, passwordData, {
                 withCredentials: true,
             });
         } catch (err) { 
@@ -205,7 +207,7 @@ const UserInfoCard = () => {
                             <label className="block text-sm font-medium text-gray-300 mb-1">Old Password</label>
                             <input
                                 type="password"
-                                name="oldpassword"
+                                name="oldPassword"
                                 value={passwordData.oldPassword}
                                 onChange={handlePasswordChange}
                                 className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
