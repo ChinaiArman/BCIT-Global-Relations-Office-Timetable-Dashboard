@@ -960,11 +960,35 @@ class Database:
         -------
         None
         """
-        user = self.get_user_by_id(user_id)
-        user.is_admin = not user.is_admin
-        self.db.session.commit()
+        try:
+            user = self.get_user_by_id(user_id)
+            user.is_admin = not user.is_admin
+            self.db.session.commit()
+        except Exception as e:
+            raise DatabaseError(f"Error changing user admin status: {str(e)}")
         return
 
+    def update_user_info(self, user_id: int, username: str, email: str) -> None:
+        """
+        Update user information.
+
+        Args
+        ----
+        user_id (int): User ID.
+        username (str): User username.
+        email (str): User email.
+
+        Returns
+        -------
+        None
+        """
+        try:
+            user = self.get_user_by_id(user_id)
+            user.username = username
+            user.email = email
+            self.db.session.commit()
+        except Exception as e:
+            raise DatabaseError(f"Error updating user information: {str(e)}")
 
     def delete_user(self, user_id: int) -> None:
         """

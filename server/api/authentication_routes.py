@@ -323,3 +323,49 @@ def change_user_role() -> tuple:
         return jsonify({"message": f"Role for user {user_id} successfully updated"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@authentication_bp.route('/authenticate/change-password/', methods=['POST'])
+@verified_login_required
+def change_password() -> tuple:
+    """
+    Change the password of the logged in user.
+    """
+    try:
+        db = current_app.config['database']
+        authenticator = current_app.config['authenticator']
+        user_id = session.get('user_id')
+        user = db.get_user_by_id(user_id)
+        old_password = request.json.get('old_password')
+        new_password = request.json.get('new_password')
+        
+        if not old_password or not new_password:
+            return jsonify({"error": "Old password and new password are required"}), 400
+        
+        authenticator.verify_password(old_password, user.password)
+        encrypted_new_password = authenticator.encrypt_password(new_password)
+        db.update_password(user, encrypted_new_password)
+        
+        return jsonify({"message": "Password successfully updated"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 401
+    
+@authentication_bp.route('/authenticate/update-user-info/', methods=['POST'])
+@verified_login_required
+def update_user_info() -> tuple:
+    """
+    Update the user info for the logged in user.
+    """
+    try:
+        db = current_app.config['database']
+        user_id = session.get('user_id')
+        username = request.json.get('username')
+        email = request.json.get('email')
+        
+        if not username or not email:
+            return jsonify({"error": "Username and email are required"}), 400
+        
+        db.update_user_info(user_id, username, email)
+        
+        return jsonify({"message": "User info successfully updated"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 401
