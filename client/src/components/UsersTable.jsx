@@ -1,13 +1,17 @@
+// components/UsersTable.jsx
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { Search, UserRoundPlus } from "lucide-react";
+import DeleteUserModal from './DeleteUserModal';
 
 const UsersTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [userData, setUserData] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false); // State for controlling modal visibility
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
   const [newUser, setNewUser] = useState({
     username: "",
     email: "",
@@ -29,7 +33,7 @@ const UsersTable = () => {
         role: user.is_admin ? "Admin" : "User",
       }));
       setUserData(users);
-      setFilteredUsers(users); // Initialize filtered users with all users
+      setFilteredUsers(users);
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
@@ -48,8 +52,6 @@ const UsersTable = () => {
     setFilteredUsers(filtered);
   };
 
-
-  // Handler for 'Change Role' button
   const handleRoleChange = async (user_id) => {
     try {
       const serverUrl = import.meta.env.VITE_SERVER_URL;
@@ -86,29 +88,36 @@ const UsersTable = () => {
     }
   };
 
-  // Handler for 'Delete' button
-  const handleDelete = async (userId) => {
+  const handleDeleteClick = (user) => {
+    setUserToDelete(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return;
+    
     try {
       const serverUrl = import.meta.env.VITE_SERVER_URL;
       const response = await axios.delete(`${serverUrl}/api/authenticate/delete-user/`, {
         withCredentials: true,
-        data: { user_id: userId },
+        data: { user_id: userToDelete.id },
       });
       console.log("User deleted:", response.data);
 
-      const updatedUsers = userData.filter((user) => user.id !== userId);
-      const updatedFilteredUsers = filteredUsers.filter((user) => user.id !== userId);
+      const updatedUsers = userData.filter((user) => user.id !== userToDelete.id);
+      const updatedFilteredUsers = filteredUsers.filter((user) => user.id !== userToDelete.id);
       setUserData(updatedUsers);
       setFilteredUsers(updatedFilteredUsers);
     } catch (error) {
       console.error("Error deleting user:", error);
+    } finally {
+      setIsDeleteModalOpen(false);
+      setUserToDelete(null);
     }
   };
 
-  // Handle modal close
   const closeModal = () => setIsModalOpen(false);
 
-  // Handle modal form input
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewUser((prevUser) => ({
@@ -117,7 +126,6 @@ const UsersTable = () => {
     }));
   };
 
-  // Handle adding a new user
   const handleAddUser = async () => {
     if (newUser.password !== newUser.verifyPassword) {
       alert("Passwords do not match!");
@@ -233,7 +241,7 @@ const UsersTable = () => {
                   </button>
                   <button
                     className="text-red-400 hover:text-red-300"
-                    onClick={() => handleDelete(user.id)}
+                    onClick={() => handleDeleteClick(user)}
                   >
                     Delete
                   </button>
@@ -243,6 +251,7 @@ const UsersTable = () => {
           </tbody>
         </table>
       </div>
+
       <div className="mt-6 text-center">
         <button
           className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -324,7 +333,7 @@ const UsersTable = () => {
                 onClick={closeModal}
                 className="px-4 py-2 rounded bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors"
               >
-              Cancel
+                Cancel
               </button>
               <button
                 onClick={handleAddUser}
@@ -336,6 +345,16 @@ const UsersTable = () => {
           </motion.div>
         </div>
       )}
+
+      <DeleteUserModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setUserToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        username={userToDelete?.username}
+      />
     </motion.div>
   );
 };
