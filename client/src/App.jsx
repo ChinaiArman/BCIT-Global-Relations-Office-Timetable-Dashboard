@@ -15,6 +15,7 @@ import Database from './pages/Database.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
 import Students from './pages/Students.jsx';
 
+
 const App = () => {
     return (
       <div className='flex h-screen bg-gray-900 text-gray-100 overflow-hidden'>
@@ -82,6 +83,11 @@ const App = () => {
                                     </PrivateRoute>
                                 }
                             />
+                            <Route 
+                                path="/authenticate/verify/:code?" 
+                                element={
+                                <Verify />
+                                } />
                             <Route
                                 path="/students"
                                 element={
