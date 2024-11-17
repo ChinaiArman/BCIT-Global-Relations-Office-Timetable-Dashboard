@@ -33,28 +33,27 @@ class EmailManager:
         msg = MIMEMultipart()
         msg['From'] = self.gmail_user
         msg['To'] = to_email
-        msg['Subject'] = "Account Verification Request"
-
+        msg['Subject'] = "BCIT Account Verification"
+        
+        # Ensure we're using the React app URL
         verification_url = f"{self.base_url}/authenticate/verify/{verification_code}"
         
         body = f"""
         Hello {username},
 
-        An administrator has created an account for you. To verify your account and set up your password, 
-        please use the following verification code:
+        An administrator has created an account for you at BCIT Global Relations Office. 
+        To verify your account, please click the link below:
 
-        {verification_code}
+        {verification_url}
 
-        You can enter this code at {self.base_url}/authenticate/verify/
+        If you cannot click the link, copy and paste it into your browser.
 
-        If you did not request this account, please ignore this email.
+        Note: If you did not request this account, please ignore this email.
 
         Best regards,
-        Your Application Team
+        BCIT Global Relations Office
         """
-
         msg.attach(MIMEText(body, 'plain'))
-
         try:
             server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
             server.login(self.gmail_user, self.gmail_password)

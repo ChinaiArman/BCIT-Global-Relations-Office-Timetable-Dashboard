@@ -369,3 +369,4 @@ def update_user_info() -> tuple:
         return jsonify({"message": "User info successfully updated"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 401
+        

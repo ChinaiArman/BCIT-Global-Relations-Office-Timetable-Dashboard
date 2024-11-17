@@ -3,18 +3,10 @@ import { Shield, CheckCircle2, AlertCircle } from "lucide-react";
 import { useParams } from 'react-router-dom';
 
 const Verify = () => {
-    const { code } = useParams(); // Get verification code from URL
-    const [verificationCode, setVerificationCode] = useState(code || '');
+    const { code } = useParams();
     const [email, setEmail] = useState('');
     const [status, setStatus] = useState({ type: '', message: '' });
     const [isLoading, setIsLoading] = useState(false);
-
-    // Pre-fill verification code if it's in the URL
-    useEffect(() => {
-        if (code) {
-            setVerificationCode(code);
-        }
-    }, [code]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -27,7 +19,10 @@ const Verify = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ verification_code: verificationCode, email }),
+                body: JSON.stringify({ 
+                    verification_code: code,
+                    email 
+                }),
                 credentials: 'include'
             });
 
@@ -60,7 +55,7 @@ const Verify = () => {
                 {/* Title */}
                 <div className="text-center space-y-2">
                     <h1 className="text-3xl font-bold text-white">Verify Your Email</h1>
-                    <p className="text-gray-400">Enter your email and the verification code sent to you</p>
+                    <p className="text-gray-400">Please enter your email to complete verification</p>
                 </div>
 
                 {/* Status Message */}
@@ -78,35 +73,19 @@ const Verify = () => {
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-6 w-full">
-                    <div className="space-y-4">
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-1">
-                                Email Address
-                            </label>
-                            <input
-                                type="email"
-                                id="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-600"
-                                placeholder="Enter your email"
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="code" className="block text-sm font-medium text-gray-400 mb-1">
-                                Verification Code
-                            </label>
-                            <input
-                                type="text"
-                                id="code"
-                                value={verificationCode}
-                                onChange={(e) => setVerificationCode(e.target.value)}
-                                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-600"
-                                placeholder="Enter verification code"
-                                required
-                            />
-                        </div>
+                    <div>
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-1">
+                            Email Address
+                        </label>
+                        <input
+                            type="email"
+                            id="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                            placeholder="Enter your email"
+                            required
+                        />
                     </div>
 
                     <button
@@ -121,10 +100,10 @@ const Verify = () => {
 
                 {/* Back Link */}
                 <a
-                    href="/dashboard"
+                    href="/login"
                     className="text-gray-400 hover:text-white text-sm transition-colors"
                 >
-                    Back to Dashboard
+                    Back to Login
                 </a>
             </section>
         </main>
