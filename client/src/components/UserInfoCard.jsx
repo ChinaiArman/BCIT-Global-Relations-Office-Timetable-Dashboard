@@ -1,7 +1,24 @@
 import { useState, useEffect } from "react";
-import { User, Lock } from "lucide-react";
+import { User, Lock, CheckCircle2, AlertCircle } from "lucide-react";
 import SettingSection from "./SettingSection";
 import axios from "axios";
+
+// Status Message Component
+const StatusMessage = ({ status }) => {
+    if (!status.message) return null;
+
+    return (
+        <div className={`w-full p-4 rounded-md flex items-center space-x-2 mb-6 ${
+            status.type === 'success' ? 'bg-green-900/50 text-green-400' : 'bg-red-900/50 text-red-400'
+        }`}>
+            {status.type === 'success' ? 
+                <CheckCircle2 className="shrink-0" size={20} /> : 
+                <AlertCircle className="shrink-0" size={20} />
+            }
+            <span>{status.message}</span>
+        </div>
+    );
+};
 
 const initialProfileData = {
     username: "",
@@ -22,7 +39,8 @@ const UserInfoCard = () => {
     const [isProfileSaveEnabled, setIsProfileSaveEnabled] = useState(false);
     const [isPasswordSaveEnabled, setIsPasswordSaveEnabled] = useState(false);
     const [passwordsMatch, setPasswordsMatch] = useState(true);
-    const [loading, setLoading] = useState(true); // To track loading state
+    const [loading, setLoading] = useState(true);
+    const [status, setStatus] = useState({ type: '', message: '' });
 
     const getUserProfile = async () => {
         try {
@@ -30,8 +48,6 @@ const UserInfoCard = () => {
             const response = await axios.get(`${serverUrl}/api/authenticate/get-user-info/`, {
                 withCredentials: true,
             });
-
-            console.log("User profile response:", response);
 
             if (response.status === 200) {
                 const { name, email } = response.data.user;
@@ -41,6 +57,10 @@ const UserInfoCard = () => {
             }
         } catch (err) {
             console.error("Failed to get user profile:", err);
+            setStatus({
+                type: 'error',
+                message: 'Failed to load user profile'
+            });
         } finally {
             setLoading(false);
         }
@@ -88,38 +108,63 @@ const UserInfoCard = () => {
             if (response.status === 200) {
                 initialProfileData.username = profileData.username;
                 initialProfileData.email = profileData.email;
+                setStatus({
+                    type: 'success',
+                    message: 'Profile updated successfully'
+                });
+                setIsProfileSaveEnabled(false);
+                setIsEditingProfile(false);
+
+                setTimeout(() => {
+                    setStatus({ type: '', message: '' });
+                }, 5000);
             }
         } catch (err) {
             console.error("Failed to update profile:", err);
+            setStatus({
+                type: 'error',
+                message: err.response?.data?.error || 'Failed to update profile. Please try again.'
+            });
         }
-
-        setIsProfileSaveEnabled(false);
-        setIsEditingProfile(false);
     };
 
-    const handlePasswordSave = (e) => {
+    const handlePasswordSave = async (e) => {
         e.preventDefault();
-        console.log("Password data saved:", passwordData);
-
+        
         try {
             const serverUrl = import.meta.env.VITE_SERVER_URL;
-            axios.post(`${serverUrl}/api/authenticate/change-password/`, passwordData, {
+            const response = await axios.post(`${serverUrl}/api/authenticate/change-password/`, passwordData, {
                 withCredentials: true,
             });
+
+            if (response.status === 200) {
+                setStatus({
+                    type: 'success',
+                    message: 'Password successfully updated'
+                });
+                
+                setIsPasswordSaveEnabled(false);
+                setIsEditingPassword(false);
+                setPasswordData(initialPasswordData);
+
+                setTimeout(() => {
+                    setStatus({ type: '', message: '' });
+                }, 5000);
+            }
         } catch (err) { 
             console.error("Failed to update password:", err);
+            setStatus({
+                type: 'error',
+                message: err.response?.data?.error || 'Failed to update password. Please try again.'
+            });
         }
-
-        setIsPasswordSaveEnabled(false);
-        setIsEditingPassword(false);
-        setPasswordData(initialPasswordData);
     };
 
     const handleProfileCancel = () => {
-        console.log("Profile data reset:", initialProfileData);
         setProfileData(initialProfileData);
         setIsEditingProfile(false);
         setIsProfileSaveEnabled(false);
+        setStatus({ type: '', message: '' });
     };
 
     const handlePasswordCancel = () => {
@@ -127,14 +172,17 @@ const UserInfoCard = () => {
         setIsEditingPassword(false);
         setIsPasswordSaveEnabled(false);
         setPasswordsMatch(true);
+        setStatus({ type: '', message: '' });
     };
 
     if (loading) {
-        return <div>Loading...</div>; // Show loading text until profile is fetched
+        return <div>Loading...</div>;
     }
 
     return (
         <div className="space-y-6">
+            <StatusMessage status={status} />
+            
             <SettingSection icon={User} title="Profile Information">
                 <div className="flex flex-col sm:flex-row items-center mb-6">
                     <div>
