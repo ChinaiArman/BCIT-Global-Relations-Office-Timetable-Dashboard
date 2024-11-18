@@ -1458,3 +1458,4 @@ class Database:
                 course.num_enrolled += 1
         self.db.session.commit()
         return
+

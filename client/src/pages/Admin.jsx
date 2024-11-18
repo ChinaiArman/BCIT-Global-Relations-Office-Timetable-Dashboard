@@ -1,6 +1,7 @@
 import Header from "../components/Header";
 import UsersTable from "../components/UsersTable";
 
+
 const Admin = () => {
     return (
 		<div className='flex-1 overflow-auto relative z-10'>
