@@ -1,102 +1,216 @@
 import React, { useState } from "react";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import UploadWindow from '../components/UploadWindow';
+import DownloadWindow from '../components/DownloadWindow';  
 import StatusMessage from '../components/StatusMessage';
-
 import Header from "../components/Header";
+import axios from 'axios';
 
 const Database = () => {
-  const [courseFile, setCourseFile] = useState(null);
-  const [studentFile, setStudentFile] = useState(null);
-  const [message, setMessage] = useState({ type: '', text: '' });
-  const [isCourseLoading, setIsCourseLoading] = useState(false);
-  const [isStudentLoading, setIsStudentLoading] = useState(false);
+  // Course states
+  const [courseReplaceFile, setCourseReplaceFile] = useState(null);
+  const [courseUpdateFile, setCourseUpdateFile] = useState(null);
+  const [isCourseReplaceLoading, setIsCourseReplaceLoading] = useState(false);
+  const [isCourseUpdateLoading, setIsCourseUpdateLoading] = useState(false);
 
-  const handleCourseUpload = async (e) => {
+  // Student states
+  const [studentReplaceFile, setStudentReplaceFile] = useState(null);
+  const [studentUpdateFile, setStudentUpdateFile] = useState(null);
+  const [isStudentReplaceLoading, setIsStudentReplaceLoading] = useState(false);
+  const [isStudentUpdateLoading, setIsStudentUpdateLoading] = useState(false);
+
+  const [message, setMessage] = useState({ type: '', text: '' });
+
+  const handleCourseReplace = async (e) => {
     e.preventDefault();
-    if (!courseFile) {
+    if (!courseReplaceFile) {
       setMessage({ type: 'error', text: 'Please select an XLSX file to upload' });
       return;
     }
-
+  
     const formData = new FormData();
-    formData.append('file', courseFile);
-    setIsCourseLoading(true);
-
+    formData.append('file', courseReplaceFile);
+    setIsCourseReplaceLoading(true);
+  
     try {
       const serverUrl = import.meta.env.VITE_SERVER_URL;
-      const response = await fetch(`${serverUrl}/api/course/import`, {
-        method: 'PUT',
-        body: formData,
-        credentials: 'include'
+      const response = await axios.put(`${serverUrl}/api/course/import`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        withCredentials: true, // Include cookies with the request
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Error uploading course data');
-      }
-
+  
+      const data = response.data;
+  
       setMessage({
         type: 'success',
         text: data.message,
         details: data.invalid_rows?.length > 0
           ? `${data.invalid_rows.length} rows failed to upload.`
-          : null
+          : null,
       });
-      setCourseFile(null);
+  
+      setCourseReplaceFile(null);
       e.target.reset();
     } catch (error) {
       setMessage({
         type: 'error',
-        text: error.message || 'Error uploading course data'
+        text: error.response?.data?.message || 'Error replacing course data',
       });
     } finally {
-      setIsCourseLoading(false);
+      setIsCourseReplaceLoading(false);
     }
   };
 
-  const handleStudentUpload = async (e) => {
+  const handleCourseUpdate = async (e) => {
     e.preventDefault();
-    if (!studentFile) {
+    if (!courseUpdateFile) {
+      setMessage({ type: 'error', text: 'Please select an XLSX file to upload' });
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append('file', courseUpdateFile);
+    setIsCourseUpdateLoading(true);
+  
+    try {
+      const serverUrl = import.meta.env.VITE_SERVER_URL;
+      const response = await axios.put(`${serverUrl}/api/course/update`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        withCredentials: true,
+      });
+  
+      const data = response.data;
+  
+      setMessage({
+        type: 'success',
+        text: data.message,
+        details: data.invalid_rows?.length > 0
+          ? `${data.invalid_rows.length} rows failed to update.`
+          : null,
+      });
+  
+      setCourseUpdateFile(null);
+      e.target.reset();
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text: error.response?.data?.message || 'Error updating course data',
+      });
+    } finally {
+      setIsCourseUpdateLoading(false);
+    }
+  };
+
+  const handleTemplateDownload = async (apiURL, fileName) => { 
+    try {
+      const serverUrl = import.meta.env.VITE_SERVER_URL;
+      const response = await axios.get(`${serverUrl}${apiURL}`, {
+        withCredentials: true, 
+        responseType: 'blob'
+      });
+  
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a); 
+      a.click(); 
+      a.remove(); 
+  
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text: error.response?.data?.message || 'Error downloading course template'
+      });
+    }
+  };
+
+  const handleStudentReplace = async (e) => {
+    e.preventDefault();
+    if (!studentReplaceFile) {
       setMessage({ type: 'error', text: 'Please select a CSV file to upload' });
       return;
     }
-
+  
     const formData = new FormData();
-    formData.append('file', studentFile);
-    setIsStudentLoading(true);
-
+    formData.append('file', studentReplaceFile);
+    setIsStudentReplaceLoading(true);
+  
     try {
       const serverUrl = import.meta.env.VITE_SERVER_URL;
-      const response = await fetch(`${serverUrl}/api/student/import`, {
-        method: 'PUT',
-        body: formData,
-        credentials: 'include'
+      const response = await axios.put(`${serverUrl}/api/student/import`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        withCredentials: true, // Include cookies with the request
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Error uploading student data');
-      }
-
+  
+      const data = response.data;
+  
       setMessage({
         type: 'success',
         text: data.message,
         details: data.invalid_rows?.length > 0
           ? `${data.invalid_rows.length} rows failed to upload.`
-          : null
+          : null,
       });
-      setStudentFile(null);
+  
+      setStudentReplaceFile(null);
       e.target.reset();
     } catch (error) {
       setMessage({
         type: 'error',
-        text: error.message || 'Error uploading student data'
+        text: error.response?.data?.message || 'Error replacing student data',
       });
     } finally {
-      setIsStudentLoading(false);
+      setIsStudentReplaceLoading(false);
+    }
+  };
+
+  const handleStudentUpdate = async (e) => {
+    e.preventDefault();
+    if (!studentUpdateFile) {
+      setMessage({ type: 'error', text: 'Please select a CSV file to upload' });
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append('file', studentUpdateFile);
+    setIsStudentUpdateLoading(true);
+  
+    try {
+      const serverUrl = import.meta.env.VITE_SERVER_URL;
+      const response = await axios.put(`${serverUrl}/api/student/update`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        withCredentials: true, // Include cookies with the request
+      });
+  
+      const data = response.data;
+  
+      setMessage({
+        type: 'success',
+        text: data.message,
+        details: data.invalid_rows?.length > 0
+          ? `${data.invalid_rows.length} rows failed to update.`
+          : null,
+      });
+  
+      setStudentUpdateFile(null);
+      e.target.reset();
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text: error.response?.data?.message || 'Error updating student data',
+      });
+    } finally {
+      setIsStudentUpdateLoading(false);
     }
   };
 
@@ -105,29 +219,72 @@ const Database = () => {
       <Header title='Database' />
       <main className='max-w-7xl mx-auto py-6 px-4 lg:px-8'>
         <div className="max-w-4xl mx-auto space-y-8">
-          <h1 className="text-2xl font-bold mb-8">Course</h1>
+          <h1 className="text-2xl font-bold mb-8">Courses</h1>
           <StatusMessage message={message} />
+          
           <UploadWindow
-            title="Upload Course Data"
+            title="Upload/Replace Course Data"
             fileType="Course Data"
             fileExtension="XLSX"
-            isLoading={isCourseLoading}
-            selectedFile={courseFile}
-            onFileChange={setCourseFile}
-            onSubmit={handleCourseUpload}
+            isLoading={isCourseReplaceLoading}
+            selectedFile={courseReplaceFile}
+            onFileChange={setCourseReplaceFile}
+            onSubmit={handleCourseReplace}
+          />
+          
+          <UploadWindow
+            title="Update Course Data"
+            fileType="Course Data"
+            fileExtension="XLSX"
+            isLoading={isCourseUpdateLoading}
+            selectedFile={courseUpdateFile}
+            onFileChange={setCourseUpdateFile}
+            onSubmit={handleCourseUpdate}
+          />
+          
+          <DownloadWindow
+            title="Download Course Template"
+            fileType="Course Template"
+            fileExtension="XLSX"
+            onClick={() => handleTemplateDownload("/api/course/download_template", "course_template.xlsx")}
           />
 
-          <h1 className="text-2xl font-bold mb-8">Student</h1>
+          <h1 className="text-2xl font-bold mb-8">Students</h1>
+          
           <UploadWindow
-            title="Upload Student Data"
+            title="Upload/Replace Student Data"
             fileType="Student Data"
             fileExtension="CSV"
-            isLoading={isStudentLoading}
-            selectedFile={studentFile}
-            onFileChange={setStudentFile}
-            onSubmit={handleStudentUpload}
+            isLoading={isStudentReplaceLoading}
+            selectedFile={studentReplaceFile}
+            onFileChange={setStudentReplaceFile}
+            onSubmit={handleStudentReplace}
           />
-          <h1 className="text-2xl font-bold mb-8">Download</h1>
+          
+          <UploadWindow
+            title="Update Student Data"
+            fileType="Student Data"
+            fileExtension="CSV"
+            isLoading={isStudentUpdateLoading}
+            selectedFile={studentUpdateFile}
+            onFileChange={setStudentUpdateFile}
+            onSubmit={handleStudentUpdate}
+          />
+
+          <DownloadWindow
+            title="Download Student Template"
+            fileType="Student Template"
+            fileExtension="CSV"
+            onClick={() => handleTemplateDownload("/api/student/download_template", "student_template.csv")}
+          />
+
+          <h1 className="text-2xl font-bold mb-8">Schedules</h1>
+          <DownloadWindow
+            title="Download Schedule Data"
+            fileType="Schedule Data"
+            fileExtension="???"
+            onClick={() => handleTemplateDownload("/api/student/download_template", "schedule_data.csv")}
+          />
         </div>
       </main>
     </div>

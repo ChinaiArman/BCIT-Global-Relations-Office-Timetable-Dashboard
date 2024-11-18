@@ -3,7 +3,9 @@ This module defines the routes for course-related operations within the BCIT Glo
 """
 
 # IMPORTS
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request, current_app, send_file
+import os
+import logging
 
 from services.decorators import verified_login_required
 
@@ -109,6 +111,20 @@ def upload_course():
         return jsonify({"message": "Course data successfully uploaded", "invalid_rows": response }), 201
     except Exception as e:
         return jsonify({"message": str(e)}), 400
+    
+
+@course_bp.route('/course/update', methods=['PUT'])
+@verified_login_required
+def update_courses():
+    """
+    """
+    try:
+        db = current_app.config['database']
+        response = db.bulk_course_update(request.files['file'])
+        print(response)
+        return jsonify({"message": "Course data successfully updated", "invalid_rows": response }), 201
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
 
 @course_bp.route('/course/export', methods=['GET'])
 @verified_login_required
@@ -148,6 +164,12 @@ def get_course_students(course_grouping):
 @verified_login_required
 def download_template():
     """
+    Sends the course upload template file to the client for download.
     """
-    return jsonify({"message": "course download template endpoint"})
-    
+    try:
+        file_path = os.path.join(current_app.root_path, 'resources/templates/course_upload_template.xlsx')
+        return send_file(file_path, as_attachment=True, download_name="course_template.xlsx")
+    except FileNotFoundError:
+        return jsonify({"message": "Template file not found."}), 404
+    except Exception as e:
+        return jsonify({"message": "An unexpected error occurred."}), 500

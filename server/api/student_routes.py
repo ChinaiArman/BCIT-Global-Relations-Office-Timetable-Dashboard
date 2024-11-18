@@ -5,6 +5,7 @@
 from flask import Blueprint, jsonify, request, current_app, send_file
 
 from services.decorators import verified_login_required
+import os
 
 
 # DEFINE BLUEPRINT
@@ -128,9 +129,9 @@ def delete_student(id):
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-@student_bp.route("/student/import", methods=["PUT"])
+@student_bp.route("/student/update", methods=["PUT"])
 @verified_login_required
-def upload_student():
+def bulk_update_student():
     """
     Request: PUT /student/import
 
@@ -152,10 +153,11 @@ def upload_student():
     """
     try:
         db = current_app.config["database"]
-        response = db.bulk_student_upload(request.files["file"])
-        return jsonify({"message": "Student data successfully uploaded", "invalid_rows": response}), 201
+        response = db.bulk_student_update(request.files["file"])
+        return jsonify({"message": "Student data successfully uploaded", "results": response}), 201
     except Exception as e:
         return jsonify({"message": str(e)}), 400
+    
 
 @student_bp.route("/student/get-all", methods=["GET"])
 @verified_login_required
@@ -223,7 +225,8 @@ def download_template():
     Author: ``@ArmanChinai``
     """
     try:
-        return send_file("templates/student_upload_template.csv", as_attachment=True)
+        file_path = os.path.join(current_app.root_path, 'resources/templates/student_upload_template.csv')
+        return send_file(file_path, as_attachment=True)
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
