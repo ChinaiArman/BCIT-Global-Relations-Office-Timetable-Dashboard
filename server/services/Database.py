@@ -571,7 +571,7 @@ class Database:
         results = {
             'invalid_rows': [],
             'updated_students': [],
-            'not_found': []
+            'added_students': []
         }
 
         for _, row in df.iterrows():
@@ -585,9 +585,21 @@ class Database:
                 ).first()
 
                 if not existing_student:
-                    results['not_found'].append({
+                    results['added_students'].append({
                         "id": row["BCIT Student Number"]
                     })
+                    student = Student(
+                        id=row["BCIT Student Number"],
+                        first_name=row["Legal First Name"],
+                        last_name=row["Legal Last Name"],
+                        term_code=row["Term Code"],
+                        email=row["BCIT Email"],
+                        is_completed=False,
+                        is_approved_by_program_heads=False
+                    )
+                    self.db.session.add(student)
+                    preferences = [row[f"Course Code Preference #{i}"] for i in range(1, 9) if row[f"Course Code Preference #{i}"] and row[f"Course Code Preference #{i}"] != ""]
+                    self.add_student_preferences(student.id, preferences)
                     continue
 
                 # Create dictionary of new values
