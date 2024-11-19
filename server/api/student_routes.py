@@ -129,7 +129,7 @@ def delete_student(id):
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-@student_bp.route("/student/update", methods=["PUT"])
+@student_bp.route("/student/import", methods=["PUT"])
 @verified_login_required
 def bulk_update_student():
     """
