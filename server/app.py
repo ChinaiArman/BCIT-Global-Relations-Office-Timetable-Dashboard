@@ -70,7 +70,7 @@ def create_app():
             response.headers['Access-Control-Allow-Origin'] = 'http://localhost:3001'
             response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
             response.headers['Access-Control-Allow-Credentials'] = 'true'
-            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
             return response
         # set response headers
         response.headers['Access-Control-Allow-Origin'] = 'http://localhost:3001'

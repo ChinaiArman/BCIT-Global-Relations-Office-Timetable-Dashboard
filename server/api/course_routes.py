@@ -86,7 +86,7 @@ def get_course_by_id(id):
 
 @course_bp.route('/course/import', methods=['PUT'])
 @verified_login_required
-def upload_course():
+def bulk_replace_courses():
     """
     Request: PUT /course/import
 
@@ -107,11 +107,17 @@ def upload_course():
     """
     try:
         db = current_app.config['database']
-        response = db.bulk_course_upload(request.files['file'])
+        response = db.bulk_course_replace(request.files['file'])
         return jsonify({"message": "Course data successfully uploaded", "invalid_rows": response }), 201
     except Exception as e:
         return jsonify({"message": str(e)}), 400
     
+@course_bp.route('/course/import', methods=['PATCH'])
+@verified_login_required
+def bulk_update_courses():
+    """
+    """
+    pass
 
 @course_bp.route('/course/update', methods=['PUT'])
 @verified_login_required

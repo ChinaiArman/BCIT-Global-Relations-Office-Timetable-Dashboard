@@ -158,7 +158,13 @@ def bulk_replace_student():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
     
-
+@student_bp.route("/student/import", methods=["PATCH"])
+@verified_login_required
+def bulk_update_student():
+    """
+    """
+    pass
+    
 @student_bp.route("/student/get-all", methods=["GET"])
 @verified_login_required
 def get_all_students():

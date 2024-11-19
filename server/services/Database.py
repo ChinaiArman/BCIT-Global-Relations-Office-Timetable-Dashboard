@@ -41,7 +41,7 @@ class Database:
         """ """
         self.db = db
 
-    def bulk_course_upload(self, file) -> list:
+    def bulk_course_replace(self, file) -> list:
         """
         Save the bulk course upload file to the database.
 
