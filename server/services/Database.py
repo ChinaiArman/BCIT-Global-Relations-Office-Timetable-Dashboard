@@ -401,7 +401,7 @@ class Database:
 
         return results
 
-    def bulk_student_upload(self, file) -> list:
+    def bulk_student_replace(self, file) -> list:
         """ 
         Save the bulk student upload file to the database.
 

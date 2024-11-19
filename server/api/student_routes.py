@@ -131,7 +131,7 @@ def delete_student(id):
 
 @student_bp.route("/student/import", methods=["PUT"])
 @verified_login_required
-def bulk_update_student():
+def bulk_replace_student():
     """
     Request: PUT /student/import
 
@@ -153,7 +153,7 @@ def bulk_update_student():
     """
     try:
         db = current_app.config["database"]
-        response = db.bulk_student_update(request.files["file"])
+        response = db.bulk_student_replace(request.files["file"])
         return jsonify({"message": "Student data successfully uploaded", "results": response}), 201
     except Exception as e:
         return jsonify({"message": str(e)}), 400
