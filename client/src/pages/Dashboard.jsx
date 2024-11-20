@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import Header from "../components/Header";
 import StatCard from "../components/StatCard";
 import StudentsTable from "../components/StudentsTable";
-import UserGrowthChart from "../components/UserGrowthChart";
+import ScheduleProgressionChart from "../components/ScheduleProgressionChart";
 import UserActivityHeatmap from "../components/UserActivityHeatmap";
 import UserDemographicsChart from "../components/UserDemographicsChart";
 
@@ -96,7 +96,7 @@ const Dashboard = () => {
 
 				{/* USER CHARTS */}
 				<div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8'>
-					<UserGrowthChart />
+					<ScheduleProgressionChart />
 					<UserActivityHeatmap />
 					<UserDemographicsChart />
 				</div>

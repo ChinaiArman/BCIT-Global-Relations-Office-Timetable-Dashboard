@@ -1417,7 +1417,7 @@ class Database:
         """
         """
         # get the 7 latest schedule progressions
-        schedule_progressions = self.db.session.query(ScheduleProgression).order_by(ScheduleProgression.date.desc()).limit(7).all()
+        schedule_progressions = self.db.session.query(ScheduleProgression).order_by(ScheduleProgression.date.asc()).limit(7).all()
         total_students = self.db.session.query(Student).count()
         information = {
             "schedule_progressions": [schedule_progression.to_dict() for schedule_progression in schedule_progressions],
