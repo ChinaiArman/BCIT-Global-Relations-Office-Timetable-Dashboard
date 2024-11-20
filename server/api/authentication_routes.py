@@ -40,7 +40,7 @@ def login() -> tuple:
         return jsonify({"error": str(e)}), 401
 
 @authentication_bp.route('/authenticate/logout/', methods=['POST'])
-@verified_login_required
+@unverified_login_required
 def logout() -> tuple:
     """
     Logout a user.
