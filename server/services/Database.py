@@ -1285,7 +1285,7 @@ class Database:
         """
         """
         total_students = self.db.session.query(Student).count()
-        total_students_with_schedules_finalized = self.db.session.query(Student).filter(Student.is_completed == True).count()
+        total_students_with_schedules_finalized = self.db.session.query(Student).filter(Student.is_completed == True, Student.is_approved_by_program_heads==True).count()
         total_students_with_courses = self.db.session.query(Student).filter(or_(Student.courses.any(), Student.is_completed == True)).count()
         total_students_with_schedules_in_progress = total_students_with_courses - total_students_with_schedules_finalized
         total_students_without_course = total_students - total_students_with_courses
