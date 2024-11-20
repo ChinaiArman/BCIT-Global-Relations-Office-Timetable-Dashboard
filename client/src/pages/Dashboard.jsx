@@ -7,8 +7,7 @@ import Header from "../components/Header";
 import StatCard from "../components/StatCard";
 import StudentsTable from "../components/StudentsTable";
 import ScheduleProgressionChart from "../components/ScheduleProgressionChart";
-import UserActivityHeatmap from "../components/UserActivityHeatmap";
-import UserDemographicsChart from "../components/UserDemographicsChart";
+import CourseRankingTable from "../components/CourseRankingTable";
 
 const Dashboard = () => {
 	const [schedulingStats, setSchedulingStats] = useState({
@@ -17,7 +16,8 @@ const Dashboard = () => {
 		totalSchedulesFinalized: 0,
 		totalStudentsWithoutCourses: 0,
 	});
-	const [loading, setLoading] = useState(true); 
+	const [popularPreferences, setPopularPreferences] = useState([]);
+	const [popularCourses, setPopularCourses] = useState([]);
 
 	useEffect(() => {
 		const fetchSchedulingStats = async () => {
@@ -40,12 +40,44 @@ const Dashboard = () => {
 				}
 			} catch (error) {
 				console.error("Failed to fetch user stats:", error);
-			} finally {
-				setLoading(false);
+			}
+		};
+		const fetchPopularPreferences = async () => {
+			try {
+				const serverUrl = import.meta.env.VITE_SERVER_URL;
+				const response = await axios.get(`${serverUrl}/api/database/most-popular-preferences`, {
+					withCredentials: true,
+				});
+
+				if (response.status === 200) {
+					setPopularPreferences(response.data);
+				} else {
+					console.error("Failed to fetch popular preferences:", response);
+				}
+			} catch (error) {
+				console.error("Failed to fetch popular preferences:", error);
+			}
+		};
+		const fetchPopularCourses = async () => {
+			try {
+				const serverUrl = import.meta.env.VITE_SERVER_URL;
+				const response = await axios.get(`${serverUrl}/api/database/most-popular-course-registrations`, {
+					withCredentials: true,
+				});
+
+				if (response.status === 200) {
+					setPopularCourses(response.data);
+				} else {
+					console.error("Failed to fetch popular courses:", response);
+				}
+			} catch (error) {
+				console.error("Failed to fetch popular courses:", error);
 			}
 		};
 
 		fetchSchedulingStats();
+		fetchPopularPreferences();
+		fetchPopularCourses();
 	}, []);
 
 	return (
@@ -92,10 +124,10 @@ const Dashboard = () => {
 				<div className='mt-8'>
 					<ScheduleProgressionChart />
 				</div>
-				{/* <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8'>
-					<UserActivityHeatmap />
-					<UserDemographicsChart />
-				</div> */}
+				<div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8'>
+					<CourseRankingTable tableTitle='Top 5 Courses' scoringColumnHeader='Total Students Enrolled' courseRankings={popularCourses} />
+					<CourseRankingTable tableTitle='Top 5 Preferences' scoringColumnHeader='Average Preference Rank' courseRankings={popularPreferences}/>
+				</div>
 			</main>
 		</div>
 	);

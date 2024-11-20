@@ -7,7 +7,7 @@ import os
 from flask import current_app
 from sqlalchemy import text, delete, insert, update
 from datetime import datetime
-from sqlalchemy import or_
+from sqlalchemy import or_, func, desc
 
 from models.Course import Course
 from models.Student import Student
@@ -1424,3 +1424,39 @@ class Database:
             "total_students": total_students
         }
         return information
+    
+    def get_most_popular_preferences(self) -> dict:
+        """
+        """
+        preferences = self.db.session.query(Preferences).all()
+        preferences_dict = {}
+        for preference in preferences:
+            if preference.preference not in preferences_dict:
+                preferences_dict[preference.preference] = []
+            preferences_dict[preference.preference].append(preference.priority)
+        for preference in preferences_dict:
+            preferences_dict[preference] = sum(preferences_dict[preference]) / len(preferences_dict[preference])
+        sorted_preferences = sorted(preferences_dict.items(), key=lambda item: item[1], reverse=False)
+        sorted_preferences = sorted_preferences[:5]
+        sorted_preferences_list = [{sorted_preferences[i][0]: sorted_preferences[i][1]} for i in range(len(sorted_preferences))]
+        return sorted_preferences_list
+
+
+    
+    def get_most_popular_course_registrations(self) -> dict:
+        """
+        """
+        students = self.db.session.query(Student).all()
+        course_codes = {}
+        for student in students:
+            student_courses = set()
+            for course in student.courses:
+                student_courses.add(course.course_code)
+            for course in student_courses:
+                if course not in course_codes:
+                    course_codes[course] = 0
+                course_codes[course] += 1
+        sorted_course_codes = sorted(course_codes.items(), key=lambda item: item[1], reverse=True)
+        sorted_course_codes = sorted_course_codes[:5]
+        sorted_courses_list = [{sorted_course_codes[i][0]: sorted_course_codes[i][1]} for i in range(len(sorted_course_codes))]
+        return sorted_courses_list

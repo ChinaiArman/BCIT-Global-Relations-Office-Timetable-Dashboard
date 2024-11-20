@@ -29,3 +29,25 @@ def get_schedule_progression():
         return jsonify(response), 200
     except Exception as e:
         return jsonify({"error": "Internal server error", "message": str(e)}), 500
+    
+@database_bp.route('/database/most-popular-preferences', methods=['GET'])
+def get_most_popular_preferences():
+    """
+    """
+    try:
+        db = current_app.config['database']
+        response = db.get_most_popular_preferences()
+        return jsonify(response), 200
+    except Exception as e:
+        return jsonify({"error": "Internal server error", "message": str(e)}), 500
+    
+@database_bp.route('/database/most-popular-course-registrations', methods=['GET'])
+def get_most_popular_course_registrations():
+    """
+    """
+    try:
+        db = current_app.config['database']
+        response = db.get_most_popular_course_registrations()
+        return jsonify(response), 200
+    except Exception as e:
+        return jsonify({"error": "Internal server error", "message": str(e)}), 500
