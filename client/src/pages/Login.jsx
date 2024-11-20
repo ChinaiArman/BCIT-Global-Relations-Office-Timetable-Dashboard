@@ -87,6 +87,7 @@ const Login = () => {
                     LOG IN
                 </button>
                 
+                <a href="/verify" className="transform text-center font-semibold text-gray-500 duration-300 hover:text-gray-300">FIRST TIME LOGGING IN?</a>
                 <a href="/forgot-password" className="transform text-center font-semibold text-gray-500 duration-300 hover:text-gray-300">FORGOT PASSWORD?</a>
             </section>
         </main>
