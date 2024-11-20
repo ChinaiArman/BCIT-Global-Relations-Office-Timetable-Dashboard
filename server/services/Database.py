@@ -117,6 +117,7 @@ class Database:
         """
         try:
             self.db.session.query(Student).update({Student.is_completed: False, Student.is_approved_by_program_heads: False})
+            self.db.session.query(ScheduleProgression).filter(ScheduleProgression.date == datetime.now().date()).update({ScheduleProgression.num_schedules_completed: 0, ScheduleProgression.num_approvals_from_program_heads: 0})
             self.db.session.commit()
         except Exception as e:
             raise DatabaseError(f"Error updating student: {str(e)}")
@@ -310,6 +311,7 @@ class Database:
             raise InvalidFileType("Invalid file format. Please upload an CSV file.")
         try:
             df = pd.read_csv(file)
+            self.db.session.query(ScheduleProgression).filter(ScheduleProgression.date == datetime.now().date()).update({ScheduleProgression.num_schedules_completed: 0, ScheduleProgression.num_approvals_from_program_heads: 0})
             return self.upload_students_to_database(df)
         except:
             raise InvalidUploadFile("Invalid file format. Error processing the file.")
@@ -663,6 +665,8 @@ class Database:
             if not student:
                 raise DataNotFound(f"Student with ID not found: {id}")
             
+            # if student marked as completed or approved by program heads, reduce the count
+            self.db.session.query(ScheduleProgression).filter(ScheduleProgression.date == datetime.now().date()).update({ScheduleProgression.num_schedules_completed: ScheduleProgression.num_schedules_completed - (1 if student.is_completed else 0), ScheduleProgression.num_approvals_from_program_heads: ScheduleProgression.num_approvals_from_program_heads - (1 if student.is_approved_by_program_heads else 0)})
             self.delete_student_preferences(id)
             self.db.session.query(enrollments).filter(enrollments.c.student_id == id).delete()
             self.db.session.delete(student)
@@ -1301,9 +1305,11 @@ class Database:
         today = today.strftime("%Y-%m-%d")
         schedule_progression = self.db.session.query(ScheduleProgression).filter(ScheduleProgression.date == today).first()
         if not schedule_progression:
-            schedule_progression = ScheduleProgression(date=today, num_schedules_completed=0, num_approvals_from_program_heads=0)
+            schedules_completed = self.db.session.query(Student).filter(Student.is_completed == True).count()
+            approvals_from_program_heads = self.db.session.query(Student).filter(Student.is_approved_by_program_heads == True).count()
+            schedule_progression = ScheduleProgression(date=today, num_schedules_completed=schedules_completed, num_approvals_from_program_heads=approvals_from_program_heads)
             self.db.session.add(schedule_progression)
-        if student.is_completed:
+        elif student.is_completed:
             schedule_progression.num_schedules_completed += 1
         else:
             schedule_progression.num_schedules_completed -= 1
@@ -1319,9 +1325,11 @@ class Database:
         today = today.strftime("%Y-%m-%d")
         schedule_progression = self.db.session.query(ScheduleProgression).filter(ScheduleProgression.date == today).first()
         if not schedule_progression:
-            schedule_progression = ScheduleProgression(date=today, num_schedules_completed=0, num_approvals_from_program_heads=0)
+            schedules_completed = self.db.session.query(Student).filter(Student.is_completed == True).count()
+            approvals_from_program_heads = self.db.session.query(Student).filter(Student.is_approved_by_program_heads == True).count()
+            schedule_progression = ScheduleProgression(date=today, num_schedules_completed=schedules_completed, num_approvals_from_program_heads=approvals_from_program_heads)
             self.db.session.add(schedule_progression)
-        if student.is_approved_by_program_heads:
+        elif student.is_approved_by_program_heads:
             schedule_progression.num_approvals_from_program_heads += 1
         else:
             schedule_progression.num_approvals_from_program_heads -= 1
