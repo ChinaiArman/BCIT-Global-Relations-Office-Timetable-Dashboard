@@ -53,44 +53,38 @@ const Dashboard = () => {
 			<Header title='Dashboard' />
 
 			<main className='max-w-7xl mx-auto py-6 px-4 lg:px-8'>
-				{loading ? (
-					<div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-						<p>Loading stats...</p>
-					</div>
-				) : (
-					<motion.div
-						className='grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8'
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 1 }}
-					>
-						{/* Stat Cards */}
-						<StatCard
-							name='Total Students'
-							icon={GraduationCap}
-							value={schedulingStats.totalStudents}
-							color='#6366F1'
-						/>
-						<StatCard 
-							name='Schedules Completed'
-							icon={CalendarCheck}
-							value={schedulingStats.totalSchedulesFinalized}
-							color='#10B981' 
-						/>
-						<StatCard
-							name='Schedules In Progress'
-							icon={CalendarSearch}
-							value={schedulingStats.totalSchedulesInProgress}
-							color='#F59E0B'
-						/>
-						<StatCard
-							name='Schedules Not Started'
-							icon={CalendarX}
-							value={schedulingStats.totalStudentsWithoutCourses}
-							color='#EF4444'
-						/>
-					</motion.div>
-				)}
+				<motion.div
+					className='grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8'
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 1 }}
+				>
+					{/* Stat Cards */}
+					<StatCard
+						name='Total Students'
+						icon={GraduationCap}
+						value={schedulingStats.totalStudents}
+						color='#6366F1'
+					/>
+					<StatCard 
+						name='Schedules Completed'
+						icon={CalendarCheck}
+						value={schedulingStats.totalSchedulesFinalized}
+						color='#10B981' 
+					/>
+					<StatCard
+						name='Schedules In Progress'
+						icon={CalendarSearch}
+						value={schedulingStats.totalSchedulesInProgress}
+						color='#F59E0B'
+					/>
+					<StatCard
+						name='Schedules Not Started'
+						icon={CalendarX}
+						value={schedulingStats.totalStudentsWithoutCourses}
+						color='#EF4444'
+					/>
+				</motion.div>
 
 				<StudentsTable isDashboard={true} />
 
