@@ -12,12 +12,14 @@ const UsersTable = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [currentUserID, setCurrentUserID] = useState(null);
   const [newUser, setNewUser] = useState({
     username: "",
     email: "",
     password: "",
     verifyPassword: "",
   });
+
 
   const fetchUserData = async () => {
     try {
@@ -39,8 +41,25 @@ const UsersTable = () => {
     }
   };
 
+  const getUserID = async () => {
+    try {
+        const serverUrl = import.meta.env.VITE_SERVER_URL;
+        const response = await axios.get(`${serverUrl}/api/authenticate/get-user-info/`, {
+            withCredentials: true,
+        });
+
+        if (response.status === 200) {
+            const { id } = response.data.user;
+            setCurrentUserID(id);
+        }
+    } catch (err) {
+        console.error("Failed to get user profile:", err);
+    }
+};
+
   useEffect(() => {
     fetchUserData();
+    getUserID();
   }, []);
 
   const handleSearch = (e) => {
@@ -231,21 +250,23 @@ const UsersTable = () => {
                     {user.status}
                   </span>
                 </td>
+                {currentUserID === user.id ? (null) : (
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <button
+                      className="text-indigo-400 hover:text-indigo-300 mr-2"
+                      onClick={() => handleRoleChange(user.id)}
+                    >
+                      Change Role
+                    </button>
+                    <button
+                      className="text-red-400 hover:text-red-300"
+                      onClick={() => handleDeleteClick(user)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                )}
 
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                  <button
-                    className="text-indigo-400 hover:text-indigo-300 mr-2"
-                    onClick={() => handleRoleChange(user.id)}
-                  >
-                    Change Role
-                  </button>
-                  <button
-                    className="text-red-400 hover:text-red-300"
-                    onClick={() => handleDeleteClick(user)}
-                  >
-                    Delete
-                  </button>
-                </td>
               </motion.tr>
             ))}
           </tbody>
