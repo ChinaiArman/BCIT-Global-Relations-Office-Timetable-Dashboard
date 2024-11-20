@@ -175,10 +175,6 @@ const UserInfoCard = () => {
         setStatus({ type: '', message: '' });
     };
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
-
     return (
         <div className="space-y-6">
             <StatusMessage status={status} />
