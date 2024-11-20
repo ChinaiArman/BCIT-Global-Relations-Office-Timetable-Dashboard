@@ -1412,3 +1412,15 @@ class Database:
             os.makedirs(os.path.join(current_app.root_path, 'exports'))
         df.to_csv(file_path, index=False)
         return file_path
+    
+    def get_schedule_progression(self) -> dict:
+        """
+        """
+        # get the 7 latest schedule progressions
+        schedule_progressions = self.db.session.query(ScheduleProgression).order_by(ScheduleProgression.date.desc()).limit(7).all()
+        total_students = self.db.session.query(Student).count()
+        information = {
+            "schedule_progressions": [schedule_progression.to_dict() for schedule_progression in schedule_progressions],
+            "total_students": total_students
+        }
+        return information
