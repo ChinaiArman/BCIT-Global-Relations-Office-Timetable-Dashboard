@@ -1,5 +1,6 @@
 import React from 'react';
 import { Upload } from 'lucide-react';
+import {motion} from 'framer-motion';
 
 const UploadWindow = ({ 
   title, 
@@ -11,7 +12,12 @@ const UploadWindow = ({
   onSubmit 
 }) => {
   return (
-    <div className="bg-gray-800 rounded-lg p-6">
+    <motion.div
+      className="bg-gray-800 rounded-lg p-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.2 }}
+    >
       <h2 className="text-xl font-semibold mb-4">{title}</h2>
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="space-y-2">
@@ -44,7 +50,7 @@ const UploadWindow = ({
           {isLoading ? 'Uploading...' : `Upload ${fileType}`}
         </button>
       </form>
-    </div>
+    </motion.div>
   );
 };
 

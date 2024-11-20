@@ -5,6 +5,7 @@ import DownloadWindow from '../components/DownloadWindow';
 import StatusMessage from '../components/StatusMessage';
 import Header from "../components/Header";
 import axios from 'axios';
+import { motion } from "framer-motion";
 
 const Database = () => {
   // Course states
@@ -219,7 +220,14 @@ const Database = () => {
       <Header title='Database' />
       <main className='max-w-7xl mx-auto py-6 px-4 lg:px-8'>
         <div className="max-w-4xl mx-auto space-y-8">
-          <h1 className="text-2xl font-bold mb-8">Courses</h1>
+          <motion.h1 
+            className="text-2xl font-bold mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            Courses
+          </motion.h1>
           <StatusMessage message={message} />
           
           <UploadWindow
@@ -249,7 +257,14 @@ const Database = () => {
             onClick={() => handleTemplateDownload("/api/course/download_template", "course_template.xlsx")}
           />
 
-          <h1 className="text-2xl font-bold mb-8">Students</h1>
+          <motion.h1 
+            className="text-2xl font-bold mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            Students
+          </motion.h1>
           
           <UploadWindow
             title="Replace Student Data"
@@ -278,7 +293,14 @@ const Database = () => {
             onClick={() => handleTemplateDownload("/api/student/download_template", "student_template.csv")}
           />
 
-          <h1 className="text-2xl font-bold mb-8">Schedules</h1>
+          <motion.h1 
+            className="text-2xl font-bold mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            Schedules
+          </motion.h1>
           <DownloadWindow
             title="Download Schedule Data"
             fileType="Schedule Data"
