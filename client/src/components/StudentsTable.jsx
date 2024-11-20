@@ -139,13 +139,14 @@ const StudentsTable = ({ isDashboard = false }) => {
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-4">
             <h2 className="text-xl font-semibold text-gray-100">Students</h2>
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-            >
-              <PlusCircle size={20} />
-              <span>Add Student</span>
-            </button>
+              <div className=" flex justify-center">
+                  <button
+                      onClick={() => setIsAddModalOpen(true)}
+                      className="rounded-sm w-32 px-4 py-2 font-bold text-sm text-white duration-300 text-center bg-indigo-600 hover:bg-indigo-500"
+                  >
+                      Add Student
+                  </button>
+              </div>
           </div>
           <div className="relative">
             <input
