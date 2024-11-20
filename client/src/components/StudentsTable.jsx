@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, PlusCircle, AlertCircle } from "lucide-react";
+import { Search, GraduationCap, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import AddStudentModal from "./AddStudentModal";
 
@@ -142,9 +142,12 @@ const StudentsTable = ({ isDashboard = false }) => {
               <div className=" flex justify-center">
                   <button
                       onClick={() => setIsAddModalOpen(true)}
-                      className="rounded-sm w-32 px-4 py-2 font-bold text-sm text-white duration-300 text-center bg-indigo-600 hover:bg-indigo-500"
+                      className="rounded-sm w-42 px-4 py-2 font-bold text-sm text-white duration-300 text-center bg-indigo-600 hover:bg-indigo-500"
                   >
-                      Add Student
+                    <div className="flex items-center justify-center gap-2">
+                      <GraduationCap size={18} />
+                      ADD STUDENT
+                    </div>
                   </button>
               </div>
           </div>
