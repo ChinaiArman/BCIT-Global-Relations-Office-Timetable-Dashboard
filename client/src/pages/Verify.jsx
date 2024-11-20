@@ -161,12 +161,7 @@ const Verify = () => {
                 </form>
 
                 {/* Back Link */}
-                <a
-                    href="/login"
-                    className="text-gray-400 hover:text-white text-sm transition-colors"
-                >
-                    Back to Login
-                </a>
+                <a href="/login" className="transform text-center font-semibold text-gray-500 duration-300 hover:text-gray-300">BACK TO LOGIN</a>
             </section>
         </main>
     );
