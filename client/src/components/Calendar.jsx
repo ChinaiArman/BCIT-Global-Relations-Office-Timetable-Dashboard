@@ -13,9 +13,9 @@ const CourseColors = [
 ];
 
 const Calendar = ({ courseSchedules }) => {
-    const TOTAL_MINUTES = 900;
-    const START_HOUR = 8 * 60; // 8:00 in minutes
-    const TimeSlots = Array.from({ length: 15 }, (_, i) => i + 8); // Time slots from 8:00 to 22:00
+    const TOTAL_MINUTES = 840;
+    const START_HOUR = 7 * 60; // 8:00 in minutes
+    const TimeSlots = Array.from({ length: 14 }, (_, i) => i + 7); // Time slots from 8:00 to 22:00
     const Days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
     // A function to check if two courses on the same day overlap (i.e., have a time conflict)
