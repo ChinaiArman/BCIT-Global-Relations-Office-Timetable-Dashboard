@@ -27,6 +27,7 @@ const App = () => {
                             {/* Public Routes */}
                             <Route path="/login" element={<Login />} />
                             <Route path="/forgot-password" element={<ForgotPassword />} />
+                            <Route path="/verify" element={<Verify />} />
 
                             {/* Protected Routes */}
                             <Route
@@ -35,15 +36,6 @@ const App = () => {
                                     <PrivateRoute role="verified">
                                         <Sidebar />
                                         <Database />
-                                    </PrivateRoute>
-                                }
-                            />
-                            <Route
-                                path="/verify"
-                                element={
-                                    <PrivateRoute role="unverified">
-                                        <Sidebar />
-                                        <Verify />
                                     </PrivateRoute>
                                 }
                             />
@@ -83,11 +75,6 @@ const App = () => {
                                     </PrivateRoute>
                                 }
                             />
-                            <Route 
-                                path="/authenticate/verify/:code?" 
-                                element={
-                                <Verify />
-                                } />
                             <Route
                                 path="/students"
                                 element={

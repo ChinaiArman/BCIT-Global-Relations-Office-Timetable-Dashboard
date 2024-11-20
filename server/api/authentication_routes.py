@@ -3,6 +3,7 @@
 
 # IMPORTS
 from flask import Blueprint, jsonify, request, current_app, session
+import random
 
 from services.decorators import verified_login_required, admin_required, unverified_login_required
 from exceptions import InvalidEmailAddress
@@ -58,33 +59,6 @@ def logout() -> tuple:
         return jsonify({"message": "logout successful"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 401
-
-# @authentication_bp.route('/authenticate/register/', methods=['POST'])
-# @admin_required
-# def register() -> tuple:
-#     """
-#     Register a user.
-
-#     Args
-#     ----
-#     None
-
-#     Returns
-#     -------
-#     response (tuple): The response tuple containing the response data and status code.
-#     """
-#     try:
-#         db = current_app.config['database']
-#         authenticator = current_app.config['authenticator']
-#         username = request.json.get('username')
-#         email = request.json.get('email')
-#         password = authenticator.encrypt_password(request.json.get('password'))
-#         verification_code = authenticator.generate_one_time_code()
-#         db.create_user(username, email, password, verification_code)
-#         # TODO: SEND VERIFICATION EMAIL
-#         return jsonify({"message": "registration successful"}), 200
-#     except Exception as e:
-#         return jsonify({"error": str(e)}), 401
 
 @authentication_bp.route('/authenticate/reset-password/', methods=['POST'])
 def reset_password() -> tuple:
@@ -144,23 +118,31 @@ def verify() -> tuple:
     """
     try:
         db = current_app.config['database']
+        authenticator = current_app.config['authenticator']
         
         verification_code = request.json.get('verification_code')
+        new_password = request.json.get('new_password')
         email = request.json.get('email')
         
-        if not verification_code or not email:
-            return jsonify({"error": "Verification code and email are required"}), 400
+        if not verification_code or not email or not new_password:
+            return jsonify({"error": "Verification code, email, new password are required"}), 400
             
-        # Get user by verification code
-        user = db.get_user_by_verification_code(verification_code)
+        # Get user by email
+        user = db.get_user_by_email(email)
         
         # Verify that the email matches
-        if user.email != email:
+        if user.verification_code != verification_code:
             return jsonify({"error": "Invalid verification code or email"}), 400
             
+        # Encrypt the new password
+        new_password = authenticator.encrypt_password(new_password)
+
         # Verify the user
-        db.verify_user(user)
+        db.verify_user_with_password(user, new_password)
         
+        # Log the user in
+        session.permanent = True
+        session["user_id"] = user.id
         return jsonify({"message": "Email verified successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 401
@@ -202,9 +184,10 @@ def register() -> tuple:
         
         username = request.json.get('username')
         email = request.json.get('email')
-        password = request.json.get('password')  # Get password from request
+        # generate a password starting with PW, followed by 6 random digits, and ! at the end
+        password = "PW" + str(random.randint(100000, 999999)) + "!"
         
-        if not username or not email or not password:
+        if not username or not email:
             return jsonify({"error": "Username, email, and password are required"}), 400
 
         # Check if the email is already in the system

@@ -19,9 +19,12 @@ from services.EmailManager import EmailManager
 
 from db_config import db, configure_db
 from session_config import configure_sessions
-from logging_config import configure_logging
 from dotenv import load_dotenv
 import os
+
+
+# CONSTANTS
+CLIENT_URL = os.getenv('CLIENT_URL')
 
 
 # FLASK CONFIGURATION
@@ -32,7 +35,7 @@ def create_app():
     load_dotenv()
 
     app = Flask(__name__)
-    CORS(app, resources={r"/api/*": {"origins": "http://localhost:3001", "allow_headers": ["Content-Type"]}}, supports_credentials=True)
+    CORS(app, resources={r"/api/*": {"origins": CLIENT_URL, "allow_headers": ["Content-Type"]}}, supports_credentials=True)
 
     # CONFIGURE SERVICES
     app.config['database'] = Database(db)
@@ -41,7 +44,7 @@ def create_app():
     app.config['email_manager'] = EmailManager(
         gmail_user=os.getenv('GMAIL_EMAIL'),
         gmail_password=os.getenv('GMAIL_PASSWORD'),
-        base_url=os.getenv('BASE_URL')
+        client_url=CLIENT_URL
     )
 
     # DATABASE CONFIGURATION
@@ -50,21 +53,16 @@ def create_app():
     # SESSION CONFIGURATION
     configure_sessions(app, db)
 
-    # LOGGING CONFIGURATION
-    # configure_logging(app)
-
     
-
-
     # ROUTES
     @app.route('/', methods=['GET'])
     def _():
         return jsonify({"message": "Hello World"})
     
-    # set response headers
+    # RESPONSE HEADERS
     @app.after_request
     def _(response):
-        response.headers['Access-Control-Allow-Origin'] = 'http://localhost:3001'
+        response.headers['Access-Control-Allow-Origin'] = CLIENT_URL
         response.headers['Access-Control-Allow-Credentials'] = 'true'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, PATCH, DELETE, OPTIONS'
@@ -73,7 +71,7 @@ def create_app():
             response.status_code = 200
         return response
             
-
+    # REGISTER BLUEPRINTS
     app.register_blueprint(student_bp, url_prefix='/api')
     app.register_blueprint(course_bp, url_prefix='/api')
     app.register_blueprint(schedule_bp, url_prefix='/api')

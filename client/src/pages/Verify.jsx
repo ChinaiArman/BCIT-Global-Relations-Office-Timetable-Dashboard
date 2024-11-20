@@ -1,15 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Shield, CheckCircle2, AlertCircle } from "lucide-react";
-import { useParams } from 'react-router-dom';
 
 const Verify = () => {
-    const { code } = useParams();
     const [email, setEmail] = useState('');
+    const [code, setCode] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState(''); // New state for confirm password
     const [status, setStatus] = useState({ type: '', message: '' });
     const [isLoading, setIsLoading] = useState(false);
 
+    const passwordsMatch = newPassword && confirmPassword && newPassword === confirmPassword; // Check if passwords match
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!passwordsMatch) {
+            setStatus({
+                type: 'error',
+                message: 'Passwords do not match. Please try again.',
+            });
+            return;
+        }
+
         setIsLoading(true);
         
         try {
@@ -21,6 +33,7 @@ const Verify = () => {
                 },
                 body: JSON.stringify({ 
                     verification_code: code,
+                    new_password: newPassword,
                     email 
                 }),
                 credentials: 'include'
@@ -34,12 +47,16 @@ const Verify = () => {
 
             setStatus({
                 type: 'success',
-                message: 'Email verified successfully! You can now access your account.'
+                message: 'Email verified successfully! You will automatically be redirected to the home page.',
             });
+            // Redirect to home page after 3 seconds
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 3000);
         } catch (error) {
             setStatus({
                 type: 'error',
-                message: error.message || 'Failed to verify email'
+                message: error.message || 'Failed to verify email',
             });
         } finally {
             setIsLoading(false);
@@ -87,12 +104,57 @@ const Verify = () => {
                             required
                         />
                     </div>
+                    <div>
+                        <label htmlFor="code" className="block text-sm font-medium text-gray-400 mb-1">
+                            Verification Code
+                        </label>
+                        <input
+                            type="text"
+                            id="code"
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
+                            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                            placeholder="Enter your verification code"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="newPassword" className="block text-sm font-medium text-gray-400 mb-1">
+                            New Password
+                        </label>
+                        <input
+                            type="password"
+                            id="newPassword"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                            placeholder="Enter your password"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-400 mb-1">
+                            Confirm New Password
+                        </label>
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                            placeholder="Confirm your password"
+                            required
+                        />
+                    </div>
 
                     <button
                         type="submit"
-                        disabled={isLoading}
-                        className={`w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 rounded-md font-medium transition-colors
-                            ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        disabled={!passwordsMatch || isLoading}
+                        className={`w-full py-3 px-4 rounded-md font-medium transition-colors ${
+                            passwordsMatch 
+                                ? 'bg-indigo-600 hover:bg-indigo-700' 
+                                : 'bg-gray-700 cursor-not-allowed'
+                        } ${isLoading ? 'opacity-50' : ''}`}
                     >
                         {isLoading ? 'Verifying...' : 'Verify Email'}
                     </button>

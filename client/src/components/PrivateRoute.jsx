@@ -19,7 +19,6 @@ const PrivateRoute = ({ children, role }) => {
     if (role === 'unverified' && isUnverified) return children;
 
     // Redirect based on role type
-    if (role === 'verified') return <Navigate to="/verify" />;
     return <Navigate to="/login" />;
 };
 

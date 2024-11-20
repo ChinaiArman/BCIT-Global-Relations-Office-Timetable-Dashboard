@@ -321,34 +321,6 @@ const UsersTable = () => {
               />
             </div>
 
-            <div className="mb-4">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-400">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                className="mt-1 block w-full bg-gray-700 text-white rounded-lg p-2"
-                value={newUser.password}
-                onChange={handleInputChange}
-              />
-            </div>
-
-            <div className="mb-4">
-              <label htmlFor="verifyPassword" className="block text-sm font-medium text-gray-400">
-                Verify Password
-              </label>
-              <input
-                type="password"
-                id="verifyPassword"
-                name="verifyPassword"
-                className="mt-1 block w-full bg-gray-700 text-white rounded-lg p-2"
-                value={newUser.verifyPassword}
-                onChange={handleInputChange}
-              />
-            </div>
-
             <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={closeModal}
