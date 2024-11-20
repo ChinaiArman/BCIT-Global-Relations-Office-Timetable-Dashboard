@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { motion } from "framer-motion";
 
 const ScheduleProgressionChart = () => {
@@ -30,7 +30,7 @@ const ScheduleProgressionChart = () => {
         fetchData();
     }, []);
 
-    return (
+       return (
         <motion.div
             className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
             initial={{ opacity: 0, y: 20 }}
@@ -55,6 +55,15 @@ const ScheduleProgressionChart = () => {
                             }}
                             itemStyle={{ color: "#E5E7EB" }}
                             formatter={(value) => `${value.toFixed(2)}%`}
+                        />
+                        <Legend
+                            verticalAlign="top"
+                            height={36}
+                            wrapperStyle={{
+                                color: "#E5E7EB",
+                                textAlign: "center",
+                                fontSize: "14px",
+                            }}
                         />
                         <Line
                             type="monotone"

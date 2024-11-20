@@ -95,11 +95,13 @@ const Dashboard = () => {
 				<StudentsTable isDashboard={true} />
 
 				{/* USER CHARTS */}
-				<div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8'>
+				<div className='mt-8'>
 					<ScheduleProgressionChart />
+				</div>
+				{/* <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8'>
 					<UserActivityHeatmap />
 					<UserDemographicsChart />
-				</div>
+				</div> */}
 			</main>
 		</div>
 	);
