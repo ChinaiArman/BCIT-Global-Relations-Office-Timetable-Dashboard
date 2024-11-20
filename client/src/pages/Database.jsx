@@ -282,8 +282,8 @@ const Database = () => {
           <DownloadWindow
             title="Download Schedule Data"
             fileType="Schedule Data"
-            fileExtension="???"
-            onClick={() => handleTemplateDownload("/api/student/download_template", "schedule_data.csv")}
+            fileExtension="CSV"
+            onClick={() => handleTemplateDownload("/api/schedule/export", "schedule_data.csv")}
           />
         </div>
       </main>
