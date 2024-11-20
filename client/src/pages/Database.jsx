@@ -223,7 +223,7 @@ const Database = () => {
           <StatusMessage message={message} />
           
           <UploadWindow
-            title="Upload/Replace Course Data"
+            title="Replace Course Data"
             fileType="Course Data"
             fileExtension="XLSX"
             isLoading={isCourseReplaceLoading}
@@ -252,7 +252,7 @@ const Database = () => {
           <h1 className="text-2xl font-bold mb-8">Students</h1>
           
           <UploadWindow
-            title="Upload/Replace Student Data"
+            title="Replace Student Data"
             fileType="Student Data"
             fileExtension="CSV"
             isLoading={isStudentReplaceLoading}
