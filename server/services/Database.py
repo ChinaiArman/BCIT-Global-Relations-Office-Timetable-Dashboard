@@ -1567,5 +1567,7 @@ class Database:
             "Instructor"
         ])
         file_path = os.path.join(current_app.root_path, 'exports/schedule.csv')
+        if not os.path.exists(os.path.join(current_app.root_path, 'exports')):
+            os.makedirs(os.path.join(current_app.root_path, 'exports'))
         df.to_csv(file_path, index=False)
         return file_path
