@@ -163,7 +163,12 @@ def bulk_replace_student():
 def bulk_update_student():
     """
     """
-    pass
+    try:
+        db = current_app.config["database"]
+        response = db.bulk_student_update(request.files["file"])
+        return jsonify({"message": "Student data successfully updated", "results": response}), 201
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
     
 @student_bp.route("/student/get-all", methods=["GET"])
 @verified_login_required

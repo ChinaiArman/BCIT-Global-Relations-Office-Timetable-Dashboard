@@ -117,7 +117,12 @@ def bulk_replace_courses():
 def bulk_update_courses():
     """
     """
-    pass
+    try:
+        db = current_app.config['database']
+        response = db.bulk_course_update(request.files['file'])
+        return jsonify({"message": "Course data successfully updated", "invalid_rows": response }), 201
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
 
 @course_bp.route('/course/update', methods=['PUT'])
 @verified_login_required
@@ -127,7 +132,6 @@ def update_courses():
     try:
         db = current_app.config['database']
         response = db.bulk_course_update(request.files['file'])
-        print(response)
         return jsonify({"message": "Course data successfully updated", "invalid_rows": response }), 201
     except Exception as e:
         return jsonify({"message": str(e)}), 400

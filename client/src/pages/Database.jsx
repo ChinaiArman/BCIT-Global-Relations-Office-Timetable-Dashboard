@@ -76,7 +76,7 @@ const Database = () => {
   
     try {
       const serverUrl = import.meta.env.VITE_SERVER_URL;
-      const response = await axios.put(`${serverUrl}/api/course/update`, formData, {
+      const response = await axios.patch(`${serverUrl}/api/course/import`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -185,7 +185,7 @@ const Database = () => {
   
     try {
       const serverUrl = import.meta.env.VITE_SERVER_URL;
-      const response = await axios.put(`${serverUrl}/api/student/update`, formData, {
+      const response = await axios.patch(`${serverUrl}/api/student/import`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

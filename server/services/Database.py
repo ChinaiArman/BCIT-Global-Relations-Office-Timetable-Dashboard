@@ -41,6 +41,40 @@ class Database:
         """ """
         self.db = db
 
+    def bulk_course_update(self, file) -> list:
+        """
+        """
+        if not file.filename.endswith(".xlsx"):
+            raise InvalidFileType("Invalid file format. Please upload an XLSX file.")
+        try:
+            df = self.parse_bulk_course_upload_file(file)
+            self.set_all_student_is_completed_and_is_approved_by_program_heads_to_false()
+            student_enrollments = self.get_enrollments_by_student()
+            self.upload_courses_to_database(df)
+            self.update_student_enrollments(student_enrollments)
+        except:
+            raise InvalidUploadFile("Invalid file format. Error processing the file.")
+
+    def update_student_enrollments(self, student_enrollments: dict):
+        """
+        """
+        for student_id, groupings in student_enrollments.items():
+            groupings = list(groupings)
+            self.add_courses_by_groupings(student_id, groupings)
+
+    def get_enrollments_by_student(self) -> dict:
+        """
+        """
+        all_enrollments = self.db.session.query(enrollments).all()
+        student_enrollments = {}
+        for enrollment in all_enrollments:
+            course_grouping = self.db.session.query(Course).filter(Course.id == enrollment.course_id).first().course_grouping
+            if enrollment.student_id in student_enrollments:
+                student_enrollments[enrollment.student_id].add(course_grouping)
+            else:
+                student_enrollments[enrollment.student_id] = {course_grouping}
+        return student_enrollments
+
     def bulk_course_replace(self, file) -> list:
         """
         Save the bulk course upload file to the database.
@@ -71,9 +105,19 @@ class Database:
             raise InvalidFileType("Invalid file format. Please upload an XLSX file.")
         try:
             df = self.parse_bulk_course_upload_file(file)
+            self.set_all_student_is_completed_and_is_approved_by_program_heads_to_false()
             return self.upload_courses_to_database(df)
         except:
             raise InvalidUploadFile("Invalid file format. Error processing the file.")
+
+    def set_all_student_is_completed_and_is_approved_by_program_heads_to_false(self):
+        """
+        """
+        try:
+            self.db.session.query(Student).update({Student.is_completed: False, Student.is_approved_by_program_heads: False})
+            self.db.session.commit()
+        except Exception as e:
+            raise DatabaseError(f"Error updating student: {str(e)}")
 
     def parse_bulk_course_upload_file(self, file) -> pd.DataFrame:
         """
@@ -234,172 +278,172 @@ class Database:
         self.db.session.commit()
         return invalid_rows
     
-    def bulk_course_update(self, file) -> list:
-        """
-        Save the bulk course upload file to the database.
+    # def bulk_course_update(self, file) -> list:
+    #     """
+    #     Save the bulk course upload file to the database.
 
-        Args:
-        -----
-        file (FileStorage): The file to save.
+    #     Args:
+    #     -----
+    #     file (FileStorage): The file to save.
 
-        Returns:
-        --------
-        list: A list of invalid rows.
+    #     Returns:
+    #     --------
+    #     list: A list of invalid rows.
 
-        Notes:
-        ------
-        1. The file is validated to ensure it is an XLSX file.
-        2. The file is parsed to remove unnecessary columns.
-        3. The data is normalized and uploaded to the database.
-        4. Invalid rows are returned.
+    #     Notes:
+    #     ------
+    #     1. The file is validated to ensure it is an XLSX file.
+    #     2. The file is parsed to remove unnecessary columns.
+    #     3. The data is normalized and uploaded to the database.
+    #     4. Invalid rows are returned.
 
-        Example:
-        --------
-        >>> db = Database()
-        >>> db.save_bulk_course_upload_file(file)
-        ... # Invalid rows returned
-        ... # Course data uploaded to the database
-        """
-        if not file.filename.endswith(".xlsx"):
-            raise InvalidFileType("Invalid file format. Please upload an XLSX file.")
-        try:
-            df = self.parse_bulk_course_upload_file(file)
-            return self.update_courses_in_database(df)
-        except:
-            raise InvalidUploadFile("Invalid file format. Error processing the file.")
+    #     Example:
+    #     --------
+    #     >>> db = Database()
+    #     >>> db.save_bulk_course_upload_file(file)
+    #     ... # Invalid rows returned
+    #     ... # Course data uploaded to the database
+    #     """
+    #     if not file.filename.endswith(".xlsx"):
+    #         raise InvalidFileType("Invalid file format. Please upload an XLSX file.")
+    #     try:
+    #         df = self.parse_bulk_course_upload_file(file)
+    #         return self.update_courses_in_database(df)
+    #     except:
+    #         raise InvalidUploadFile("Invalid file format. Error processing the file.")
         
-    def update_courses_in_database(self, df: pd.DataFrame) -> dict:
-        """
-        Update existing courses in the database, only modifying fields that have changed.
+    # def update_courses_in_database(self, df: pd.DataFrame) -> dict:
+    #     """
+    #     Update existing courses in the database, only modifying fields that have changed.
 
-        Args:
-        -----
-        df (pd.DataFrame): The DataFrame containing course updates.
+    #     Args:
+    #     -----
+    #     df (pd.DataFrame): The DataFrame containing course updates.
 
-        Returns:
-        --------
-        dict: A dictionary containing:
-            - 'invalid_rows': List of rows that couldn't be processed
-            - 'updated_courses': List of courses that were updated
-            - 'no_changes': List of courses that didn't require updates
-            - 'not_found': List of courses that weren't found in the database
+    #     Returns:
+    #     --------
+    #     dict: A dictionary containing:
+    #         - 'invalid_rows': List of rows that couldn't be processed
+    #         - 'updated_courses': List of courses that were updated
+    #         - 'no_changes': List of courses that didn't require updates
+    #         - 'not_found': List of courses that weren't found in the database
 
-        Notes:
-        ------
-        1. Courses are matched using CRN and Term Code
-        2. Only modified fields are updated
-        3. Invalid rows are tracked and returned
-        4. No data is deleted from the enrollments table
+    #     Notes:
+    #     ------
+    #     1. Courses are matched using CRN and Term Code
+    #     2. Only modified fields are updated
+    #     3. Invalid rows are tracked and returned
+    #     4. No data is deleted from the enrollments table
 
-        Example:
-        --------
-        >>> db = Database()
-        >>> result = db.update_courses_in_database(df)
-        >>> print(f"Updated {len(result['updated_courses'])} courses")
-        """
-        results = {
-            'invalid_rows': [],
-            'updated_courses': [],
-            'not_found': []
-        }
+    #     Example:
+    #     --------
+    #     >>> db = Database()
+    #     >>> result = db.update_courses_in_database(df)
+    #     >>> print(f"Updated {len(result['updated_courses'])} courses")
+    #     """
+    #     results = {
+    #         'invalid_rows': [],
+    #         'updated_courses': [],
+    #         'not_found': []
+    #     }
 
-        for _, row in df.iterrows():
-            try:
-                # Normalize the incoming data
-                row = self.normalize_course_data(row)
+    #     for _, row in df.iterrows():
+    #         try:
+    #             # Normalize the incoming data
+    #             row = self.normalize_course_data(row)
                 
-                # Find existing course by CRN and Term Code
-                existing_course = self.db.session.query(Course).filter(
-                    Course.crn == row["CRN"],
-                    Course.course_grouping==row["Block"] + row["Course"],
-                    Course.course_type == row["Type"],
-                    Course.day == row["Day"],
-                    Course.begin_time == row["Begin Time"]
-                ).first()
+    #             # Find existing course by CRN and Term Code
+    #             existing_course = self.db.session.query(Course).filter(
+    #                 Course.crn == row["CRN"],
+    #                 Course.course_grouping==row["Block"] + row["Course"],
+    #                 Course.course_type == row["Type"],
+    #                 Course.day == row["Day"],
+    #                 Course.begin_time == row["Begin Time"]
+    #             ).first()
 
-                if not existing_course:
-                    # results['course added'].append({
-                    #     "crn": row["CRN"],
-                    #     "course": row["Course"],
-                    #     "term_code": row["Term Code (swvmday)"]
-                    # })
-                    # new_course = Course(
-                    #     status=row["Status"],
-                    #     block=row["Block"],
-                    #     crn=row["CRN"],
-                    #     course_grouping=row["Block"] + row["Course"],
-                    #     course_code=row["Course"],
-                    #     course_type=row["Type"],
-                    #     day=row["Day"],
-                    #     begin_time=row["Begin Time"],
-                    #     end_time=row["End Time"],
-                    #     building_room=row["Bldg/Room"],
-                    #     start_date=row["Start Date"],
-                    #     end_date=row["End Date"],
-                    #     max_capacity=row["Max."],
-                    #     num_enrolled=row["Act."],
-                    #     is_full_time=row["FT/PT"],
-                    #     term_code=row["Term Code (swvmday)"],
-                    #     instructor=row["Instructor"],
-                    # )
-                    # self.db.session.add(new_course)
-                    continue
+    #             if not existing_course:
+    #                 # results['course added'].append({
+    #                 #     "crn": row["CRN"],
+    #                 #     "course": row["Course"],
+    #                 #     "term_code": row["Term Code (swvmday)"]
+    #                 # })
+    #                 # new_course = Course(
+    #                 #     status=row["Status"],
+    #                 #     block=row["Block"],
+    #                 #     crn=row["CRN"],
+    #                 #     course_grouping=row["Block"] + row["Course"],
+    #                 #     course_code=row["Course"],
+    #                 #     course_type=row["Type"],
+    #                 #     day=row["Day"],
+    #                 #     begin_time=row["Begin Time"],
+    #                 #     end_time=row["End Time"],
+    #                 #     building_room=row["Bldg/Room"],
+    #                 #     start_date=row["Start Date"],
+    #                 #     end_date=row["End Date"],
+    #                 #     max_capacity=row["Max."],
+    #                 #     num_enrolled=row["Act."],
+    #                 #     is_full_time=row["FT/PT"],
+    #                 #     term_code=row["Term Code (swvmday)"],
+    #                 #     instructor=row["Instructor"],
+    #                 # )
+    #                 # self.db.session.add(new_course)
+    #                 continue
 
-                # Create dictionary of new values
-                new_values = {
-                    "status": row["Status"],
-                    "block": row["Block"],
-                    "course_grouping": row["Block"] + row["Course"],
-                    "course_code": row["Course"],
-                    "course_type": row["Type"],
-                    "day": row["Day"],
-                    "begin_time": row["Begin Time"],
-                    "end_time": row["End Time"],
-                    "building_room": row["Bldg/Room"],
-                    "start_date": row["Start Date"],
-                    "end_date": row["End Date"],
-                    "max_capacity": row["Max."],
-                    "num_enrolled": row["Act."],
-                    "is_full_time": row["FT/PT"],
-                    "instructor": row["Instructor"],
-                }
+    #             # Create dictionary of new values
+    #             new_values = {
+    #                 "status": row["Status"],
+    #                 "block": row["Block"],
+    #                 "course_grouping": row["Block"] + row["Course"],
+    #                 "course_code": row["Course"],
+    #                 "course_type": row["Type"],
+    #                 "day": row["Day"],
+    #                 "begin_time": row["Begin Time"],
+    #                 "end_time": row["End Time"],
+    #                 "building_room": row["Bldg/Room"],
+    #                 "start_date": row["Start Date"],
+    #                 "end_date": row["End Date"],
+    #                 "max_capacity": row["Max."],
+    #                 "num_enrolled": row["Act."],
+    #                 "is_full_time": row["FT/PT"],
+    #                 "instructor": row["Instructor"],
+    #             }
 
-                # Track if any changes were made
-                changes_made = False
-                fields = []
+    #             # Track if any changes were made
+    #             changes_made = False
+    #             fields = []
 
-                # Compare and update only changed fields
-                for field, new_value in new_values.items():
-                    current_value = getattr(existing_course, field)
-                    if current_value != new_value:
-                        setattr(existing_course, field, new_value)
-                        fields.append(field)
-                        changes_made = True
+    #             # Compare and update only changed fields
+    #             for field, new_value in new_values.items():
+    #                 current_value = getattr(existing_course, field)
+    #                 if current_value != new_value:
+    #                     setattr(existing_course, field, new_value)
+    #                     fields.append(field)
+    #                     changes_made = True
 
-                if changes_made:
-                    results['updated_courses'].append({
-                        "crn": row["CRN"],
-                        "course": row["Course"],
-                        "fields": fields
-                    })
+    #             if changes_made:
+    #                 results['updated_courses'].append({
+    #                     "crn": row["CRN"],
+    #                     "course": row["Course"],
+    #                     "fields": fields
+    #                 })
 
-            except Exception as e:
-                results['invalid_rows'].append({
-                    "crn": row.get("CRN", "Unknown"),
-                    "course": row.get("Course", "Unknown"),
-                    "block": row.get("Block", "Unknown"),
-                    "instructor": row.get("Instructor", "Unknown"),
-                    "error": str(e)
-                })
+    #         except Exception as e:
+    #             results['invalid_rows'].append({
+    #                 "crn": row.get("CRN", "Unknown"),
+    #                 "course": row.get("Course", "Unknown"),
+    #                 "block": row.get("Block", "Unknown"),
+    #                 "instructor": row.get("Instructor", "Unknown"),
+    #                 "error": str(e)
+    #             })
 
-        # Commit all changes at once
-        try:
-            self.db.session.commit()
-        except Exception as e:
-            self.db.session.rollback()
-            raise Exception(f"Error committing updates to database: {str(e)}")
+    #     # Commit all changes at once
+    #     try:
+    #         self.db.session.commit()
+    #     except Exception as e:
+    #         self.db.session.rollback()
+    #         raise Exception(f"Error committing updates to database: {str(e)}")
 
-        return results
+    #     return results
 
     def bulk_student_replace(self, file) -> list:
         """ 
@@ -1465,6 +1509,8 @@ class Database:
         student = self.db.session.query(Student).filter(Student.id == student_id).first()
         for grouping in groupings_list:
             courses = self.db.session.query(Course).filter(Course.course_grouping == grouping).all()
+            if not courses:
+                pass
             for course in courses:
                 student.courses.append(course)
                 course.num_enrolled += 1
