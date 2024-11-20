@@ -136,13 +136,6 @@ def update_courses():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-@course_bp.route('/course/export', methods=['GET'])
-@verified_login_required
-def download_course():
-    """
-    """
-    return jsonify({"message": "course export endpoint"})
-
 @course_bp.route('/course/<string:course_grouping>/students/', methods=['GET'])
 @verified_login_required
 def get_course_students(course_grouping):

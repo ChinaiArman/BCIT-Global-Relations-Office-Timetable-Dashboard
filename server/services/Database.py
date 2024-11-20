@@ -3,6 +3,8 @@
 
 # IMPORTS
 import pandas as pd
+import os
+from flask import current_app
 from sqlalchemy import text, delete, insert, update
 from datetime import datetime
 from sqlalchemy import or_
@@ -1517,3 +1519,53 @@ class Database:
         self.db.session.commit()
         return
 
+    def save_schedules_to_local_file(self) -> list:
+        """
+        """
+        # get all students
+        schedule = []
+        students = self.db.session.query(Student).all()
+        for student in students:
+            for course in student.courses:
+                row = [
+                    student.id,
+                    student.first_name,
+                    student.last_name,
+                    student.term_code,
+                    student.email,
+                    student.is_completed,
+                    student.is_approved_by_program_heads,
+                    course.course_code,
+                    course.crn,
+                    course.block,
+                    course.day,
+                    course.start_date,
+                    course.end_date,
+                    course.begin_time,
+                    course.end_time,
+                    course.building_room,
+                    course.instructor
+                ]
+                schedule.append(row)
+        df = pd.DataFrame(schedule, columns=[
+            "Student ID",
+            "First Name",
+            "Last Name",
+            "Term Code",
+            "Email",
+            "Is Completed",
+            "Is Approved By Program Heads",
+            "Course Code",
+            "CRN",
+            "Block",
+            "Day",
+            "Start Date",
+            "End Date",
+            "Begin Time",
+            "End Time",
+            "Building Room",
+            "Instructor"
+        ])
+        file_path = os.path.join(current_app.root_path, 'exports/schedule.csv')
+        df.to_csv(file_path, index=False)
+        return file_path

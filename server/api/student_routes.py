@@ -194,30 +194,6 @@ def get_all_students():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-@student_bp.route("/student/export", methods=["GET"])
-@verified_login_required
-def download_student():
-    """
-    Request: GET /student/export/
-
-    Description: Export student data as a CSV file.
-
-    Response:
-    - file: The CSV file containing student data.
-
-    Status Codes:
-    - 200: Student data successfully exported.
-    - 400: Invalid request.
-
-    Author: ``@ArmanChinai``
-    """
-    try:
-        db = current_app.config["database"]
-        file_path = db.export_student()
-        return send_file(file_path, as_attachment=True)
-    except Exception as e:
-        return jsonify({"message": str(e)}), 400
-
 @student_bp.route("/student/download_template", methods=["GET"])
 @verified_login_required
 def download_template():
