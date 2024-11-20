@@ -133,7 +133,7 @@ const UserInfoCard = () => {
         
         try {
             const serverUrl = import.meta.env.VITE_SERVER_URL;
-            const response = await axios.post(`${serverUrl}/api/authenticate/change-password/`, passwordData, {
+            const response = await axios.put(`${serverUrl}/api/authenticate/change-password/`, passwordData, {
                 withCredentials: true,
             });
 
@@ -228,7 +228,7 @@ const UserInfoCard = () => {
                             <button
                                 type="submit"
                                 disabled={!isProfileSaveEnabled}
-                                className={`px-4 py-2 rounded ${isProfileSaveEnabled ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-600 text-gray-300'} transition-colors`}
+                                className={`px-4 py-2 rounded ${isProfileSaveEnabled ? 'bg-indigo-600 hover:bg-indigo-500 text-white' : 'bg-gray-600 text-gray-300'} transition-colors`}
                             >
                                 Save
                             </button>
@@ -292,7 +292,7 @@ const UserInfoCard = () => {
                             <button
                                 type="submit"
                                 disabled={!isPasswordSaveEnabled || !passwordsMatch}
-                                className={`px-4 py-2 rounded ${isPasswordSaveEnabled && passwordsMatch ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-600 text-gray-300'} transition-colors`}
+                                className={`px-4 py-2 rounded ${isPasswordSaveEnabled && passwordsMatch ? 'bg-indigo-600 hover:bg-indigo-500 text-white' : 'bg-gray-600 text-gray-300'} transition-colors`}
                             >
                                 Save
                             </button>
