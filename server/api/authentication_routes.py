@@ -82,6 +82,8 @@ def reset_password() -> tuple:
         user = db.get_user_by_email(email)
         authenticator.verify_code(reset_code, user.reset_code)
         db.update_password(user, password)
+        session.permanent = True
+        session["user_id"] = user.id
         return jsonify({"message": "password reset successful"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 401
@@ -102,11 +104,12 @@ def request_password_reset() -> tuple:
     try:
         db = current_app.config['database']
         authenticator = current_app.config['authenticator']
+        email_manager = current_app.config['email_manager']
         email = request.json.get('email')
         user = db.get_user_by_email(email)
         reset_code = authenticator.generate_one_time_code()
         db.update_reset_code(user, reset_code)
-        # TODO: SEND VERIFICATION EMAIL
+        email_manager.forgot_password_email(email, reset_code)
         return jsonify({"message": "reset code sent"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 401

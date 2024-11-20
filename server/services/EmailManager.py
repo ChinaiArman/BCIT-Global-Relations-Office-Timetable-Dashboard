@@ -60,3 +60,32 @@ class EmailManager:
             server.close()
         except Exception as e:
             raise Exception(f"Failed to send email: {str(e)}")
+        
+    def forgot_password_email(self, to_email: str, reset_code: str) -> None:
+        """
+        """
+        msg = MIMEMultipart()
+        msg['From'] = self.gmail_user
+        msg['To'] = to_email
+        msg['Subject'] = "BCIT Password Reset"
+        
+        body = f"""
+        Hello,
+
+        You have requested to reset your password at BCIT Global Relations Office. 
+
+        Your one time reset code is: {reset_code}
+
+        Note: If you did not request this reset, please ignore this email.
+
+        Best regards,
+        BCIT Global Relations Office
+        """
+        msg.attach(MIMEText(body, 'plain'))
+        try:
+            server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+            server.login(self.gmail_user, self.gmail_password)
+            server.send_message(msg)
+            server.close()
+        except Exception as e:
+            raise Exception(f"Failed to send email: {str(e)}")
