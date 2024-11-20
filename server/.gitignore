@@ -7,3 +7,6 @@ logs/
 # Environment
 .env
 myenv/
+
+# Exports Folder
+exports/
