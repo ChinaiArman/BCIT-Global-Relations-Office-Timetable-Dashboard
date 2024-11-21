@@ -450,7 +450,8 @@ const ConflictList = ({ selectedCourses }) => {
                             const startB = parseTime(scheduleB.begin_time);
                             const endB = parseTime(scheduleB.end_time);
 
-                            if ((startA < endB) && (startB < endA)) {
+
+                            if ((startA < endB) && (startB < endA) && (scheduleA.start_date <= scheduleB.end_date) && (scheduleA.end_date >= scheduleB.start_date)) {   
                                 detectedConflicts.push({
                                     day: scheduleA.day,
                                     startTime: scheduleA.begin_time,

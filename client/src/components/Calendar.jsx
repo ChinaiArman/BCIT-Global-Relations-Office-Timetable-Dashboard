@@ -19,12 +19,13 @@ const Calendar = ({ courseSchedules }) => {
     const Days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
     // A function to check if two courses on the same day overlap (i.e., have a time conflict)
-    const isTimeSlotInConflict = (day, startTime, endTime, conflicts, currentCourseCode) => {
+    const isTimeSlotInConflict = (day, startTime, endTime, startDate, endDate, conflicts, currentCourseCode) => {
         return conflicts.some(conflict =>
             conflict.day === day &&
             conflict.course !== currentCourseCode && // Exclude the current course from being compared with itself
             startTime < conflict.endTime &&
-            endTime > conflict.startTime
+            endTime > conflict.startTime &&
+            (conflict.startDate <= endDate && conflict.endDate >= startDate) // Check if the dates overlap
         );
     };
 
@@ -57,6 +58,8 @@ const Calendar = ({ courseSchedules }) => {
                     day: schedule.day.toUpperCase(), // Ensure it's uppercase for matching
                     startTime,
                     endTime,
+                    startDate: schedule.start_date,
+                    endDate: schedule.end_date,
                     color: courseColor // Attach the color
                 };
             });
@@ -102,7 +105,7 @@ const Calendar = ({ courseSchedules }) => {
                                 {events
                                     .filter((event) => event.day === day)
                                     .map((event, idx) => {
-                                        const hasConflict = isTimeSlotInConflict(event.day, event.startTime, event.endTime, events, event.course);
+                                        const hasConflict = isTimeSlotInConflict(event.day, event.startTime, event.endTime, event.startDate, event.endDate, events, event.course);
                                         
                                         // Calculate top position and height dynamically based on the event's times
                                         const { top, height } = calculatePosition(event.startTime, event.endTime);
