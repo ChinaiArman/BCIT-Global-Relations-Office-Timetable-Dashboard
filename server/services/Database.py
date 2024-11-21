@@ -1429,19 +1429,22 @@ class Database:
         """
         """
         preferences = self.db.session.query(Preferences).all()
-        preferences_dict = {}
+        preferences_scores = {}
+        preferences_counts = {}
+        max_points = 8
         for preference in preferences:
-            if preference.preference not in preferences_dict:
-                preferences_dict[preference.preference] = []
-            preferences_dict[preference.preference].append(preference.priority)
-        for preference in preferences_dict:
-            preferences_dict[preference] = sum(preferences_dict[preference]) / len(preferences_dict[preference])
-        sorted_preferences = sorted(preferences_dict.items(), key=lambda item: item[1], reverse=False)
-        sorted_preferences = sorted_preferences[:5]
-        sorted_preferences_list = [{sorted_preferences[i][0]: sorted_preferences[i][1]} for i in range(len(sorted_preferences))]
-        return sorted_preferences_list
-
-
+            if preference.preference not in preferences_scores:
+                preferences_scores[preference.preference] = 0
+                preferences_counts[preference.preference] = 0
+            preferences_scores[preference.preference] += max_points - (preference.priority - 1)
+            preferences_counts[preference.preference] += 1
+        preferences_avg_rank = {
+            pref: (max_points - (preferences_scores[pref] / preferences_counts[pref]) + 1)
+            for pref in preferences_scores
+        }
+        sorted_preferences = sorted(preferences_avg_rank.items(), key=lambda item: item[1])
+        top_preferences = [{pref[0]: pref[1]} for pref in sorted_preferences[:5]]
+        return top_preferences
     
     def get_most_popular_course_registrations(self) -> dict:
         """
