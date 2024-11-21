@@ -24,6 +24,7 @@ import os
 
 
 # CONSTANTS
+load_dotenv()
 CLIENT_URL = os.getenv('CLIENT_URL')
 
 
