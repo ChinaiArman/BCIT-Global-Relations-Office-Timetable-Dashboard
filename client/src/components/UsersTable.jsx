@@ -1,9 +1,11 @@
 // components/UsersTable.jsx
-import { useState, useEffect } from "react";
+// import { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
 import { Search, UserRoundPlus } from "lucide-react";
 import DeleteUserModal from './DeleteUserModal';
+import StatusToast from './StatusToast';
 
 const UsersTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -19,6 +21,13 @@ const UsersTable = () => {
     password: "",
     verifyPassword: "",
   });
+  const [status, setStatus] = useState({ type: '', message: '' });
+const showToast = useCallback((type, message) => {
+    setStatus({ type, message });
+}, []);
+const clearToast = useCallback(() => {
+    setStatus({ type: '', message: '' });
+}, []);
 
 
   const fetchUserData = async () => {
@@ -80,6 +89,7 @@ const UsersTable = () => {
         { withCredentials: true }
       );
       console.log("Role Changed:", response.data);
+      showToast('success', 'User role updated successfully');
 
       const updatedUsers = userData.map((user) => {
         if (user.id === user_id) {
@@ -104,6 +114,7 @@ const UsersTable = () => {
       setFilteredUsers(updatedFilteredUsers);
     } catch (error) {
       console.error("Error changing role:", error);
+      showToast('error', 'Failed to update user role');
     }
   };
 
@@ -122,6 +133,7 @@ const UsersTable = () => {
         data: { user_id: userToDelete.id },
       });
       console.log("User deleted:", response.data);
+      showToast('success', `User "${userToDelete.username}" deleted successfully`);
 
       const updatedUsers = userData.filter((user) => user.id !== userToDelete.id);
       const updatedFilteredUsers = filteredUsers.filter((user) => user.id !== userToDelete.id);
@@ -129,6 +141,7 @@ const UsersTable = () => {
       setFilteredUsers(updatedFilteredUsers);
     } catch (error) {
       console.error("Error deleting user:", error);
+      showToast('error', 'Failed to delete user');
     } finally {
       setIsDeleteModalOpen(false);
       setUserToDelete(null);
@@ -156,11 +169,13 @@ const UsersTable = () => {
         withCredentials: true,
       });
       console.log("New user added:", response.data);
+      showToast('success', 'New user added successfully');
 
       closeModal();
       fetchUserData();
     } catch (error) {
       console.error("Error adding new user:", error);
+      showToast('Error adding new user');
     }
   };
 
@@ -348,6 +363,7 @@ const UsersTable = () => {
         onConfirm={handleDeleteConfirm}
         username={userToDelete?.username}
       />
+      <StatusToast status={status} onClose={clearToast} />
     </motion.div>
   );
 };
