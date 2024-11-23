@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect} from "react";
 import { User, Lock, CheckCircle2, AlertCircle } from "lucide-react";
 import SettingSection from "./SettingSection";
 import axios from "axios";
+import StatusToast from './StatusToast';
 
 // Status Message Component
 const StatusMessage = ({ status }) => {
@@ -41,6 +42,8 @@ const UserInfoCard = () => {
     const [passwordsMatch, setPasswordsMatch] = useState(true);
     const [loading, setLoading] = useState(true);
     const [status, setStatus] = useState({ type: '', message: '' });
+
+    
 
     const getUserProfile = async () => {
         try {
