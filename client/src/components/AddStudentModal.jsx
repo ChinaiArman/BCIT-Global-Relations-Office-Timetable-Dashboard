@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AlertCircle, X } from "lucide-react";
+import { FormInput, PreferenceInput } from "./AddStudentModalFormInput";
 
 const AddStudentModal = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
@@ -52,7 +53,6 @@ const AddStudentModal = ({ isOpen, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate all fields before submission
     const newErrors = {
       id: validateField('id', formData.id),
       first_name: validateField('first_name', formData.first_name),
@@ -63,7 +63,6 @@ const AddStudentModal = ({ isOpen, onClose }) => {
       )
     };
 
-    // Check if there are any validation errors
     const hasErrors = Object.values(newErrors).some(error => 
       typeof error === 'string' ? error !== "" : error.some(e => e !== "")
     );
@@ -75,13 +74,11 @@ const AddStudentModal = ({ isOpen, onClose }) => {
     }
 
     try {
-      // Filter out empty preferences and submit
       const submissionData = {
         ...formData,
         preferences: formData.preferences.filter(pref => pref !== "")
       };
       
-      // Your submission logic here
       onClose(true);
     } catch (error) {
       setSubmitError(error.response?.data?.message || "Error creating student");
@@ -96,7 +93,6 @@ const AddStudentModal = ({ isOpen, onClose }) => {
       const newPreferences = [...formData.preferences];
       newPreferences[index] = value;
       
-      // Update preference error
       const newPreferenceErrors = [...errors.preferences];
       newPreferenceErrors[index] = validateField('preference', value);
       
@@ -132,75 +128,51 @@ const AddStudentModal = ({ isOpen, onClose }) => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">Student ID</label>
-              <input
-                type="text"
-                name="id"
-                required
-                value={formData.id}
-                onChange={handleChange}
-                className={`w-full bg-gray-700 border rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.id ? 'border-red-500' : 'border-gray-600'
-                }`}
-              />
-              {errors.id && <p className="mt-1 text-sm text-red-400">{errors.id}</p>}
-            </div>
+            <FormInput
+              label="Student ID"
+              name="id"
+              required
+              value={formData.id}
+              onChange={handleChange}
+              error={errors.id}
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">Term Code</label>
-              <input
-                type="number"
-                name="term_code"
-                value={formData.term_code}
-                onChange={handleChange}
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+            <FormInput
+              label="Term Code"
+              name="term_code"
+              type="number"
+              value={formData.term_code}
+              onChange={handleChange}
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">First Name</label>
-              <input
-                type="text"
-                name="first_name"
-                required
-                value={formData.first_name}
-                onChange={handleChange}
-                className={`w-full bg-gray-700 border rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.first_name ? 'border-red-500' : 'border-gray-600'
-                }`}
-              />
-              {errors.first_name && <p className="mt-1 text-sm text-red-400">{errors.first_name}</p>}
-            </div>
+            <FormInput
+              label="First Name"
+              name="first_name"
+              required
+              value={formData.first_name}
+              onChange={handleChange}
+              error={errors.first_name}
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">Last Name</label>
-              <input
-                type="text"
-                name="last_name"
-                required
-                value={formData.last_name}
-                onChange={handleChange}
-                className={`w-full bg-gray-700 border rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.last_name ? 'border-red-500' : 'border-gray-600'
-                }`}
-              />
-              {errors.last_name && <p className="mt-1 text-sm text-red-400">{errors.last_name}</p>}
-            </div>
+            <FormInput
+              label="Last Name"
+              name="last_name"
+              required
+              value={formData.last_name}
+              onChange={handleChange}
+              error={errors.last_name}
+            />
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
-              <input
-                type="email"
+              <FormInput
+                label="Email"
                 name="email"
+                type="email"
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className={`w-full bg-gray-700 border rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.email ? 'border-red-500' : 'border-gray-600'
-                }`}
+                error={errors.email}
               />
-              {errors.email && <p className="mt-1 text-sm text-red-400">{errors.email}</p>}
             </div>
           </div>
 
@@ -208,21 +180,13 @@ const AddStudentModal = ({ isOpen, onClose }) => {
             <label className="block text-sm font-medium text-gray-300">Course Preferences</label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {formData.preferences.map((pref, index) => (
-                <div key={index}>
-                  <input
-                    type="text"
-                    name={`preference${index + 1}`}
-                    placeholder={`Preference ${index + 1}`}
-                    value={pref}
-                    onChange={handleChange}
-                    className={`w-full bg-gray-700 border rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.preferences[index] ? 'border-red-500' : 'border-gray-600'
-                    }`}
-                  />
-                  {errors.preferences[index] && (
-                    <p className="mt-1 text-sm text-red-400">{errors.preferences[index]}</p>
-                  )}
-                </div>
+                <PreferenceInput
+                  key={index}
+                  index={index}
+                  value={pref}
+                  onChange={handleChange}
+                  error={errors.preferences[index]}
+                />
               ))}
             </div>
           </div>
