@@ -1,21 +1,20 @@
-// components/StatusToast.jsx
-import React from 'react';
+import { useEffect } from 'react';
 import { CheckCircle2, AlertCircle, X } from 'lucide-react';
 
 const StatusToast = ({ status, onClose }) => {
     if (!status.message) return null;
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (status.message) {
             const timer = setTimeout(() => {
                 onClose();
-            }, 5000);
+            }, 2000);
             return () => clearTimeout(timer);
         }
     }, [status.message, onClose]);
 
     return (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 animate-fade-in">
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-300">
             <div className={`w-96 p-4 rounded-md flex items-center justify-between shadow-lg ${
                 status.type === 'success' ? 'bg-green-900/90 text-green-400' : 'bg-red-900/90 text-red-400'
             }`}>
