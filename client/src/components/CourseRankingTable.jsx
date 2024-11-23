@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
 
 const CourseRankingTable = ({ tableTitle, scoringColumnHeader, courseRankings }) => {
+ 
+  const formatNumber = (num) => Number(num).toFixed(1);
+
   return (
     <motion.div
       className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
@@ -13,7 +16,6 @@ const CourseRankingTable = ({ tableTitle, scoringColumnHeader, courseRankings })
           {tableTitle}
         </h2>
       </div>
-
       <div className="overflow-x-auto">
         {courseRankings.length === 0 ? (
           <div className="text-center text-gray-400 py-6">
@@ -31,12 +33,10 @@ const CourseRankingTable = ({ tableTitle, scoringColumnHeader, courseRankings })
                 </th>
               </tr>
             </thead>
-
             <tbody className="divide-y divide-gray-700">
               {courseRankings.map((course, index) => {
                 const courseCode = Object.keys(course)[0];
-                const ranking = course[courseCode];
-
+                const ranking = formatNumber(course[courseCode]);
                 return (
                   <motion.tr
                     key={index}
