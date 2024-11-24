@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AlertCircle, X } from "lucide-react";
-import { FormInput, PreferenceInput } from "./AddStudentModalFormInput";
+import { AddStudentModalFormInput, PreferenceInput } from "./AddStudentModalFormInput";
 
 const AddStudentModal = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
