@@ -57,12 +57,16 @@ def create_app():
     
     # ROUTES
     @app.route('/', methods=['GET'])
-    def _():
+    def root():
         return jsonify({"message": "Hello World"})
+    
+    @app.route('/health', methods=['GET'])
+    def health():
+        return jsonify({"status": "OK"}), 200
     
     # RESPONSE HEADERS
     @app.after_request
-    def _(response):
+    def after_request(response):
         response.headers['Access-Control-Allow-Origin'] = CLIENT_URL
         response.headers['Access-Control-Allow-Credentials'] = 'true'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
