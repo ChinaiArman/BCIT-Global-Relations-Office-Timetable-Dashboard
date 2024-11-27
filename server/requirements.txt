@@ -8,3 +8,4 @@ PyMySQL==1.1.1
 flask_session==0.8.0
 bcrypt==4.2.0
 cryptography==43.0.3
+gunicorn
