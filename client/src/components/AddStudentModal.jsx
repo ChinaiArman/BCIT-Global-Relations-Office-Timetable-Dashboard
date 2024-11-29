@@ -128,7 +128,7 @@ const AddStudentModal = ({ isOpen, onClose }) => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormInput
+            <AddStudentModalFormInput
               label="Student ID"
               name="id"
               required
@@ -137,7 +137,7 @@ const AddStudentModal = ({ isOpen, onClose }) => {
               error={errors.id}
             />
 
-            <FormInput
+            <AddStudentModalFormInput
               label="Term Code"
               name="term_code"
               type="number"
@@ -145,7 +145,7 @@ const AddStudentModal = ({ isOpen, onClose }) => {
               onChange={handleChange}
             />
 
-            <FormInput
+            <AddStudentModalFormInput
               label="First Name"
               name="first_name"
               required
@@ -154,7 +154,7 @@ const AddStudentModal = ({ isOpen, onClose }) => {
               error={errors.first_name}
             />
 
-            <FormInput
+            <AddStudentModalFormInput
               label="Last Name"
               name="last_name"
               required
@@ -164,7 +164,7 @@ const AddStudentModal = ({ isOpen, onClose }) => {
             />
 
             <div className="md:col-span-2">
-              <FormInput
+              <AddStudentModalFormInput
                 label="Email"
                 name="email"
                 type="email"
