@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AlertCircle, X } from "lucide-react";
+import axios from "axios";
 import { AddStudentModalFormInput, PreferenceInput } from "./AddStudentModalFormInput";
 
 const AddStudentModal = ({ isOpen, onClose }) => {
@@ -78,9 +79,33 @@ const AddStudentModal = ({ isOpen, onClose }) => {
         ...formData,
         preferences: formData.preferences.filter(pref => pref !== "")
       };
-      
+
+      // Send submissionData to the server
+
+      const serverUrl = import.meta.env.VITE_SERVER_URL;
+      await axios.post(`${serverUrl}/api/student`, submissionData, {
+        withCredentials: true
+      });
+
+      setSubmitError("");
+      setFormData({
+        id: "",
+        first_name: "",
+        last_name: "",
+        email: "",
+        term_code: "",
+        preferences: ["", "", "", "", "", "", "", ""]
+      });
+      setErrors({
+        id: "",
+        first_name: "",
+        last_name: "",
+        email: "",
+        preferences: Array(8).fill("")
+      });
       onClose(true);
     } catch (error) {
+      console.log(error)
       setSubmitError(error.response?.data?.message || "Error creating student");
     }
   };
