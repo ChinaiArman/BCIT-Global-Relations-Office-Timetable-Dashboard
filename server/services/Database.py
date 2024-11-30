@@ -381,7 +381,7 @@ class Database:
                     )
                     self.db.session.add(student)
 
-                    preferences = [row[f"Course Code Preference #{i}"] for i in range(1, 9) if row[f"Course Code Preference #{i}"] and row[f"Course Code Preference #{i}"] != ""] 
+                    preferences = [row[f"Course Code Preference #{i + 1}"] for i in range(0, 8) if row[f"Course Code Preference #{i + 1}"] and row[f"Course Code Preference #{i + 1}"] != ""] 
                     self.add_student_preferences(student.id, preferences)
 
                 except Exception as e:
@@ -479,7 +479,7 @@ class Database:
                         is_approved_by_program_heads=False
                     )
                     self.db.session.add(student)
-                    preferences = [row[f"Course Code Preference #{i}"] for i in range(1, 9) if row[f"Course Code Preference #{i}"] and row[f"Course Code Preference #{i}"] != ""]
+                    preferences = [row[f"Course Code Preference #{i + 1}"] for i in range(0, 8) if row[f"Course Code Preference #{i + 1}"] and row[f"Course Code Preference #{i + 1}"] != ""]
                     self.add_student_preferences(student.id, preferences)
                     continue
 
@@ -593,7 +593,7 @@ class Database:
             )
             self.db.session.add(student)
 
-            preferences = [row[f"Course Code Preference #{i}"] for i in range(1, len(data.get("preferences"))) if row[f"Course Code Preference #{i}"]]
+            preferences = [row[f"Course Code Preference #{i+1}"] for i in range(0, len(data.get("preferences"))) if row[f"Course Code Preference #{i+1}"]]
 
             self.change_student_preferences(student.id, preferences) 
             self.db.session.commit()
