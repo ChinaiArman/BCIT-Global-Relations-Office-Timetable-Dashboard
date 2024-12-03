@@ -57,12 +57,16 @@
    - Add the following environment variables to the `.env` file:
 
    ```sh
-   PORT=5000         # The port on which the server will run
-   DB_USERNAME=""    # The username for the database
-   DB_PASSWORD=""    # The password for the database
-   DB_HOST=""        # The host for the database
-   DB_PORT=""        # The port for the database
-   DB_NAME=""        # The name of the database
+   PORT=""                 # Port number for the server
+   DB_USERNAME=""          # Database username
+   DB_PASSWORD=""          # Database password
+   DB_HOST=""              # Database host
+   DB_PORT=""              # Database port
+   DB_NAME=""              # Database name
+   DB_SSL_CERT=""          # Database SSL certificate as a string
+   GMAIL_EMAIL=""          # Gmail email address
+   GMAIL_PASSWORD=""       # Gmail password
+   CLIENT_URL=""           # Client URL
    ```
 
 5. Install MYSQL Server
