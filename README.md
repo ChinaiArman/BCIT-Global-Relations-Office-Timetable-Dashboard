@@ -4,7 +4,6 @@
   <a href="https://github.com/ChinaiArman/BCIT-Global-Relations-Office-Timetable-Dashboard">
     <img src="client/public/dashboard.png" alt="Dashboard">
   </a>
-  <img src="client/public/upload.png" alt="Upload">
 
 <h3 align="center">Timecheck</h3>
 
