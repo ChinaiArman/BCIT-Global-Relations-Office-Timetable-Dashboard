@@ -5,7 +5,7 @@
     <img src="client/public/dashboard.png" alt="Dashboard">
   </a>
 
-<h3 align="center">Timecheck</h3>
+<h3 align="center">Timetable Checker Dashboard</h3>
 
   <p align="center">
     A web application to increase timetable creation efficiency.
@@ -28,7 +28,7 @@ We are:
 
 ## About the Project
 
-Timecheck was created to help make timetable creation easier. It aids timetable creation through allowing users to upload course information and student information, users can easily reference 
+Timetable Checker Dashboard was created to help make timetable creation easier. It aids timetable creation through allowing users to upload course information and student information, users can easily reference 
 
 ## Built With
 
