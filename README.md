@@ -60,3 +60,6 @@ The Timetable Checker Dashboard was developed using the following technologies:
 ### Workflow
 ![GitHub](https://img.shields.io/badge/-GitHub-181717?logo=github&logoColor=white&style=for-the-badge)
 ![Trello](https://img.shields.io/badge/-Trello-0079BF?logo=trello&logoColor=white&style=for-the-badge)
+
+## Getting Started
+For more information on how to set up the project, please refer to Info folder in the root directory of the project.
