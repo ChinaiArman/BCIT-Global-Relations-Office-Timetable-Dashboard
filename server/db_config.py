@@ -47,26 +47,31 @@ def configure_db(app) -> None:
 
     Author: ``@ChinaiArman``
     """
-    ssl_context = ssl.create_default_context()
+    if not DB_SSL_CERT:
+        app.config['SQLALCHEMY_DATABASE_URI'] = (
+            f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+        )
+    else:
+        ssl_context = ssl.create_default_context()
 
-    # Load the certificate into the SSLContext
-    ssl_context.load_verify_locations(cadata=DB_SSL_CERT)
+        # Load the certificate into the SSLContext
+        ssl_context.load_verify_locations(cadata=DB_SSL_CERT)
 
-    # Disable certificate verification to bypass the self-signed cert issue
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
+        # Disable certificate verification to bypass the self-signed cert issue
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
 
-    # Set the database URI
-    app.config['SQLALCHEMY_DATABASE_URI'] = (
-        f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    )
+        # Set the database URI
+        app.config['SQLALCHEMY_DATABASE_URI'] = (
+            f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+        )
 
-    # Pass the SSL context directly in the connect_args
-    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-        'connect_args': {
-            'ssl': ssl_context  # Pass the SSLContext with the loaded certificate
+        # Pass the SSL context directly in the connect_args
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+            'connect_args': {
+                'ssl': ssl_context  # Pass the SSLContext with the loaded certificate
+            }
         }
-    }
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
