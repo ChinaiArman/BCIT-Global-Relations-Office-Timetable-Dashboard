@@ -8,61 +8,55 @@
 <h3 align="center">Timetable Checker Dashboard</h3>
 
   <p align="center">
-    A web application to increase timetable creation efficiency.
+    A web application that allows users to create and manage timetables for various courses.
     <br>
   </p>
 </div>
 
+## About the Project
+
+The Timetable Checker Dashboard is a web application that allows users to create and manage timetables for various courses. The application is designed to increase the efficiency of creating timetables by providing a user-friendly interface that allows users to easily add, remove, and modify courses.
+
+This project was developed as part of the COMP 4800 course at the British Columbia Institute of Technology (BCIT). The project was completed for the BCIT Global Relations Office, which was struggling with the manual process of creating timetables for international students through Excel spreadsheets.
+
 ## About Us
 
-COMP 4800 Team #1
-
-Team #1 is a group of 4 students passionate about create new projects with Python. Throughout this project, we've learned many new and interesting technologies.
-
-We are:
+This project was completed by a team of four students. The team members are:
 
 - [Arman Chinai](https://github.com/ChinaiArman)
 - [Charlie Zhang](https://github.com/cz1501)
 - [Kate Sullivan](https://github.com/katesully)
 - [Lex Wong](https://github.com/levxxvi)
 
-## About the Project
+## Technologies Used
 
-Timetable Checker Dashboard was created to help make timetable creation easier. It aids timetable creation through allowing users to upload course information and student information, users can easily reference 
+The Timetable Checker Dashboard was developed using the following technologies:
 
-## Built With
+### Frontend
+![React](https://img.shields.io/badge/-React-61DAFB?logo=react&logoColor=white&style=for-the-badge)
+![Tailwind CSS](https://img.shields.io/badge/-Tailwind_CSS-38B2AC?logo=tailwind-css&logoColor=white&style=for-the-badge)
+![JavaScript](https://img.shields.io/badge/-JavaScript-F7DF1E?logo=javascript&logoColor=black&style=for-the-badge)
+![HTML](https://img.shields.io/badge/-HTML-E34F26?logo=html5&logoColor=white&style=for-the-badge)
+![CSS](https://img.shields.io/badge/-CSS-1572B6?logo=css3&logoColor=white&style=for-the-badge)
 
-This web application was developed with the following technologies and frameworks:
+### Backend
+![Flask](https://img.shields.io/badge/-Flask-000000?logo=flask&logoColor=white&style=for-the-badge)
+![SQLAlchemy](https://img.shields.io/badge/-SQLAlchemy-333333?logo=sqlalchemy&logoColor=white&style=for-the-badge)
+![Pandas](https://img.shields.io/badge/-Pandas-150458?logo=pandas&logoColor=white&style=for-the-badge)
+![Python](https://img.shields.io/badge/-Python-3776AB?logo=python&logoColor=white&style=for-the-badge)
 
-![Application Load Balancer](https://img.shields.io/badge/Application_Load_Balancer-%23003366.svg?style=for-the-badge&logo=amazonaws&logoColor=white)
+### Database
+![MySQL](https://img.shields.io/badge/-MySQL-4479A1?logo=mysql&logoColor=white&style=for-the-badge)
 
-![AWS Amplify](https://img.shields.io/badge/AWS_Amplify-%23003366.svg?style=for-the-badge&logo=amazonaws&logoColor=white)
+### Deployment
+![AWS Amplify](https://img.shields.io/badge/-AWS_Amplify-FF9900?logo=aws-amplify&logoColor=white&style=for-the-badge)
+![Amazon RDS](https://img.shields.io/badge/-Amazon_RDS-232F3E?logo=amazon-rds&logoColor=white&style=for-the-badge)
+![Amazon S3](https://img.shields.io/badge/-Amazon_S3-569A31?logo=amazon-s3&logoColor=white&style=for-the-badge)
+![Amazon EC2](https://img.shields.io/badge/-Amazon_EC2-232F3E?logo=amazon-ec2&logoColor=white&style=for-the-badge)
+![Amazon Route 53](https://img.shields.io/badge/-Amazon_Route_53-232F3E?logo=amazon-route-53&logoColor=white&style=for-the-badge)
+![Amazon Certificate Manager](https://img.shields.io/badge/-Amazon_Certificate_Manager-232F3E?logo=amazon-certificate-manager&logoColor=white&style=for-the-badge)
+![Amazon Elastic Beanstalk](https://img.shields.io/badge/-Amazon_Elastic_Beanstalk-232F3E?logo=amazon-elastic-beanstalk&logoColor=white&style=for-the-badge)
 
-![AWS Certificate Manager](https://img.shields.io/badge/AWS_Certificate_Manager-%23003366.svg?style=for-the-badge&logo=amazonaws&logoColor=white)
-
-![Amazon EC2](https://img.shields.io/badge/Amazon_EC2-%23003366.svg?style=for-the-badge&logo=amazonaws&logoColor=white)
-
-![Elastic Beanstalk](https://img.shields.io/badge/Elastic_Beanstalk-%23003366.svg?style=for-the-badge&logo=amazonaws&logoColor=white)
-
-![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white)
-
-![GitHub](https://img.shields.io/badge/GitHub-%23003366.svg?style=for-the-badge&logo=github&logoColor=white)
-
-![MySQL](https://img.shields.io/badge/mysql-4479A1.svg?style=for-the-badge&logo=mysql&logoColor=white)
-
-![Pandas](https://img.shields.io/badge/pandas-%23150458.svg?style=for-the-badge&logo=pandas&logoColor=white)
-
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
-
-![Amazon RDS](https://img.shields.io/badge/Amazon_RDS-%23003366.svg?style=for-the-badge&logo=amazonaws&logoColor=white)
-
-
-![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
-
-![Amazon Route 53](https://img.shields.io/badge/Amazon_Route_53-%23003366.svg?style=for-the-badge&logo=amazonaws&logoColor=white)
-
-![Amazon S3](<https://img.shields.io/badge/Amazon%20S3-FF9900?style=for-the-badge&logo=amazons3&logoColor=white>)
-
-![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
-
-![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white)
+### Workflow
+![GitHub](https://img.shields.io/badge/-GitHub-181717?logo=github&logoColor=white&style=for-the-badge)
+![Trello](https://img.shields.io/badge/-Trello-0079BF?logo=trello&logoColor=white&style=for-the-badge)
